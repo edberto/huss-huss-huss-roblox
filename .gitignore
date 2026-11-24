@@ -1,0 +1,16 @@
+sourcemap.json
+Packages/
+ServerPackages/
+DevPackages/
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxlx.lock
+.jest-roblox/
+coverage/
+.env
+.env.*
+tmp/
+*.log
+.DS_Store
+Thumbs.db

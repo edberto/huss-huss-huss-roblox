@@ -1,0 +1,18 @@
+{
+  "placeFile": "./HussHussHussTests.rbxl",
+  "rojoProject": "./jest.project.json",
+  "jestPath": "ReplicatedStorage/DevPackages/Jest",
+  "test": {
+    "projects": [
+      {
+        "test": {
+          "displayName": "huss-huss-huss",
+          "include": ["tests/**/*.spec.luau"],
+          "outDir": "tests"
+        }
+      }
+    ],
+    "projectTimeout": 180000,
+    "verbose": true
+  }
+}

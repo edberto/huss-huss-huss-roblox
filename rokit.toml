@@ -1,0 +1,9 @@
+# Same toolchain as mahjong-mayhem. Install with `rokit install`.
+[tools]
+rojo = "rojo-rbx/rojo@7.7.1"
+wally = "UpliftGames/wally@0.3.2"
+StyLua = "JohnnyMorganz/StyLua@2.5.2"
+selene = "Kampfkarren/selene@0.32.0"
+lune = "lune-org/lune@0.10.5"
+luau = "luau-lang/luau@0.740.0"
+jest-roblox-cli = "christopher-buss/jest-roblox-cli@0.4.7"
