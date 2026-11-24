@@ -336,7 +336,11 @@ function NightScreens.start()
 				askedFavorite = true
 				task.delay(4, function() -- after the Dawn card has had its moment
 					pcall(function()
-						AvatarEditorService:PromptSetFavorite(game.PlaceId, Enum.AvatarItemType.Asset, true)
+						AvatarEditorService:PromptSetFavorite(
+							game.PlaceId,
+							Enum.AvatarItemType.Asset,
+							true
+						)
 					end)
 				end)
 			end
