@@ -150,10 +150,9 @@ RunService.Heartbeat:Connect(function()
 	for player, session in sessions do
 		while true do
 			local n = session.settled + 1
-			local closesAt = (
-				BeatClock.noteTime(session.startTime, session.bpm, n, session.pattern)
-				+ BeatClock.noteTime(session.startTime, session.bpm, n + 1, session.pattern)
-			) / 2 + Rhythm.settleDelay
+			local due = BeatClock.noteTime(session.startTime, session.bpm, n, session.pattern)
+			local nextDue = BeatClock.noteTime(session.startTime, session.bpm, n + 1, session.pattern)
+			local closesAt = (due + nextDue) / 2 + Rhythm.settleDelay
 			if now < closesAt then
 				break
 			end

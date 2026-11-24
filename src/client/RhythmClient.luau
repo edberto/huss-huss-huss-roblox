@@ -230,7 +230,11 @@ function RhythmClient.start()
 		local startTime, bpm = player:GetAttribute("BeatStart"), player:GetAttribute("BeatBpm")
 		local previous = segment
 		segment = if typeof(startTime) == "number" and typeof(bpm) == "number"
-			then { startTime = startTime, bpm = bpm, pattern = Night.pattern(player:GetAttribute("Station")) }
+			then {
+				startTime = startTime,
+				bpm = bpm,
+				pattern = Night.pattern(player:GetAttribute("Station")),
+			}
 			else nil
 		-- Tempo steps restart the beat half a second later, off the old grid: a deliberate
 		-- distraction, so announce it.
@@ -259,7 +263,8 @@ function RhythmClient.start()
 				note -= 1
 			end
 			if current.startTime ~= clickStart then
-				clickStart, clickBeat, clapNote = current.startTime, math.min(beat, -1), math.min(note, -1)
+				clickStart, clickBeat, clapNote =
+					current.startTime, math.min(beat, -1), math.min(note, -1)
 			end
 			if beat > clickBeat then
 				clickBeat = beat
@@ -298,8 +303,12 @@ function RhythmClient.start()
 				tick.Visible = true
 			end
 		end
-		local first =
-			BeatClock.nearest(current.startTime, current.bpm, now - interval * 0.25, current.pattern)
+		local first = BeatClock.nearest(
+			current.startTime,
+			current.bpm,
+			now - interval * 0.25,
+			current.pattern
+		)
 		first = math.max(0, first)
 		for i, dot in dots do
 			local beat = first + i - 1
