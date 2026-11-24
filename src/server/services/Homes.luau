@@ -7,6 +7,7 @@ local Homes = {}
 
 local homesFolder = workspace:WaitForChild("Homes")
 local owners: { [Player]: Model } = {}
+local npcHomes: { [Model]: boolean } = {}
 
 local function isTaken(home: Model): boolean
 	for _, owned in owners do
@@ -28,8 +29,6 @@ function Homes.assign(player: Player): Model?
 	end
 	return nil -- more players than homes; MaxPlayers should prevent this
 end
-
-local npcHomes: { [Model]: boolean } = {}
 
 -- Homes for NPCs come from the far end of the street, so players (from Home1 up) keep theirs.
 function Homes.claimForNpc(): Model?
