@@ -13,6 +13,7 @@ Manual place changes that a code publish doesn't carry. Newest first.
       with `default.project.json`.
 - [ ] Phone test with real players (touch layout was checked by maths only).
 - [ ] Replace the placeholder sounds with our own recordings (huss, "almost almost").
+- [ ] Upload `assets/thumbnail.png` as the experience thumbnail (Creator Hub > Places > Thumbnails).
 - [ ] Tag the published version (`v0.1.0`).
 
 ## 2026-11-24 - [PLAYTEST] place (121340921046411)
