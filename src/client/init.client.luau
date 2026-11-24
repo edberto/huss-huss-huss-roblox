@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 
 local Basketball = require(script.Basketball)
 local NightScreens = require(script.NightScreens)
+local PartyClient = require(script.PartyClient)
 local RhythmClient = require(script.RhythmClient)
 
 local player = Players.LocalPlayer
@@ -32,3 +33,4 @@ updateCamera()
 RhythmClient.onResult = Basketball.start(home)
 RhythmClient.start()
 NightScreens.start()
+PartyClient.start()
