@@ -5,6 +5,7 @@ local AvatarEditorService = game:GetService("AvatarEditorService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SocialService = game:GetService("SocialService")
 local TweenService = game:GetService("TweenService")
 
 local Night = require(ReplicatedStorage.Shared.Night)
@@ -327,23 +328,33 @@ function NightScreens.start()
 		})
 	end
 
-	-- First top-3 finish this session: ask to favorite (no reward; Roblox forbids rewarding favorites).
-	-- ponytail: once per session, not once per account; save a flag if players find it nagging.
-	local askedFavorite = false
+	-- At most one prompt per Dawn, each once per session (no rewards: Roblox forbids rewarding
+	-- favorites). A top-3 finish asks to favorite; otherwise, invite friends.
+	-- ponytail: once per session, not once per account; save flags if players find it nagging.
+	local askedFavorite, askedInvite = false, false
 	resultsEvent.OnClientEvent:Connect(function(results: { any })
+		local topThree = false
 		for i, result in results do
-			if i <= 3 and result.userId == player.UserId and not askedFavorite then
-				askedFavorite = true
-				task.delay(4, function() -- after the Dawn card has had its moment
-					pcall(function()
-						AvatarEditorService:PromptSetFavorite(
-							game.PlaceId,
-							Enum.AvatarItemType.Asset,
-							true
-						)
-					end)
-				end)
+			if i <= 3 and result.userId == player.UserId then
+				topThree = true
 			end
+		end
+		local prompt: (() -> ())? = nil
+		if topThree and not askedFavorite then
+			askedFavorite = true
+			prompt = function()
+				AvatarEditorService:PromptSetFavorite(game.PlaceId, Enum.AvatarItemType.Asset, true)
+			end
+		elseif not askedInvite then
+			askedInvite = true
+			prompt = function()
+				if SocialService:CanSendGameInviteAsync(player) then
+					SocialService:PromptGameInvite(player)
+				end
+			end
+		end
+		if prompt then
+			task.delay(4, pcall, prompt) -- after the Dawn card has had its moment
 		end
 	end)
 

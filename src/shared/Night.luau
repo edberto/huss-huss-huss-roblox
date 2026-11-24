@@ -5,7 +5,7 @@ local Night = {}
 
 Night.duskTime = 30
 Night.nightTime = 240
-Night.dawnTime = 60
+Night.dawnTime = 30
 
 -- The night clock runs from 9:00 PM to 6:00 AM over the Party Night phase.
 Night.clockStartMinutes = 21 * 60
