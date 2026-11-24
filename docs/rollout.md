@@ -2,6 +2,19 @@
 
 Manual place changes that a code publish doesn't carry. Newest first.
 
+## Before the first Production publish (checklist)
+
+- [ ] Game Settings: max players 12 (both places).
+- [ ] Game Settings > Security: enable Studio Access to API Services (PlayTest) so saves can be tested.
+- [ ] Create the Roblox group; set `GROUP_ID` in `src/server/services/RewardService.luau`.
+- [ ] Create the VIP game pass and 5 developer products (HP 500 / 1,750 / 5,000, Second Wind,
+      Throw a Party); fill the ids in `src/shared/Products.luau`.
+- [ ] Production place: run `scripts/build_scene.luau`, set max players, then publish from Rojo
+      with `default.project.json`.
+- [ ] Phone test with real players (touch layout was checked by maths only).
+- [ ] Replace the placeholder sounds with our own recordings (huss, "almost almost").
+- [ ] Tag the published version (`v0.1.0`).
+
 ## 2026-11-24 - [PLAYTEST] place (121340921046411)
 
 - Rebuilt the town with `scripts/build_scene.luau` for 12 players: workspace.Homes (Home1-12, six
