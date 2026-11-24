@@ -8,18 +8,27 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local Night = require(ReplicatedStorage.Shared.Night)
 local Progress = require(ReplicatedStorage.Shared.Progress)
+local Rewards = require(ReplicatedStorage.Shared.Rewards)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 
 export type Data = {
 	hp: number,
 	stationXp: { [string]: number },
 	nights: number,
+	owned: { [string]: boolean },
+	equipped: { [string]: string },
+	daily: { lastDay: number, streak: number },
+	groupClaimed: boolean,
 }
 
 local TEMPLATE: Data = {
 	hp = 0,
 	stationXp = { Basketball = 0, Gym = 0, Burgers = 0 },
 	nights = 0,
+	owned = {},
+	equipped = {},
+	daily = { lastDay = 0, streak = 0 },
+	groupClaimed = false,
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -43,6 +52,18 @@ local function publish(player: Player, data: Data)
 	end
 	local rank = Progress.rank(totalLevels(data))
 	player:SetAttribute("Rank", rank)
+	-- Shop and rewards state for the client screens.
+	local owned = {}
+	for id in data.owned do
+		table.insert(owned, id)
+	end
+	player:SetAttribute("Owned", table.concat(owned, ","))
+	for _, slot in { "trail", "title", "ball" } do
+		player:SetAttribute(`Equipped_{slot}`, data.equipped[slot])
+	end
+	player:SetAttribute("DailyLastDay", data.daily.lastDay)
+	player:SetAttribute("DailyStreak", data.daily.streak)
+	player:SetAttribute("GroupClaimed", data.groupClaimed)
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then
 		(stats:FindFirstChild("HP") :: IntValue).Value = data.hp;
@@ -55,6 +76,20 @@ function Data.get(player: Player): Data?
 	return profile and profile.Data
 end
 
+-- Change saved data and push the result to the client. `change` returns a reason string to
+-- refuse (nothing is published) or nil to accept.
+function Data.update(player: Player, change: (Data) -> string?): string?
+	local data = Data.get(player)
+	if not data then
+		return "NotLoaded"
+	end
+	local refused = change(data)
+	if not refused then
+		publish(player, data)
+	end
+	return refused
+end
+
 -- Credit one night: Huss Points plus XP for the station the player practised.
 -- Returns the station level before and after, for the Dawn card.
 function Data.creditNight(player: Player, hp: number, station: string, xp: number): (number, number)
@@ -63,6 +98,10 @@ function Data.creditNight(player: Player, hp: number, station: string, xp: numbe
 		return 1, 1
 	end
 	local before = Progress.level(data.stationXp[station] or 0)
+	-- Group members earn a bonus on every night (design doc: rewards).
+	if player:GetAttribute("InGroup") == true then
+		hp *= 1 + Rewards.groupBonus
+	end
 	data.hp += math.max(0, math.floor(hp))
 	data.stationXp[station] = (data.stationXp[station] or 0) + math.max(0, math.floor(xp))
 	data.nights += 1

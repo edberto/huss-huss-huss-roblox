@@ -3,6 +3,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 require(script.services.Rhythm) -- creates the RhythmRemotes folder the other services use
 require(script.services.Stations)
+require(script.services.Shop)
+require(script.services.RewardService)
 local Round = require(script.services.Round)
 
 local isPlaytest = ReplicatedStorage:GetAttribute("DevelopmentPlaytest") == true

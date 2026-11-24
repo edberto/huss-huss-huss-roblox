@@ -7,6 +7,7 @@ local Gym = require(script.Gym)
 local NightScreens = require(script.NightScreens)
 local PartyClient = require(script.PartyClient)
 local RhythmClient = require(script.RhythmClient)
+local ShopClient = require(script.ShopClient)
 
 local player = Players.LocalPlayer
 while player:GetAttribute("Home") == nil do
@@ -54,3 +55,5 @@ end
 RhythmClient.start()
 NightScreens.start()
 PartyClient.start()
+ShopClient.start()
+ShopClient.applyBallSkin(home:WaitForChild("Ball") :: BasePart)
