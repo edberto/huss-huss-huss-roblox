@@ -107,7 +107,12 @@ local function button(parent: Instance, text: string, color: Color3, textColor: 
 		Parent = parent,
 	}, {
 		corner(10),
-		make("UIPadding", { PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0) }),
+		make("UIPadding", {
+			PaddingTop = UDim.new(0.15, 0),
+			PaddingBottom = UDim.new(0.15, 0),
+			PaddingLeft = UDim.new(0.1, 0),
+			PaddingRight = UDim.new(0.1, 0),
+		}),
 	})
 end
 
