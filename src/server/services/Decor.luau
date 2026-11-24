@@ -289,8 +289,9 @@ local function fence(from: Vector3, to: Vector3)
 	})
 end
 
--- One front yard: mailbox at the sidewalk, bushes under the window, a street tree. Nothing tall
--- between z 9 and 20 local: that is where the practice cameras look for the party.
+-- One front yard: mailbox at the sidewalk, bushes under the window, and a tall tree in the gap
+-- beside the house. Nothing tall in the front yard or along the curb: the practice cameras look
+-- diagonally across them to see the party.
 -- `lot` is the home's origin at the street edge, local -Z towards the street (build_scene).
 local function yard(lot: CFrame)
 	local post = part({
@@ -319,16 +320,16 @@ local function yard(lot: CFrame)
 	end
 	local trunk = part({
 		Name = "YardTrunk",
-		Size = Vector3.new(0.9, 6, 0.9),
-		CFrame = lot * CFrame.new(15, 3, 6), -- by the sidewalk: practice cameras look along z 12
+		Size = Vector3.new(1.1, 10, 1.1),
+		CFrame = lot * CFrame.new(16, 5, 29),
 		Color = Color3.fromRGB(80, 55, 45),
 		CanCollide = false,
 	})
 	part({
 		Name = "YardLeaves",
 		Shape = Enum.PartType.Ball,
-		Size = Vector3.one * 6,
-		CFrame = trunk.CFrame * CFrame.new(0, 4, 0),
+		Size = Vector3.one * 8,
+		CFrame = trunk.CFrame * CFrame.new(0, 7, 0),
 		Color = Color3.fromRGB(45, 85, 70),
 		CanCollide = false,
 	})
