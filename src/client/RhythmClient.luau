@@ -15,15 +15,10 @@ local remotes = ReplicatedStorage:WaitForChild("RhythmRemotes")
 local tapEvent = remotes:WaitForChild("Tap") :: RemoteEvent
 local resultEvent = remotes:WaitForChild("Result") :: RemoteEvent
 
--- Art-style palette (design doc).
-local NAVY = Color3.fromHex("141B36")
-local CREAM = Color3.fromHex("F2EEDC")
-local AMBER = Color3.fromHex("FFB547")
-local ORANGE = Color3.fromHex("FF6B1A")
-local MINT = Color3.fromHex("3DFFB0")
-local PINK = Color3.fromHex("FF2E93")
-local PANEL = Color3.fromHex("2C2C2A")
-local FONT = Font.fromEnum(Enum.Font.FredokaOne)
+local Ui = require(script.Parent.Ui)
+local NAVY, CREAM, AMBER = Ui.colors.navy, Ui.colors.cream, Ui.colors.amber
+local ORANGE, MINT, PINK, PANEL = Ui.colors.orange, Ui.colors.mint, Ui.colors.pink, Ui.colors.panel
+local FONT = Ui.font
 
 local GRADE_STYLE = {
 	Perfect = { text = "PERFECT", color = MINT },
@@ -36,31 +31,7 @@ local BEATS_SHOWN = 4 -- beats visible ahead of the hit ring
 
 local RhythmClient = {}
 
-local function make(className: string, props: { [string]: any }, children: { Instance }?): any
-	local inst = Instance.new(className)
-	for key, value in props do
-		(inst :: any)[key] = value
-	end
-	for _, child in children or {} do
-		child.Parent = inst
-	end
-	return inst
-end
-
-local function corner(radius: number?): UICorner
-	return make(
-		"UICorner",
-		{ CornerRadius = if radius then UDim.new(0, radius) else UDim.new(1, 0) }
-	)
-end
-
-local function label(props: { [string]: any }): TextLabel
-	props.BackgroundTransparency = props.BackgroundTransparency or 1
-	props.FontFace = FONT
-	props.TextScaled = true
-	props.TextColor3 = props.TextColor3 or CREAM
-	return make("TextLabel", props)
-end
+local make, corner, label = Ui.make, Ui.corner, Ui.label
 
 function RhythmClient.start()
 	local gui = make("ScreenGui", {
@@ -188,7 +159,7 @@ function RhythmClient.start()
 		Position = UDim2.new(1, -18, 0.5, 0),
 		Size = UDim2.fromOffset(70, 22),
 		Text = "",
-		TextColor3 = Color3.fromHex("FAC775"),
+		TextColor3 = Ui.colors.gold,
 		TextXAlignment = Enum.TextXAlignment.Right,
 		ZIndex = 3,
 		Parent = track,
@@ -234,6 +205,9 @@ function RhythmClient.start()
 		for _, dot in dots do
 			dot.Visible = false
 		end
+		-- Track and button only while practising (not at Dusk, Dawn or as a partier).
+		track.Visible = current ~= nil
+		tapButton.Visible = current ~= nil
 		if not current then
 			return
 		end

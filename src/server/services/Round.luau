@@ -59,6 +59,9 @@ local function record(player: Player, lasted: string?, progress: number)
 		lasted = lasted,
 		progress = progress,
 	}
+	-- The give-in screen shows these straight away; the full ranking comes at Dawn.
+	player:SetAttribute("NightPoints", results[player].points)
+	player:SetAttribute("LastedUntil", lasted)
 end
 
 local function startTraining(player: Player)
