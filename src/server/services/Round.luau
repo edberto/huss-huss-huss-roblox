@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Night = require(ReplicatedStorage.Shared.Night)
 local Focus = require(script.Parent.Focus)
+local Homes = require(script.Parent.Homes)
 local Rhythm = require(script.Parent.Rhythm)
 
 export type Result = {
@@ -20,7 +21,8 @@ export type Result = {
 
 local Round = {}
 
-local PARTY_LAWN = CFrame.new(-31, 4, 8)
+local partyLawn =
+	workspace:WaitForChild("Town"):WaitForChild("PartyHouse"):WaitForChild("Lawn") :: BasePart
 
 local resultsEvent = Instance.new("RemoteEvent")
 resultsEvent.Name = "NightResults" -- server -> client: { Result }, sorted best first
@@ -141,8 +143,14 @@ end
 function Round.run()
 	-- A player who joins mid-night trains from their arrival; at other times they wait for Dusk.
 	Players.PlayerAdded:Connect(function(player)
-		player.CharacterAdded:Connect(function()
-			task.defer(setMovement, player, player:GetAttribute("Team") == "Partier")
+		Homes.assign(player)
+		player.CharacterAdded:Connect(function(character)
+			character:WaitForChild("HumanoidRootPart")
+			local partier = player:GetAttribute("Team") == "Partier"
+			if not partier then
+				Homes.placeOnSpot(player)
+			end
+			setMovement(player, partier)
 		end)
 		if ReplicatedStorage:GetAttribute("Phase") == "Night" then
 			startTraining(player)

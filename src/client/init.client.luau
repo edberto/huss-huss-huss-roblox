@@ -5,10 +5,12 @@ local Basketball = require(script.Basketball)
 local RhythmClient = require(script.RhythmClient)
 
 local player = Players.LocalPlayer
-local home = workspace:WaitForChild("Home") :: Model
+while player:GetAttribute("Home") == nil do
+	player:GetAttributeChangedSignal("Home"):Wait()
+end
+local home = workspace:WaitForChild("Homes"):WaitForChild(player:GetAttribute("Home")) :: Model
 
--- Fixed three-quarter view of the driveway with the party house behind (design doc: camera).
--- ponytail: one shared home until homes are assigned per player.
+-- Fixed view of the player's driveway with the party house behind them (design doc: camera).
 local camera = workspace.CurrentCamera
 local cameraPoint = home:WaitForChild("PracticeCamera") :: BasePart
 -- Trainers get the fixed practice view; partiers walk around with the normal camera.
