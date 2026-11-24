@@ -7,6 +7,8 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 
+local Looks = require(script.Parent.Looks)
+
 local Decor = {}
 
 local DANCES = { "rbxassetid://507771019", "rbxassetid://507776043", "rbxassetid://507777268" }
@@ -67,18 +69,16 @@ function Decor.dressPartier(character: Model)
 end
 
 local function dancer(at: CFrame, index: number)
-	local description = Instance.new("HumanoidDescription")
-	local skin = pick({
-		Color3.fromRGB(234, 184, 146),
-		Color3.fromRGB(160, 110, 80),
-		Color3.fromRGB(105, 70, 50),
-		Color3.fromRGB(250, 210, 180),
-	})
-	description.HeadColor, description.LeftArmColor, description.RightArmColor = skin, skin, skin
-	description.TorsoColor = pick(PARTY_COLORS)
-	description.LeftLegColor = Color3.fromRGB(40, 40, 60)
-	description.RightLegColor = description.LeftLegColor
-	local model = Players:CreateHumanoidModelFromDescription(description, Enum.HumanoidRigType.R15)
+	local ok, created = pcall(
+		Players.CreateHumanoidModelFromDescription,
+		Players,
+		Looks.random(),
+		Enum.HumanoidRigType.R15
+	)
+	if not ok then
+		return
+	end
+	local model = created :: Model
 	model.Name = `Dancer{index}`
 	model:PivotTo(at)
 	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart

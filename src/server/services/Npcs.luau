@@ -9,11 +9,26 @@ local Night = require(ReplicatedStorage.Shared.Night)
 local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
 local Decor = require(script.Parent.Decor)
+local Looks = require(script.Parent.Looks)
 local Party = require(script.Parent.Party)
 
 local FILL_TO = 6 -- real players + NPC trainers per night
-local NAMES = { "Rafi", "Mia", "Dimas", "Sari", "Leo", "Nina", "Bayu", "Kiki", "Joel", "Tara" }
-local SHIRTS = { "378ADD", "D4537E", "1D9E75", "BA7517", "7F77DD", "D85A30" }
+local NAMES = {
+	"Rafi",
+	"Mia",
+	"Aiko",
+	"Omar",
+	"Sari",
+	"Mateo",
+	"Priya",
+	"Kwame",
+	"Lucia",
+	"Bayu",
+	"Hana",
+	"Joel",
+	"Zoe",
+	"Dimas",
+}
 local TEMPT_EVERY = 12 -- seconds between an NPC partier's tries
 
 type Npc = {
@@ -41,8 +56,10 @@ local function partyLawn(): BasePart
 			:WaitForChild("Lawn") :: BasePart
 end
 
+local nameOffset = 0 -- new random start each night, so names vary but never repeat in a server
+
 local function spawnNpc(home: Model, index: number): Npc?
-	local description = Instance.new("HumanoidDescription")
+	local description = Looks.random()
 	local ok, model = pcall(
 		Players.CreateHumanoidModelFromDescription,
 		Players,
@@ -52,20 +69,11 @@ local function spawnNpc(home: Model, index: number): Npc?
 	if not ok or not model then
 		return nil
 	end
-	local name = NAMES[(index - 1) % #NAMES + 1]
+	local name = NAMES[(index + nameOffset) % #NAMES + 1] -- distinct within a night
 	model.Name = name
 	local humanoid = model:FindFirstChildOfClass("Humanoid") :: Humanoid
 	humanoid.DisplayName = name
 	humanoid.WalkSpeed = 0
-	local shirt = Color3.fromHex(SHIRTS[(index - 1) % #SHIRTS + 1])
-	for _, part in model:GetDescendants() do
-		if
-			part:IsA("BasePart")
-			and (part.Name:find("Torso") or part.Name:find("Arm") or part.Name:find("Hand"))
-		then
-			part.Color = shirt
-		end
-	end
 	local spot = home:FindFirstChild("PracticeSpot") :: BasePart
 	model:PivotTo(spot.CFrame + Vector3.new(0, 2, 0))
 	model.Parent = folder
@@ -115,6 +123,7 @@ end
 -- Fill free homes at the start of a night.
 function Npcs.beginNight()
 	Npcs.clear()
+	nameOffset = math.random(0, #NAMES - 1)
 	local count = math.max(0, FILL_TO - #Players:GetPlayers())
 	for i = 1, count do
 		local home = Homes.claimForNpc()
