@@ -2,6 +2,8 @@
 -- Random, varied avatars for NPC trainers/partiers and the party dancers: skin tone, body shape,
 -- hair, face, glasses or cap, shirt and pants colours. Catalog ids were checked with
 -- MarketplaceService:GetProductInfo (hair = type 41, face = 18, face accessory = 42, hat = 8).
+-- Every mesh and texture loads (InsertService check); two brown hairs were dropped for missing
+-- textures.
 
 local Looks = {}
 
@@ -33,9 +35,7 @@ local HAIR = {
 	"451221329", -- True Blue Hair
 	"376548738", -- Brown Charmer Hair
 	"63690008", -- Pal Hair
-	"62743701", -- Stylish Brown Hair
 	"5890690147", -- Popstar Hair
-	"62234425", -- Brown Hair
 	"80922374", -- Chestnut Spikes
 }
 local FACES = { 144075659, 7074764, 7076110, 7699174, 209995366, 12145366, 7317773 }
