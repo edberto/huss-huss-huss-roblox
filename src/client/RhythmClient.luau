@@ -247,7 +247,14 @@ function RhythmClient.start()
 	end)
 
 	resultEvent.OnClientEvent:Connect(
-		function(_beat: number, grade: string, _earned: number, total: number, streak: number)
+		function(
+			_beat: number,
+			grade: string,
+			_earned: number,
+			total: number,
+			streak: number,
+			skill: boolean
+		)
 			local style = GRADE_STYLE[grade]
 			if not style then
 				return
@@ -261,7 +268,7 @@ function RhythmClient.start()
 			local fade = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 			TweenService:Create(hitWord, fade, { TextTransparency = 1 }):Play()
 			TweenService:Create(hitStroke, fade, { Transparency = 1 }):Play()
-			RhythmClient.onResult(grade)
+			RhythmClient.onResult(grade, skill)
 		end
 	)
 end
