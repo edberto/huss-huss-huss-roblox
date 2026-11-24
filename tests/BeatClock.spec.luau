@@ -37,4 +37,11 @@ describe("BeatClock", function()
 		-- Calibration of 0.2 s (late audio) moves the judged tap 0.2 s earlier.
 		expect(BeatClock.trustedTapTime(10.0, 10.05, 0.05, 0.2, 0.1)).toBeCloseTo(9.8)
 	end)
+
+	it("calibrates from the average lateness, ignoring stray taps", function()
+		local beats = { 1, 1.6, 2.2, 2.8 }
+		local taps = { 1.14, 1.74, 2.34, 2.94, 2.5 } -- 2.5 is 0.3 off any beat: ignored
+		expect(BeatClock.averageOffset(taps, beats, 0.25, 4)).toBeCloseTo(0.14)
+		expect(BeatClock.averageOffset({ 1.1, 1.7 }, beats, 0.25, 4)).toBe(nil)
+	end)
 end)

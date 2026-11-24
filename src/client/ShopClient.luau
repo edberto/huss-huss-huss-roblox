@@ -8,7 +8,9 @@ local MarketplaceService = game:GetService("MarketplaceService")
 
 local Cosmetics = require(ReplicatedStorage.Shared.Cosmetics)
 local Products = require(ReplicatedStorage.Shared.Products)
+local BeatClock = require(ReplicatedStorage.Shared.BeatClock)
 local Rewards = require(ReplicatedStorage.Shared.Rewards)
+local StationFx = require(script.Parent.StationFx)
 local Ui = require(script.Parent.Ui)
 
 local player = Players.LocalPlayer
@@ -19,6 +21,7 @@ local dailyRemote = remotes:WaitForChild("ClaimDaily") :: RemoteFunction
 local giftRemote = remotes:WaitForChild("ClaimGift") :: RemoteFunction
 local groupRemote = remotes:WaitForChild("ClaimGroup") :: RemoteFunction
 local codeRemote = remotes:WaitForChild("RedeemCode") :: RemoteFunction
+local offsetRemote = remotes:WaitForChild("SetTapOffset") :: RemoteFunction
 
 local C = Ui.colors
 local make, corner, label = Ui.make, Ui.corner, Ui.label
@@ -493,20 +496,117 @@ function ShopClient.start()
 		groupButton.Visible = player:GetAttribute("GroupClaimed") ~= true
 	end
 
+	-- Timing: tap along to 8 thuds; the average lateness becomes the saved calibration -------------
+	local CAL_BEATS, CAL_BPM = 8, 100
+	local timing, timingBody, timingNote = panel(gui, "Timing")
+	label({
+		Size = UDim2.fromScale(1, 0.2),
+		Text = "Using earbuds? Tap along to the beat so we can match your sound.",
+		TextColor3 = C.navy,
+		TextWrapped = true,
+		ZIndex = 22,
+		Parent = timingBody,
+	})
+	local calDots: { Frame } = {}
+	for i = 1, CAL_BEATS do
+		calDots[i] = make("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = C.rule,
+			Position = UDim2.fromScale(0.15 + (i - 1) * 0.1, 0.3),
+			Size = UDim2.fromScale(0.06, 0.06),
+			SizeConstraint = Enum.SizeConstraint.RelativeXX,
+			ZIndex = 22,
+			Parent = timingBody,
+		}, { corner() })
+	end
+	local calTap = button(timingBody, "TAP", C.orange, C.navy)
+	calTap.Position = UDim2.fromScale(0.3, 0.4)
+	calTap.Size = UDim2.fromScale(0.4, 0.25)
+	local calResult = label({
+		Position = UDim2.fromScale(0, 0.68),
+		Size = UDim2.fromScale(1, 0.12),
+		Text = "",
+		TextColor3 = C.navy,
+		ZIndex = 22,
+		Parent = timingBody,
+	})
+	local calRetry = button(timingBody, "Retry", C.rule, C.navy)
+	calRetry.Position = UDim2.fromScale(0.2, 0.84)
+	calRetry.Size = UDim2.fromScale(0.25, 0.15)
+	local calSave = button(timingBody, "Save", C.navy, C.cream)
+	calSave.Position = UDim2.fromScale(0.55, 0.84)
+	calSave.Size = UDim2.fromScale(0.25, 0.15)
+
+	local calTaps: { number } = {}
+	local calBeats: { number } = {}
+	local calOffset: number? = nil
+	local calRun = 0
+	local function runCalibration()
+		calRun += 1
+		local run = calRun
+		table.clear(calTaps)
+		table.clear(calBeats)
+		calOffset = nil
+		calSave.Visible = false
+		local saved = math.round((tonumber(player:GetAttribute("TapOffset")) or 0) * 1000)
+		calResult.Text = `Get ready... (now {saved} ms)`
+		local first = os.clock() + 1.5
+		for i = 1, CAL_BEATS do
+			calBeats[i] = first + (i - 1) * 60 / CAL_BPM
+			calDots[i].BackgroundColor3 = C.rule
+		end
+		for i, at in calBeats do
+			task.wait(math.max(0, at - os.clock()))
+			if run ~= calRun or not timing.Visible then
+				return
+			end
+			StationFx.play("kick")
+			calDots[i].BackgroundColor3 = C.orange
+		end
+		task.wait(0.4)
+		if run ~= calRun then
+			return
+		end
+		calOffset = BeatClock.averageOffset(calTaps, calBeats, 0.25, 5)
+		if calOffset then
+			local ms = math.round(calOffset * 1000)
+			calResult.Text = if math.abs(ms) < 15
+				then "Your timing is spot on!"
+				else `You tap {math.abs(ms)} ms {if ms > 0 then "late" else "early"} → Save to adjust`
+			calSave.Visible = true
+		else
+			calResult.Text = "Not enough taps on the beat. Retry!"
+		end
+	end
+	calTap.Activated:Connect(function()
+		table.insert(calTaps, os.clock())
+	end)
+	calRetry.Activated:Connect(function()
+		task.spawn(runCalibration)
+	end)
+	calSave.Activated:Connect(function()
+		if calOffset then
+			local reason = offsetRemote:InvokeServer(calOffset)
+			timingNote.Text = if reason then REASONS[reason] or reason else "Saved ✓"
+		end
+	end)
+
 	-- Side buttons -----------------------------------------------------------------------------
 	local side = make("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0, 12, 0.42, 0),
-		Size = UDim2.fromScale(0.07, 0.38),
+		Size = UDim2.fromScale(0.07, 0.5),
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Parent = gui,
 	}, { make("UIListLayout", { Padding = UDim.new(0.04, 0) }) })
 	local dots: { [string]: Frame } = {}
-	for i, spec in { { "Shop", C.orange }, { "Daily", C.cream }, { "Gifts", C.cream } } do
+	for i, spec in
+		{ { "Shop", C.orange }, { "Daily", C.cream }, { "Gifts", C.cream }, { "Timing", C.cream } }
+	do
 		local side_button = button(side, spec[1], spec[2], C.navy)
 		side_button.LayoutOrder = i
-		side_button.Size = UDim2.fromScale(1, 0.3)
+		side_button.Size = UDim2.fromScale(1, 0.225)
 		side_button.ZIndex = 5
 		dots[spec[1]] = make("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
@@ -519,13 +619,21 @@ function ShopClient.start()
 			Parent = side_button,
 		}, { corner() })
 		side_button.Activated:Connect(function()
-			if spec[1] == "Shop" then
+			if spec[1] == "Timing" then
+				shop.Visible, rewards.Visible = false, false
+				timing.Visible = not timing.Visible
+				timingNote.Text = ""
+				if timing.Visible then
+					task.spawn(runCalibration)
+				end
+			elseif spec[1] == "Shop" then
+				timing.Visible = false
 				rewards.Visible = false
 				shop.Visible = not shop.Visible
 				shopNote.Text = ""
 				renderShop()
 			else
-				shop.Visible = false
+				shop.Visible, timing.Visible = false, false
 				rewards.Visible = not rewards.Visible
 				rewardsNote.Text = ""
 				refreshRewards()

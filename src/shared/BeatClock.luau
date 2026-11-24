@@ -51,6 +51,30 @@ function BeatClock.trustedTapTime(
 	return math.clamp(claimed, arrived - tolerance, arrived + tolerance) - offset
 end
 
+-- Timing calibration: the average lateness of taps against the beats they were aimed at,
+-- ignoring taps further than `maxError` from any beat. Returns nil with fewer than `minTaps`.
+function BeatClock.averageOffset(
+	taps: { number },
+	beats: { number },
+	maxError: number,
+	minTaps: number
+): number?
+	local sum, count = 0, 0
+	for _, tap in taps do
+		local best = math.huge
+		for _, beat in beats do
+			if math.abs(tap - beat) < math.abs(best) then
+				best = tap - beat
+			end
+		end
+		if math.abs(best) <= maxError then
+			sum += best
+			count += 1
+		end
+	end
+	return if count >= minTaps then sum / count else nil
+end
+
 -- Beats 0, 1, 2 of every bar are "huss" taps; beat 3 is the station's skill move.
 function BeatClock.isSkillBeat(beat: number): boolean
 	return beat % 4 == 3

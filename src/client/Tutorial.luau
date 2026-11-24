@@ -10,7 +10,9 @@ local player = Players.LocalPlayer
 local remotes = ReplicatedStorage:WaitForChild("RhythmRemotes")
 
 local HINTS = {
-	dusk = "Pick your practice!",
+	dusk = if game:GetService("UserInputService").TouchEnabled
+		then "Pick your practice! Earbuds? Tap Timing"
+		else "Pick your practice!",
 	beat = "Tap HUSS as dots hit the ring",
 	skill = "Orange dot = skill move, x2!",
 	temptation = "Say no! Tap before it runs out",
