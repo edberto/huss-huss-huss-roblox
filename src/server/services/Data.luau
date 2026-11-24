@@ -8,6 +8,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local Night = require(ReplicatedStorage.Shared.Night)
 local Progress = require(ReplicatedStorage.Shared.Progress)
+local Products = require(ReplicatedStorage.Shared.Products)
 local Rewards = require(ReplicatedStorage.Shared.Rewards)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 
@@ -19,6 +20,9 @@ export type Data = {
 	equipped: { [string]: string },
 	daily: { lastDay: number, streak: number },
 	groupClaimed: boolean,
+	receipts: { string }, -- recent Robux purchase ids, so a receipt is never granted twice
+	secondWinds: number, -- bought but not yet used
+	tutorialDone: boolean,
 }
 
 local TEMPLATE: Data = {
@@ -29,6 +33,9 @@ local TEMPLATE: Data = {
 	equipped = {},
 	daily = { lastDay = 0, streak = 0 },
 	groupClaimed = false,
+	receipts = {},
+	secondWinds = 0,
+	tutorialDone = false,
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -64,10 +71,20 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("DailyLastDay", data.daily.lastDay)
 	player:SetAttribute("DailyStreak", data.daily.streak)
 	player:SetAttribute("GroupClaimed", data.groupClaimed)
+	player:SetAttribute("SecondWinds", data.secondWinds)
+	player:SetAttribute("TutorialDone", data.tutorialDone)
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then
 		(stats:FindFirstChild("HP") :: IntValue).Value = data.hp;
 		(stats:FindFirstChild("Rank") :: StringValue).Value = rank
+	end
+end
+
+-- Saves now (after a Robux purchase) instead of waiting for the autosave.
+function Data.save(player: Player)
+	local profile = profiles[player]
+	if profile then
+		profile:Save()
 	end
 end
 
@@ -101,6 +118,9 @@ function Data.creditNight(player: Player, hp: number, station: string, xp: numbe
 	-- Group members earn a bonus on every night (design doc: rewards).
 	if player:GetAttribute("InGroup") == true then
 		hp *= 1 + Rewards.groupBonus
+	end
+	if player:GetAttribute("VIP") == true then
+		hp *= Products.vipMultiplier
 	end
 	data.hp += math.max(0, math.floor(hp))
 	data.stationXp[station] = (data.stationXp[station] or 0) + math.max(0, math.floor(xp))

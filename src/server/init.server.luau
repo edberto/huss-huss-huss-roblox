@@ -5,6 +5,7 @@ require(script.services.Rhythm) -- creates the RhythmRemotes folder the other se
 require(script.services.Stations)
 require(script.services.Shop)
 require(script.services.RewardService)
+require(script.services.Store)
 local Round = require(script.services.Round)
 
 local isPlaytest = ReplicatedStorage:GetAttribute("DevelopmentPlaytest") == true

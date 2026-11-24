@@ -4,7 +4,10 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local MarketplaceService = game:GetService("MarketplaceService")
+
 local Cosmetics = require(ReplicatedStorage.Shared.Cosmetics)
+local Products = require(ReplicatedStorage.Shared.Products)
 local Rewards = require(ReplicatedStorage.Shared.Rewards)
 local Ui = require(script.Parent.Ui)
 
@@ -22,6 +25,15 @@ local TABS = {
 	{ slot = "trail", name = "Trails" },
 	{ slot = "title", name = "Titles" },
 	{ slot = "ball", name = "Ball" },
+	{ slot = "robux", name = "Robux" },
+}
+-- Robux tab cards, in order.
+local ROBUX_CARDS = {
+	{ key = "vip", name = "VIP: x2 HP", robux = 199, color = "FAC775" },
+	{ key = "hp_small", name = "500 HP", robux = 25, color = "FFB547" },
+	{ key = "hp_medium", name = "1,750 HP", robux = 75, color = "FFB547" },
+	{ key = "hp_large", name = "5,000 HP", robux = 199, color = "FFB547" },
+	{ key = "throw_party", name = "Throw a Party", robux = 99, color = "FF2E93" },
 }
 local REASONS = {
 	NotEnoughHP = "Not enough HP yet",
@@ -33,6 +45,23 @@ local REASONS = {
 }
 
 local ShopClient = {}
+
+-- Opens the Robux prompt for a card; returns a note to show, or nil.
+local function promptRobux(key: string): string?
+	if key == "vip" then
+		if Products.vipPassId == 0 then
+			return "Coming soon"
+		end
+		MarketplaceService:PromptGamePassPurchase(player, Products.vipPassId)
+		return nil
+	end
+	local product = Products.items[key]
+	if not product or product.id == 0 then
+		return "Coming soon"
+	end
+	MarketplaceService:PromptProductPurchase(player, product.id)
+	return nil
+end
 
 local function owned(): { [string]: boolean }
 	local set = {}
@@ -188,6 +217,46 @@ function ShopClient.start()
 			if child:IsA("Frame") then
 				child:Destroy()
 			end
+		end
+		if currentTab == "robux" then
+			for order, card in ROBUX_CARDS do
+				local frame = make("Frame", {
+					BackgroundColor3 = Color3.new(1, 1, 1),
+					LayoutOrder = order,
+					ZIndex = 22,
+					Parent = grid,
+				}, { corner(10) })
+				make("Frame", {
+					BackgroundColor3 = Color3.fromHex(card.color),
+					Position = UDim2.fromScale(0.08, 0.08),
+					Size = UDim2.fromScale(0.84, 0.3),
+					ZIndex = 23,
+					Parent = frame,
+				}, { corner(6) })
+				label({
+					Position = UDim2.fromScale(0.05, 0.42),
+					Size = UDim2.fromScale(0.9, 0.22),
+					Text = card.name,
+					TextColor3 = C.navy,
+					ZIndex = 23,
+					Parent = frame,
+				})
+				local owns = card.key == "vip" and player:GetAttribute("VIP") == true
+				local action = button(
+					frame,
+					if owns then "Owned" else `R$ {card.robux}`,
+					if owns then Color3.fromHex("C0DD97") else C.orange,
+					C.navy
+				)
+				action.Position = UDim2.fromScale(0.08, 0.7)
+				action.Size = UDim2.fromScale(0.84, 0.24)
+				action.Activated:Connect(function()
+					if not owns then
+						shopNote.Text = promptRobux(card.key) or ""
+					end
+				end)
+			end
+			return
 		end
 		local mine = owned()
 		local ids = {}
@@ -429,6 +498,64 @@ function ShopClient.start()
 			end
 		end)
 	end
+	-- Second Wind: shown to a trainer at low focus during the night, once per night.
+	local secondWind = button(gui, "Second Wind", C.mint, C.navy)
+	secondWind.AnchorPoint = Vector2.new(0.5, 0)
+	secondWind.Position = UDim2.fromScale(0.5, 0.12)
+	secondWind.Size = UDim2.fromScale(0.2, 0.08)
+	secondWind.ZIndex = 8
+	secondWind.Visible = false
+	secondWind.Activated:Connect(function()
+		if (tonumber(player:GetAttribute("SecondWinds")) or 0) > 0 then
+			remotes:WaitForChild("UseSecondWind"):InvokeServer()
+		else
+			local note = promptRobux("second_wind")
+			if note then
+				secondWind.Text = note
+			end
+		end
+	end)
+	local function refreshSecondWind()
+		local focus = tonumber(player:GetAttribute("Focus")) or 100
+		secondWind.Visible = player:GetAttribute("Team") == "Trainer"
+			and ReplicatedStorage:GetAttribute("Phase") == "Night"
+			and player:GetAttribute("UsedSecondWind") ~= true
+			and focus > 0
+			and focus < Products.secondWindShowBelow
+		if secondWind.Visible and secondWind.Text ~= "Coming soon" then
+			local banked = tonumber(player:GetAttribute("SecondWinds")) or 0
+			secondWind.Text = if banked > 0
+				then `Second Wind ({banked})`
+				else `Second Wind · R$ {Products.items.second_wind.robux}`
+		end
+	end
+	for _, name in { "Focus", "Team", "UsedSecondWind", "SecondWinds" } do
+		player:GetAttributeChangedSignal(name):Connect(refreshSecondWind)
+	end
+	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(refreshSecondWind)
+
+	-- Someone threw a party: banner for everyone.
+	local banner = label({
+		AnchorPoint = Vector2.new(0.5, 0),
+		BackgroundColor3 = C.pink,
+		BackgroundTransparency = 0,
+		Position = UDim2.fromScale(0.5, 0.22),
+		Size = UDim2.fromScale(0.5, 0.07),
+		Visible = false,
+		ZIndex = 8,
+		Parent = gui,
+	}, {
+		corner(12),
+		make("UIPadding", { PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0) }),
+	})
+	remotes:WaitForChild("PartyThrown").OnClientEvent:Connect(function(name: string)
+		banner.Text = `{name} threw a party! +{Products.partyHpForEveryone} HP for everyone`
+		banner.Visible = true
+		task.delay(5, function()
+			banner.Visible = false
+		end)
+	end)
+
 	task.spawn(function()
 		while true do
 			dots.Daily.Visible = dailyReady()

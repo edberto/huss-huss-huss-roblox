@@ -124,6 +124,7 @@ local function runNight()
 	setPhase("Night", Night.nightTime)
 	for _, player in Players:GetPlayers() do
 		Party.reset(player)
+		player:SetAttribute("UsedSecondWind", false)
 		startTraining(player)
 	end
 	local bpm = Night.bpm(0)
@@ -217,10 +218,14 @@ function Round.run()
 		for place, result in ranking do
 			local player = Players:GetPlayerByUserId(result.userId)
 			if player then
+				-- Second Wind users can't win the last-trainer-standing bonus (design doc).
+				local rewardPlace = if player:GetAttribute("UsedSecondWind") == true
+					then math.max(place, 2)
+					else place
 				local hp = Progress.nightReward(
 					result.points,
 					result.party,
-					place,
+					rewardPlace,
 					#ranking,
 					result.lasted == nil
 				)

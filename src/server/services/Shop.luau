@@ -79,7 +79,10 @@ local function applyTag(player: Player)
 	local item = Cosmetics.items[player:GetAttribute("Equipped_title") :: string]
 	local rank = tostring(player:GetAttribute("Rank") or "Rookie")
 	local label = (tag :: BillboardGui):FindFirstChild("Text") :: TextLabel
-	label.Text = if item then `{rank} · {item.name}` else rank
+	local text = if item then `{rank} · {item.name}` else rank
+	local vip = player:GetAttribute("VIP") == true
+	label.Text = if vip then `VIP · {text}` else text
+	label.TextColor3 = if vip then Color3.fromHex("FAC775") else Color3.fromHex("3DFFB0")
 end
 
 buyEvent.OnServerInvoke = function(player: Player, id: unknown): string?
@@ -114,6 +117,9 @@ Players.PlayerAdded:Connect(function(player)
 		applyTag(player)
 	end)
 	player:GetAttributeChangedSignal("Rank"):Connect(function()
+		applyTag(player)
+	end)
+	player:GetAttributeChangedSignal("VIP"):Connect(function()
 		applyTag(player)
 	end)
 end)

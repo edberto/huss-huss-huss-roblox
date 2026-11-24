@@ -56,6 +56,17 @@ function Focus.drain(player: Player, amount: number): number
 	return before - math.max(0, before - amount)
 end
 
+-- Second Wind: restore focus to `value` (only upwards, only for trainers still in).
+function Focus.refill(player: Player, value: number): boolean
+	local state = states[player]
+	if not state or state.focus >= value then
+		return false
+	end
+	state.focus = value
+	player:SetAttribute("Focus", value)
+	return true
+end
+
 function Focus.begin(player: Player, now: number)
 	states[player] = {
 		focus = Night.focusStart,
