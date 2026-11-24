@@ -22,6 +22,9 @@ Rhythm.maxClockSkew = 1
 
 local sessions: { [Player]: Session } = {}
 
+-- Called with every judged tap; the night cycle uses it to drain focus on misses.
+function Rhythm.onGrade(_player: Player, _grade: BeatClock.Grade) end
+
 local remotes = Instance.new("Folder")
 remotes.Name = "RhythmRemotes"
 local tapEvent = Instance.new("RemoteEvent")
@@ -45,6 +48,10 @@ function Rhythm.start(player: Player, bpm: number, leadIn: number?)
 	-- The client reads the segment from attributes, so it can't miss it while loading.
 	player:SetAttribute("BeatBpm", bpm)
 	player:SetAttribute("BeatStart", startTime)
+end
+
+function Rhythm.isActive(player: Player): boolean
+	return sessions[player] ~= nil
 end
 
 function Rhythm.stop(player: Player): Score.State?
@@ -72,6 +79,10 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 	if beat <= session.lastBeat then
 		return
 	end
+	-- A skipped beat breaks the combo (no focus loss: idle players lose focus to temptations).
+	if session.lastBeat >= 0 and beat > session.lastBeat + 1 then
+		session.score = Score.apply(session.score, "Miss")
+	end
 	session.lastBeat = beat
 	local grade = BeatClock.grade(offset)
 	local skill = BeatClock.isSkillBeat(beat)
@@ -86,6 +97,7 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 		session.score.combo,
 		skill
 	)
+	Rhythm.onGrade(player, grade)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
