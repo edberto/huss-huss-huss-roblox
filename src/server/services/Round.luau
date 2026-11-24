@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Night = require(ReplicatedStorage.Shared.Night)
 local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
+local Party = require(script.Parent.Party)
 local Rhythm = require(script.Parent.Rhythm)
 
 export type Result = {
@@ -17,6 +18,7 @@ export type Result = {
 	perfects: number,
 	lasted: string?, -- clock time the player gave in; nil = locked in all night
 	progress: number, -- how far through the night they lasted, 0-1
+	party: number, -- party points earned as a partier
 }
 
 local Round = {}
@@ -44,7 +46,7 @@ local function setMovement(player: Player, free: boolean)
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
 		humanoid.UseJumpPower = false
-		humanoid.WalkSpeed = if free then 16 else 0
+		humanoid.WalkSpeed = if free then Night.partierSpeed else 0
 		humanoid.JumpHeight = if free then 7.2 else 0
 	end
 end
@@ -58,6 +60,7 @@ local function record(player: Player, lasted: string?, progress: number)
 		perfects = if score then score.perfects else 0,
 		lasted = lasted,
 		progress = progress,
+		party = 0,
 	}
 	-- The give-in screen shows these straight away; the full ranking comes at Dawn.
 	player:SetAttribute("NightPoints", results[player].points)
@@ -73,6 +76,7 @@ end
 -- Focus hit 0: the player walks over to the party and plays as a partier until Dawn.
 Focus.onBroken = function(player: Player)
 	record(player, Night.clockText(progressNow()), progressNow())
+	Party.creditGiveIn(player)
 	player:SetAttribute("Team", "Partier")
 	setMovement(player, true)
 	local root = player.Character
@@ -82,6 +86,20 @@ Focus.onBroken = function(player: Player)
 	end
 end
 Rhythm.onGrade = Focus.onGrade
+
+local function setLockedIn(player: Player, on: boolean)
+	local character = player.Character
+	local glow = character and character:FindFirstChild("LockedInGlow")
+	if on and character and not glow then
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "LockedInGlow"
+		highlight.FillTransparency = 1
+		highlight.OutlineColor = Color3.fromHex("3DFFB0")
+		highlight.Parent = character
+	elseif not on and glow then
+		glow:Destroy()
+	end
+end
 
 local function trainersLeft(): number
 	local count = 0
@@ -98,6 +116,7 @@ local function runNight()
 	nightStart = os.clock()
 	setPhase("Night", Night.nightTime)
 	for _, player in Players:GetPlayers() do
+		Party.reset(player)
 		startTraining(player)
 	end
 	local bpm = Night.bpm(0)
@@ -113,6 +132,16 @@ local function runNight()
 			end
 		end
 		Focus.tick(os.clock(), progress)
+		-- The last few trainers glow for everyone (only meaningful with more players than that).
+		local left = trainersLeft()
+		for _, player in Players:GetPlayers() do
+			setLockedIn(
+				player,
+				Focus.isTrainer(player)
+					and left <= Night.lockedInCount
+					and #Players:GetPlayers() > Night.lockedInCount
+			)
+		end
 		-- Everyone gave in: the night ends early (design doc).
 		if #Players:GetPlayers() > 0 and trainersLeft() == 0 then
 			break
@@ -121,6 +150,7 @@ local function runNight()
 	end
 	ReplicatedStorage:SetAttribute("NightClock", Night.clockText(1))
 	for _, player in Players:GetPlayers() do
+		setLockedIn(player, false)
 		if Focus.isTrainer(player) then
 			Focus.finish(player)
 			record(player, nil, 1)
@@ -130,7 +160,8 @@ end
 
 local function sortedResults(): { Result }
 	local list = {}
-	for _, result in results do
+	for player, result in results do
+		result.party = math.floor(tonumber(player:GetAttribute("PartyPoints")) or 0)
 		table.insert(list, result)
 	end
 	-- Whoever lasted longest first (locked in all night = 1); points break ties.

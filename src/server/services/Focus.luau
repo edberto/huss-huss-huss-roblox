@@ -45,6 +45,17 @@ local function setFocus(player: Player, state: State, value: number)
 	end
 end
 
+-- Drain focus from outside (partier abilities). Returns how much was actually taken.
+function Focus.drain(player: Player, amount: number): number
+	local state = states[player]
+	if not state then
+		return 0
+	end
+	local before = state.focus
+	setFocus(player, state, state.focus - amount)
+	return before - math.max(0, before - amount)
+end
+
 function Focus.begin(player: Player, now: number)
 	states[player] = {
 		focus = Night.focusStart,

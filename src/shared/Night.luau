@@ -29,6 +29,19 @@ Night.temptations = table.freeze({
 Night.temptationOrder =
 	table.freeze({ "Doorbell", "Phone", "Friend", "BassDrop" } :: { TemptationKind })
 
+-- Partier abilities (design doc: partiers). range in studs, cooldown and duration in seconds.
+export type Ability = "Invite" | "Speaker" | "Dance"
+Night.abilities = table.freeze({
+	Invite = { cooldown = 15, duration = 4, points = 5 },
+	Speaker = { cooldown = 15, duration = 5, points = 5 },
+	Dance = { cooldown = 15, duration = 5, points = 0, drainPerSecond = 3 },
+})
+Night.abilityRange = 14
+Night.shieldTime = 3 -- a trainer can't be hit by another ability this soon after one
+Night.partierSpeed = 24
+Night.giveInBonus = 50 -- party points for the partier who last tempted a trainer who gives in
+Night.lockedInCount = 3 -- the last trainers standing glow for everyone
+
 -- Seconds between temptations for one player: 14 at the start of the night, 6 at the end.
 function Night.temptationGap(progress: number): number
 	return 14 - 8 * math.clamp(progress, 0, 1)

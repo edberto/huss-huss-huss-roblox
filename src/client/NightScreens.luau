@@ -350,7 +350,8 @@ function NightScreens.start()
 			})
 			label({
 				Size = UDim2.fromScale(1, 1),
-				Text = `While they partied, you hit {mine.perfects} Perfects · {mine.points} HP`,
+				Text = `While they partied, you hit {mine.perfects} Perfects · {mine.points} HP`
+					.. if (mine.party or 0) > 0 then ` · {mine.party} party pts` else "",
 				TextColor3 = C.navy,
 				Parent = line,
 			})
