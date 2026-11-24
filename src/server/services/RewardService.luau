@@ -20,6 +20,20 @@ end
 local claimDaily = remote("ClaimDaily") -- returns nil or a failure reason
 local claimGift = remote("ClaimGift") -- arg: minutes threshold; returns nil or a reason
 local claimGroup = remote("ClaimGroup") -- returns nil or a reason
+local completeTutorial = remote("CompleteTutorial") -- first Dawn reached; returns nil or a reason
+
+local TUTORIAL_HP = 100
+
+completeTutorial.OnServerInvoke = function(player: Player): string?
+	return Data.update(player, function(data)
+		if data.tutorialDone then
+			return "AlreadyClaimed"
+		end
+		data.tutorialDone = true
+		data.hp += TUTORIAL_HP
+		return nil
+	end)
+end
 
 local joinedAt: { [Player]: number } = {}
 local giftsClaimed: { [Player]: { [number]: boolean } } = {}
