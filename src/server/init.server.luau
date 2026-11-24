@@ -8,6 +8,13 @@ local isPlaytest = ReplicatedStorage:GetAttribute("DevelopmentPlaytest") == true
 print(`[Huss] server started{if isPlaytest then " (PLAYTEST)" else ""}`)
 
 -- ponytail: every player practices at 100 BPM from joining until RoundService exists.
+-- Practising players stand still: no walking, and Space taps instead of jumping.
 Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		local humanoid = character:WaitForChild("Humanoid") :: Humanoid
+		humanoid.WalkSpeed = 0
+		humanoid.JumpHeight = 0
+		humanoid.UseJumpPower = false
+	end)
 	Rhythm.start(player, 100)
 end)

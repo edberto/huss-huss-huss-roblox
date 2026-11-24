@@ -101,7 +101,7 @@ part(town, "Street", Vector3.new(400, 0.2, 14), CFrame.new(0, 0.1, -6), C.asphal
 for x = -190, 190, 20 do
 	part(town, "Line", Vector3.new(8, 0.1, 0.6), CFrame.new(x, 0.25, -6), C.cream)
 end
-for _, x in { -60, -20, 20, 60 } do
+for _, x in { -90, 20, 60 } do
 	local pole = part(town, "Lamp", Vector3.new(0.8, 14, 0.8), CFrame.new(x, 7, 2.5), C.asphalt)
 	local bulb = part(
 		town,
@@ -217,7 +217,7 @@ part(
 	home,
 	"PracticeCamera",
 	Vector3.new(1, 1, 1),
-	CFrame.lookAt(Vector3.new(10, 7.5, 4), Vector3.new(-20, 6, 10)),
+	CFrame.lookAt(Vector3.new(5, 6.5, 5), Vector3.new(-20, 6, 13)),
 	C.cream,
 	{
 		Transparency = 1,
