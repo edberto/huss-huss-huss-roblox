@@ -188,7 +188,7 @@ for i = 0, 11 do
 		Vector3.new(0.85, 0.22, 0.22),
 		CFrame.lookAt(pos, rimCenter) * CFrame.Angles(0, math.rad(90), 0),
 		C.orange,
-		{ CanCollide = false }
+		{ CanCollide = false, Material = Enum.Material.Neon }
 	)
 end
 

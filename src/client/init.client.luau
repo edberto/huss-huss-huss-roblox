@@ -1,11 +1,11 @@
--- Client entry: practice screen, fixed practice camera, ball bounce on each hit.
+-- Client entry: practice screen, fixed practice camera, basketball station.
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
 
+local Basketball = require(script.Basketball)
 local RhythmClient = require(script.RhythmClient)
 
 local player = Players.LocalPlayer
-local home = workspace:WaitForChild("Home")
+local home = workspace:WaitForChild("Home") :: Model
 
 -- Fixed three-quarter view of the driveway with the party house behind (design doc: camera).
 -- ponytail: one shared home until homes are assigned per player.
@@ -20,14 +20,5 @@ player.CharacterAdded:Connect(function()
 end)
 lockCamera()
 
--- Ball bounces from the player's hand height to the ground and back on every hit.
-local ball = home:WaitForChild("Ball") :: BasePart
-local ballTop = ball.CFrame
-local bounce = TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, true)
-RhythmClient.onResult = function(grade)
-	if grade ~= "Miss" then
-		TweenService:Create(ball, bounce, { CFrame = ballTop - Vector3.new(0, 2.6, 0) }):Play()
-	end
-end
-
+RhythmClient.onResult = Basketball.start(home)
 RhythmClient.start()

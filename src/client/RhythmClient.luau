@@ -13,7 +13,6 @@ local Score = require(ReplicatedStorage.Shared.Score)
 local player = Players.LocalPlayer
 local remotes = ReplicatedStorage:WaitForChild("RhythmRemotes")
 local tapEvent = remotes:WaitForChild("Tap") :: RemoteEvent
-local segmentEvent = remotes:WaitForChild("Segment") :: RemoteEvent
 local resultEvent = remotes:WaitForChild("Result") :: RemoteEvent
 
 -- Art-style palette (design doc).
@@ -220,9 +219,15 @@ function RhythmClient.start()
 	gui.Parent = player:WaitForChild("PlayerGui")
 
 	local segment: { startTime: number, bpm: number }? = nil
-	segmentEvent.OnClientEvent:Connect(function(startTime: number?, bpm: number?)
-		segment = if startTime and bpm then { startTime = startTime, bpm = bpm } else nil
-	end)
+	local function refreshSegment()
+		local startTime, bpm = player:GetAttribute("BeatStart"), player:GetAttribute("BeatBpm")
+		segment = if typeof(startTime) == "number" and typeof(bpm) == "number"
+			then { startTime = startTime, bpm = bpm }
+			else nil
+	end
+	player:GetAttributeChangedSignal("BeatStart"):Connect(refreshSegment)
+	player:GetAttributeChangedSignal("BeatBpm"):Connect(refreshSegment)
+	refreshSegment()
 
 	RunService.RenderStepped:Connect(function()
 		local current = segment
@@ -287,7 +292,7 @@ function RhythmClient.start()
 	)
 end
 
--- Hook for the station (ball bounce, "huss" sound). Replaced by the basketball station.
-function RhythmClient.onResult(_grade: string) end
+-- Hook for the station's visuals and sounds; set by the station before start().
+function RhythmClient.onResult(_grade: string, _skill: boolean) end
 
 return RhythmClient

@@ -27,11 +27,8 @@ remotes.Name = "RhythmRemotes"
 local tapEvent = Instance.new("RemoteEvent")
 tapEvent.Name = "Tap" -- client -> server: tapTime (number, server clock)
 tapEvent.Parent = remotes
-local segmentEvent = Instance.new("RemoteEvent")
-segmentEvent.Name = "Segment" -- server -> client: startTime, bpm (nil = stopped)
-segmentEvent.Parent = remotes
 local resultEvent = Instance.new("RemoteEvent")
-resultEvent.Name = "Result" -- server -> client: beat, grade, earned, points, combo
+resultEvent.Name = "Result" -- server -> client: beat, grade, earned, points, combo, skill
 resultEvent.Parent = remotes
 remotes.Parent = ReplicatedStorage
 
@@ -45,14 +42,17 @@ function Rhythm.start(player: Player, bpm: number, leadIn: number?)
 		-- A tempo change starts a new segment but keeps the score and combo.
 		score = if previous then previous.score else Score.new(),
 	}
-	segmentEvent:FireClient(player, startTime, bpm)
+	-- The client reads the segment from attributes, so it can't miss it while loading.
+	player:SetAttribute("BeatBpm", bpm)
+	player:SetAttribute("BeatStart", startTime)
 end
 
 function Rhythm.stop(player: Player): Score.State?
 	local session = sessions[player]
 	sessions[player] = nil
+	player:SetAttribute("BeatStart", nil)
+	player:SetAttribute("BeatBpm", nil)
 	if session then
-		segmentEvent:FireClient(player, nil, nil)
 		return session.score
 	end
 	return nil
@@ -74,9 +74,18 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 	end
 	session.lastBeat = beat
 	local grade = BeatClock.grade(offset)
+	local skill = BeatClock.isSkillBeat(beat)
 	local earned
-	session.score, earned = Score.apply(session.score, grade)
-	resultEvent:FireClient(player, beat, grade, earned, session.score.points, session.score.combo)
+	session.score, earned = Score.apply(session.score, grade, skill)
+	resultEvent:FireClient(
+		player,
+		beat,
+		grade,
+		earned,
+		session.score.points,
+		session.score.combo,
+		skill
+	)
 end)
 
 Players.PlayerRemoving:Connect(function(player)

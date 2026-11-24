@@ -22,6 +22,11 @@ describe("Score", function()
 		expect(earned).toBe(9)
 	end)
 
+	it("pays double on the skill move", function()
+		local _, earned = Score.apply(Score.new(), "Perfect", true)
+		expect(earned).toBe(6)
+	end)
+
 	it("keeps the combo on Almost and resets it on Miss", function()
 		local state = Score.apply({ points = 10, combo = 5 }, "Almost")
 		expect(state.combo).toBe(5)

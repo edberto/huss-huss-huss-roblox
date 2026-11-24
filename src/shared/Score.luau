@@ -9,6 +9,7 @@ local Score = {}
 Score.points = table.freeze({ Perfect = 3, Good = 1, Almost = 0, Miss = 0 })
 Score.maxMultiplier = 4
 Score.comboPerStep = 8 -- every 8 hits in a row raise the multiplier by 1
+Score.skillBonus = 2 -- the skill move (every 4th beat) pays double
 
 function Score.new(): State
 	return { points = 0, combo = 0 }
@@ -19,12 +20,14 @@ function Score.multiplier(combo: number): number
 end
 
 -- Returns the next state and the points this tap earned. "Almost" keeps the combo (design doc),
--- "Miss" resets it.
-function Score.apply(state: State, grade: BeatClock.Grade): (State, number)
+-- "Miss" resets it. `skill` is true on the skill-move beat.
+function Score.apply(state: State, grade: BeatClock.Grade, skill: boolean?): (State, number)
 	if grade == "Miss" then
 		return { points = state.points, combo = 0 }, 0
 	end
-	local earned = Score.points[grade] * Score.multiplier(state.combo)
+	local earned = Score.points[grade]
+		* Score.multiplier(state.combo)
+		* (if skill then Score.skillBonus else 1)
 	local combo = if grade == "Almost" then state.combo else state.combo + 1
 	return { points = state.points + earned, combo = combo }, earned
 end
