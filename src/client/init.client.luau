@@ -1,4 +1,5 @@
 -- Client entry: practice screen, fixed practice camera, basketball station.
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 
 local Basketball = require(script.Basketball)
@@ -21,7 +22,10 @@ local camera = workspace.CurrentCamera
 local cameraPoint = home:WaitForChild("PracticeCamera") :: BasePart
 -- Trainers get the fixed practice view; partiers walk around with the normal camera.
 local function updateCamera()
-	if player:GetAttribute("Team") == "Partier" then
+	local partier = player:GetAttribute("Team") == "Partier"
+	-- Trainers never walk; hiding the thumbstick and jump button keeps them off the TAP button.
+	GuiService.TouchControlsEnabled = partier
+	if partier then
 		camera.CameraType = Enum.CameraType.Custom
 	else
 		camera.CameraType = Enum.CameraType.Scriptable

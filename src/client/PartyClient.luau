@@ -4,6 +4,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local Night = require(ReplicatedStorage.Shared.Night)
 local Ui = require(script.Parent.Ui)
@@ -85,7 +86,8 @@ function PartyClient.start()
 	local buttonRow = make("Frame", {
 		AnchorPoint = Vector2.new(1, 1),
 		BackgroundTransparency = 1,
-		Position = UDim2.new(1, -16, 1, -16),
+		-- On phones, sit above the jump button.
+		Position = UDim2.new(1, -16, 1, if UserInputService.TouchEnabled then -150 else -16),
 		Size = UDim2.fromScale(0.42, 0.2),
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Parent = partierView,

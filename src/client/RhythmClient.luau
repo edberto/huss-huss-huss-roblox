@@ -52,9 +52,11 @@ function RhythmClient.start()
 		Size = UDim2.new(1, 0, 0, 16),
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
+	-- Under the clock: the top-left corner belongs to Roblox's menu buttons.
 	make("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0),
 		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(16, 12),
+		Position = UDim2.new(0.5, 0, 0, 46),
 		Size = UDim2.fromOffset(170, 36),
 		Parent = gui,
 	}, {
