@@ -81,7 +81,7 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("TapOffset", data.tapOffset)
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then
-		(stats:FindFirstChild("HP") :: IntValue).Value = data.hp;
+		(stats:FindFirstChild("Huss") :: IntValue).Value = data.hp;
 		(stats:FindFirstChild("Rank") :: StringValue).Value = rank
 	end
 end
@@ -138,7 +138,7 @@ end
 local function onPlayerAdded(player: Player)
 	local stats = Instance.new("Folder")
 	stats.Name = "leaderstats"
-	Instance.new("IntValue", stats).Name = "HP"
+	Instance.new("IntValue", stats).Name = "Huss"
 	Instance.new("StringValue", stats).Name = "Rank"
 	stats.Parent = player
 

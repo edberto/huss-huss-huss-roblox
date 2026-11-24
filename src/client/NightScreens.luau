@@ -251,7 +251,7 @@ function NightScreens.start()
 		gaveInStats.Text =
 			`You lasted until {player:GetAttribute("LastedUntil") or "?"} · {player:GetAttribute(
 				"NightPoints"
-			) or 0} HP`
+			) or 0} Huss`
 		gaveIn.Visible = true
 		task.delay(4, function()
 			gaveIn.Visible = false
@@ -391,7 +391,7 @@ function NightScreens.start()
 			})
 			label({
 				Size = UDim2.fromScale(1, 1),
-				Text = `+{mine.earned} HP · {levelText}`,
+				Text = `+{mine.earned} Huss · {levelText}`,
 				TextColor3 = C.orange,
 				Parent = reward,
 			})
@@ -412,7 +412,7 @@ function NightScreens.start()
 			})
 			label({
 				Size = UDim2.fromScale(1, 1),
-				Text = `While they partied, you hit {mine.perfects} Perfects · {mine.points} HP`
+				Text = `While they partied, you hit {mine.perfects} Perfects · {mine.points} Huss`
 					.. if (mine.party or 0) > 0 then ` · {mine.party} party pts` else "",
 				TextColor3 = C.navy,
 				Parent = line,

@@ -30,14 +30,14 @@ local TABS = {
 }
 -- Robux tab cards, in order.
 local ROBUX_CARDS = {
-	{ key = "vip", name = "VIP: x2 HP", robux = 199, color = "FAC775" },
-	{ key = "hp_small", name = "500 HP", robux = 25, color = "FFB547" },
-	{ key = "hp_medium", name = "1,750 HP", robux = 75, color = "FFB547" },
-	{ key = "hp_large", name = "5,000 HP", robux = 199, color = "FFB547" },
+	{ key = "vip", name = "VIP: x2 Huss", robux = 199, color = "FAC775" },
+	{ key = "hp_small", name = "500 Huss", robux = 25, color = "FFB547" },
+	{ key = "hp_medium", name = "1,750 Huss", robux = 75, color = "FFB547" },
+	{ key = "hp_large", name = "5,000 Huss", robux = 199, color = "FFB547" },
 	{ key = "throw_party", name = "Throw a Party", robux = 99, color = "FF2E93" },
 }
 local REASONS = {
-	NotEnoughHP = "Not enough HP yet",
+	NotEnoughHP = "Not enough Huss yet",
 	AlreadyOwned = "You already own this",
 	AlreadyClaimed = "Already claimed",
 	NotYet = "Not yet",
@@ -277,7 +277,7 @@ function ShopClient.start()
 			local status = if equipped
 				then "Equipped"
 				elseif mine[id] then "Owned"
-				else `{item.price} HP`
+				else `{item.price} Huss`
 			local card = make("Frame", {
 				BackgroundColor3 = Color3.new(1, 1, 1),
 				LayoutOrder = order,
@@ -381,7 +381,7 @@ function ShopClient.start()
 			}
 			if dailyReady() and day == Rewards.nextDailyDay(state, Rewards.today(os.time())) then
 				local reason = dailyRemote:InvokeServer()
-				rewardsNote.Text = if reason then REASONS[reason] or reason else `+{hp} HP`
+				rewardsNote.Text = if reason then REASONS[reason] or reason else `+{hp} Huss`
 			end
 		end)
 		dayCells[day] = cell
@@ -395,15 +395,15 @@ function ShopClient.start()
 			if not reason or reason == "AlreadyClaimed" then
 				claimedGifts[gift.minutes] = true
 			end
-			rewardsNote.Text = if reason then REASONS[reason] or reason else `+{gift.hp} HP`
+			rewardsNote.Text = if reason then REASONS[reason] or reason else `+{gift.hp} Huss`
 		end)
 		giftCells[i] = cell
 	end
-	local groupButton = button(gifts, `Join the group · {Rewards.groupHp} HP`, C.navy, C.cream)
+	local groupButton = button(gifts, `Join the group · {Rewards.groupHp} Huss`, C.navy, C.cream)
 	groupButton.LayoutOrder = #Rewards.gifts + 1
 	groupButton.Activated:Connect(function()
 		local reason = groupRemote:InvokeServer()
-		rewardsNote.Text = if reason then REASONS[reason] or reason else `+{Rewards.groupHp} HP`
+		rewardsNote.Text = if reason then REASONS[reason] or reason else `+{Rewards.groupHp} Huss`
 	end)
 
 	-- Code row under the gifts: box + Redeem, result on the line below.
@@ -444,7 +444,7 @@ function ShopClient.start()
 			return
 		end
 		local hp, reason = codeRemote:InvokeServer(codeBox.Text)
-		codeResult.Text = if hp then `+{hp} HP!` else REASONS[reason] or tostring(reason)
+		codeResult.Text = if hp then `+{hp} Huss!` else REASONS[reason] or tostring(reason)
 		if hp then
 			codeBox.Text = ""
 		end
@@ -482,10 +482,10 @@ function ShopClient.start()
 			local cell = giftCells[i]
 			cell.Text = if claimedGifts[gift.minutes]
 				then `{gift.minutes} min · claimed`
-				elseif left > 0 then `{gift.minutes} min · {gift.hp} HP · {Ui.countdown(
+				elseif left > 0 then `{gift.minutes} min · {gift.hp} Huss · {Ui.countdown(
 					now + left
 				)}`
-				else `{gift.minutes} min · Claim {gift.hp} HP`
+				else `{gift.minutes} min · Claim {gift.hp} Huss`
 			cell.BackgroundColor3 = if left <= 0 and not claimedGifts[gift.minutes]
 				then C.orange
 				else C.rule
@@ -602,7 +602,7 @@ function ShopClient.start()
 		make("UIPadding", { PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0) }),
 	})
 	remotes:WaitForChild("PartyThrown").OnClientEvent:Connect(function(name: string)
-		banner.Text = `{name} threw a party! +{Products.partyHpForEveryone} HP for everyone`
+		banner.Text = `{name} threw a party! +{Products.partyHpForEveryone} Huss for everyone`
 		banner.Visible = true
 		task.delay(5, function()
 			banner.Visible = false

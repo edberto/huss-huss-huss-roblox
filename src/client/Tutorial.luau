@@ -10,12 +10,12 @@ local player = Players.LocalPlayer
 local remotes = ReplicatedStorage:WaitForChild("RhythmRemotes")
 
 local HINTS = {
-	dusk = "Pick what you'll practise tonight. Everyone else is going to the party.",
-	beat = "Tap HUSS when a dot reaches the ring. On the beat = Perfect.",
-	skill = "Orange dots are your skill move. They're worth double!",
-	temptation = "The party wants you! Tap the button before the bar runs out.",
-	partiers = "Players who give in become partiers and try to drag you in too. Last until dawn!",
-	done = "You made it to dawn! +100 HP. Spend Huss Points in the Shop.",
+	dusk = "Pick your practice!",
+	beat = "Tap HUSS as dots hit the ring",
+	skill = "Orange dot = skill move, x2!",
+	temptation = "Say no! Tap before it runs out",
+	partiers = "Partiers will distract you. Last till dawn!",
+	done = "You made it! +100 Huss. Spend it in the Shop",
 }
 
 local Tutorial = {}

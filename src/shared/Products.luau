@@ -8,9 +8,9 @@ Products.vipMultiplier = 2
 
 export type Product = { id: number, name: string, robux: number, hp: number? }
 Products.items = table.freeze({
-	hp_small = { id = 0, name = "500 HP", robux = 25, hp = 500 },
-	hp_medium = { id = 0, name = "1,750 HP", robux = 75, hp = 1750 },
-	hp_large = { id = 0, name = "5,000 HP", robux = 199, hp = 5000 },
+	hp_small = { id = 0, name = "500 Huss", robux = 25, hp = 500 },
+	hp_medium = { id = 0, name = "1,750 Huss", robux = 75, hp = 1750 },
+	hp_large = { id = 0, name = "5,000 Huss", robux = 199, hp = 5000 },
 	second_wind = { id = 0, name = "Second Wind", robux = 15 },
 	throw_party = { id = 0, name = "Throw a Party", robux = 99 },
 } :: { [string]: Product })

@@ -196,7 +196,7 @@ function RhythmClient.start()
 	local sessionPoints = 0
 	local function refreshPoints()
 		local saved = tonumber(player:GetAttribute("HP")) or 0
-		points.Text = `{saved + sessionPoints} HP`
+		points.Text = `{saved + sessionPoints} Huss`
 	end
 	player:GetAttributeChangedSignal("HP"):Connect(refreshPoints)
 	refreshPoints()
