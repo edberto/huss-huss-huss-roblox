@@ -38,12 +38,12 @@ function Ui.corner(radius: number?): UICorner
 	)
 end
 
-function Ui.label(props: { [string]: any }): TextLabel
+function Ui.label(props: { [string]: any }, children: { Instance }?): TextLabel
 	props.BackgroundTransparency = props.BackgroundTransparency or 1
-	props.FontFace = Ui.font
+	props.FontFace = props.FontFace or Ui.font
 	props.TextScaled = true
 	props.TextColor3 = props.TextColor3 or Ui.colors.cream
-	return Ui.make("TextLabel", props)
+	return Ui.make("TextLabel", props, children)
 end
 
 -- "m:ss" until a server-clock time.

@@ -47,10 +47,17 @@ function NightScreens.start()
 	)
 	local duskTitle = label({
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.fromScale(0.5, 0.06),
-		Size = UDim2.fromScale(0.6, 0.07),
+		BackgroundColor3 = C.navy,
+		BackgroundTransparency = 0.15,
+		Position = UDim2.fromScale(0.5, 0.05),
+		Size = UDim2.fromScale(0.5, 0.08),
 		Parent = dusk,
-	})
+	}, nil)
+	corner().Parent = duskTitle
+	make(
+		"UIPadding",
+		{ PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0), Parent = duskTitle }
+	)
 	local cards = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
@@ -246,13 +253,19 @@ function NightScreens.start()
 		Size = UDim2.fromScale(0.4, 0.07),
 		Text = "Dawn · 6:00 AM",
 		TextColor3 = C.navy,
+		BackgroundColor3 = C.dawn,
+		BackgroundTransparency = 0,
 		Parent = dawn,
+	}, {
+		corner(),
+		make("UIPadding", { PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0) }),
 	})
 	local card = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
 		BackgroundColor3 = C.cream,
+		AutomaticSize = Enum.AutomaticSize.Y,
 		Position = UDim2.fromScale(0.5, 0.18),
-		Size = UDim2.fromScale(0.5, 0.62),
+		Size = UDim2.fromScale(0.5, 0),
 		Parent = dawn,
 	}, {
 		corner(14),
@@ -279,7 +292,7 @@ function NightScreens.start()
 		local line = make("Frame", {
 			BackgroundTransparency = 1,
 			LayoutOrder = order,
-			Size = UDim2.fromScale(1, 0.11),
+			Size = UDim2.new(1, 0, 0, 30),
 			Parent = card,
 		})
 		label({
@@ -332,7 +345,7 @@ function NightScreens.start()
 			local line = make("Frame", {
 				BackgroundTransparency = 1,
 				LayoutOrder = 51,
-				Size = UDim2.fromScale(1, 0.13),
+				Size = UDim2.new(1, 0, 0, 30),
 				Parent = card,
 			})
 			label({
