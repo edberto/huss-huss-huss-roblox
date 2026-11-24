@@ -238,7 +238,8 @@ function RhythmClient.start()
 	RunService.RenderStepped:Connect(function()
 		local current = segment
 		if current then
-			local beat = math.floor((workspace:GetServerTimeNow() - current.startTime) * current.bpm / 60)
+			local beat =
+				math.floor((workspace:GetServerTimeNow() - current.startTime) * current.bpm / 60)
 			if current.startTime ~= clickStart then
 				clickStart, clickBeat = current.startTime, math.min(beat, -1)
 			end
