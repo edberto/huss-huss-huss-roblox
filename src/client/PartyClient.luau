@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Night = require(ReplicatedStorage.Shared.Night)
+local StationFx = require(script.Parent.StationFx)
 local Ui = require(script.Parent.Ui)
 
 local player = Players.LocalPlayer
@@ -257,7 +258,8 @@ function PartyClient.start()
 		end
 	end)
 
-	-- Fake beats sit half a beat off the real ones, sliding at the same speed.
+	-- Fake beats sit half a beat off the real ones, sliding at the same speed, and you hear them.
+	local fakeHeard = math.huge
 	RunService.RenderStepped:Connect(function()
 		local active = os.clock() < speakerUntil
 		local startTime, bpm = player:GetAttribute("BeatStart"), player:GetAttribute("BeatBpm")
@@ -265,10 +267,16 @@ function PartyClient.start()
 			dot.Visible = false
 		end
 		if not active or typeof(startTime) ~= "number" or typeof(bpm) ~= "number" then
+			fakeHeard = math.huge -- first frame of the next Speaker only arms it
 			return
 		end
 		local now = workspace:GetServerTimeNow()
 		local interval = 60 / bpm
+		local half = math.floor((now - startTime) / interval - 0.5)
+		if half > fakeHeard then
+			StationFx.play("kick", 1.15)
+		end
+		fakeHeard = half
 		local span = trackOverlay.AbsoluteSize.X - 34 - 100
 		local first = math.ceil((now - startTime) / interval - 0.5)
 		for i, dot in fakeDots do

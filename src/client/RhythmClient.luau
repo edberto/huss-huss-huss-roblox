@@ -9,6 +9,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local BeatClock = require(ReplicatedStorage.Shared.BeatClock)
 local Score = require(ReplicatedStorage.Shared.Score)
+local StationFx = require(script.Parent.StationFx)
 
 local player = Players.LocalPlayer
 local remotes = ReplicatedStorage:WaitForChild("RhythmRemotes")
@@ -200,12 +201,29 @@ function RhythmClient.start()
 	player:GetAttributeChangedSignal("HP"):Connect(refreshPoints)
 	refreshPoints()
 
+	local function flashWord(text: string, color: Color3, seconds: number)
+		hitWord.Text = text
+		hitWord.TextColor3 = color
+		hitWord.TextTransparency = 0
+		hitStroke.Transparency = 0
+		local fade = TweenInfo.new(seconds, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+		TweenService:Create(hitWord, fade, { TextTransparency = 1 }):Play()
+		TweenService:Create(hitStroke, fade, { Transparency = 1 }):Play()
+	end
+
 	local segment: { startTime: number, bpm: number }? = nil
 	local function refreshSegment()
 		local startTime, bpm = player:GetAttribute("BeatStart"), player:GetAttribute("BeatBpm")
+		local previous = segment
 		segment = if typeof(startTime) == "number" and typeof(bpm) == "number"
 			then { startTime = startTime, bpm = bpm }
 			else nil
+		-- Tempo steps restart the beat half a second later, off the old grid: a deliberate
+		-- distraction, so announce it.
+		if previous and segment and segment.bpm > previous.bpm then
+			flashWord("TEMPO UP!", ORANGE, 1.2)
+			StationFx.play("tempo")
+		end
 		if not segment then
 			sessionPoints = 0
 			refreshPoints()
@@ -215,8 +233,20 @@ function RhythmClient.start()
 	player:GetAttributeChangedSignal("BeatBpm"):Connect(refreshSegment)
 	refreshSegment()
 
+	-- The audible beat: a thud each beat, a clap on skill beats (up to a frame late).
+	local clickStart, clickBeat = 0, -1
 	RunService.RenderStepped:Connect(function()
 		local current = segment
+		if current then
+			local beat = math.floor((workspace:GetServerTimeNow() - current.startTime) * current.bpm / 60)
+			if current.startTime ~= clickStart then
+				clickStart, clickBeat = current.startTime, math.min(beat, -1)
+			end
+			if beat > clickBeat then
+				clickBeat = beat
+				StationFx.play(if BeatClock.isSkillBeat(beat) then "clap" else "kick")
+			end
+		end
 		for _, dot in dots do
 			dot.Visible = false
 		end
@@ -277,13 +307,7 @@ function RhythmClient.start()
 			sessionPoints = total
 			refreshPoints()
 			combo.Text = if streak > 0 then `x{Score.multiplier(streak)} · {streak}` else ""
-			hitWord.Text = style.text
-			hitWord.TextColor3 = style.color
-			hitWord.TextTransparency = 0
-			hitStroke.Transparency = 0
-			local fade = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-			TweenService:Create(hitWord, fade, { TextTransparency = 1 }):Play()
-			TweenService:Create(hitStroke, fade, { Transparency = 1 }):Play()
+			flashWord(style.text, style.color, 0.5)
 			RhythmClient.onResult(grade, skill)
 		end
 	)

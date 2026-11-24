@@ -17,6 +17,9 @@ local SOUND_IDS = {
 	clank = "rbxassetid://9116717775", -- Pro Sound Effects: metal knock
 	wrap = "rbxassetid://9117410302", -- Pro Sound Effects: cellophane crunch
 	thud = "rbxassetid://9119342958", -- Pro Sound Effects: muted thud
+	kick = "rbxassetid://9119342958", -- the beat (same muted thud, its own Sound so they don't cut)
+	clap = "rbxassetid://9114771714", -- Pro Sound Effects: hand slap claps; skill beats
+	tempo = "rbxassetid://9113551773", -- Pro Sound Effects: boom thump; "TEMPO UP!"
 }
 
 local ALMOST_COOLDOWN = 20

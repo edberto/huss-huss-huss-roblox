@@ -38,6 +38,18 @@ end)
 player:GetAttributeChangedSignal("Team"):Connect(updateCamera)
 updateCamera()
 
+-- The party next door never stops: music from the lawn, loud up close, faint down the street.
+-- APM library track via the Creator Store (licensed for experiences).
+local music = Instance.new("Sound")
+music.SoundId = "rbxassetid://1840650601" -- APM: Style Revolution
+music.Looped = true
+music.Volume = 0.45
+music.RollOffMode = Enum.RollOffMode.InverseTapered
+music.RollOffMinDistance = 25
+music.RollOffMaxDistance = 260
+music.Parent = workspace:WaitForChild("Town"):WaitForChild("PartyHouse"):WaitForChild("Lawn")
+music:Play()
+
 -- The station picked at Dusk gets every hit; the others hide their props.
 local stations = {
 	Basketball = Basketball.start(home),
