@@ -18,6 +18,7 @@ local equipRemote = remotes:WaitForChild("ShopEquip") :: RemoteFunction
 local dailyRemote = remotes:WaitForChild("ClaimDaily") :: RemoteFunction
 local giftRemote = remotes:WaitForChild("ClaimGift") :: RemoteFunction
 local groupRemote = remotes:WaitForChild("ClaimGroup") :: RemoteFunction
+local codeRemote = remotes:WaitForChild("RedeemCode") :: RemoteFunction
 
 local C = Ui.colors
 local make, corner, label = Ui.make, Ui.corner, Ui.label
@@ -42,6 +43,8 @@ local REASONS = {
 	NotYet = "Not yet",
 	NotInGroup = "Join the group first",
 	NoGroup = "Group coming soon",
+	Invalid = "Unknown code",
+	AlreadyRedeemed = "Already used",
 }
 
 local ShopClient = {}
@@ -401,6 +404,55 @@ function ShopClient.start()
 	groupButton.Activated:Connect(function()
 		local reason = groupRemote:InvokeServer()
 		rewardsNote.Text = if reason then REASONS[reason] or reason else `+{Rewards.groupHp} HP`
+	end)
+
+	-- Code row under the gifts: box + Redeem, result on the line below.
+	local codeRow = make("Frame", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromScale(0, 0.8),
+		Size = UDim2.fromScale(1, 0.2),
+		ZIndex = 21,
+		Parent = rewardsBody,
+	})
+	local codeBox = make("TextBox", {
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		ClearTextOnFocus = false,
+		FontFace = Ui.font,
+		PlaceholderText = "type a code...",
+		Size = UDim2.fromScale(0.66, 0.6),
+		Text = "",
+		TextColor3 = C.navy,
+		TextScaled = true,
+		ZIndex = 22,
+		Parent = codeRow,
+	}, { corner(10), make("UIPadding", { PaddingLeft = UDim.new(0.02, 0) }) }) :: TextBox
+	local redeemButton = button(codeRow, "Redeem", C.orange, C.navy)
+	redeemButton.Position = UDim2.fromScale(0.68, 0)
+	redeemButton.Size = UDim2.fromScale(0.32, 0.6)
+	local codeResult = label({
+		Position = UDim2.fromScale(0, 0.62),
+		Size = UDim2.fromScale(0.66, 0.38),
+		Text = "",
+		TextColor3 = Color3.fromHex("854F0B"),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 22,
+		Parent = codeRow,
+	})
+	local function redeem()
+		if codeBox.Text == "" then
+			return
+		end
+		local hp, reason = codeRemote:InvokeServer(codeBox.Text)
+		codeResult.Text = if hp then `+{hp} HP!` else REASONS[reason] or tostring(reason)
+		if hp then
+			codeBox.Text = ""
+		end
+	end
+	redeemButton.Activated:Connect(redeem)
+	codeBox.FocusLost:Connect(function(enterPressed)
+		if enterPressed then
+			redeem()
+		end
 	end)
 
 	local function refreshRewards()
