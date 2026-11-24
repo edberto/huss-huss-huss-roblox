@@ -80,7 +80,11 @@ local function dancer(at: CFrame, index: number)
 	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 	model.Parent = folder
 	Decor.dressPartier(model)
-	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
+	local animator = humanoid:FindFirstChildOfClass("Animator")
+	if not animator then
+		animator = Instance.new("Animator")
+		animator.Parent = humanoid
+	end
 	local animation = Instance.new("Animation")
 	animation.AnimationId = DANCES[(index - 1) % #DANCES + 1]
 	local track = (animator :: Animator):LoadAnimation(animation)
@@ -89,7 +93,12 @@ local function dancer(at: CFrame, index: number)
 end
 
 local function car(at: CFrame, color: Color3)
-	part({ Name = "CarBody", Size = Vector3.new(9, 2, 4.4), CFrame = at * CFrame.new(0, 1.6, 0), Color = color })
+	part({
+		Name = "CarBody",
+		Size = Vector3.new(9, 2, 4.4),
+		CFrame = at * CFrame.new(0, 1.6, 0),
+		Color = color,
+	})
 	part({
 		Name = "CarCabin",
 		Size = Vector3.new(5, 1.8, 4),
@@ -180,7 +189,8 @@ function Decor.build()
 		part({
 			Name = "Beam",
 			Size = Vector3.new(1.2, 60, 1.2),
-			CFrame = CFrame.new(-146, 46, z) * CFrame.Angles(math.rad(if i == 1 then -14 else 14), 0, math.rad(-10)),
+			CFrame = CFrame.new(-146, 46, z)
+				* CFrame.Angles(math.rad(if i == 1 then -14 else 14), 0, math.rad(-10)),
 			Material = Enum.Material.Neon,
 			Color = PARTY_COLORS[i + 1],
 			Transparency = 0.6,
