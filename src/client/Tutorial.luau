@@ -10,7 +10,7 @@ local player = Players.LocalPlayer
 local remotes = ReplicatedStorage:WaitForChild("RhythmRemotes")
 
 local HINTS = {
-	dusk = "In this town, everybody goes out partying… except you. Pick what you'll practise tonight.",
+	dusk = "Pick what you'll practise tonight. Everyone else is going to the party.",
 	beat = "Tap HUSS when a dot reaches the ring. On the beat = Perfect.",
 	skill = "Orange dots are your skill move. They're worth double!",
 	temptation = "The party wants you! Tap the button before the bar runs out.",
