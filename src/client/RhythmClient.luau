@@ -8,6 +8,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local BeatClock = require(ReplicatedStorage.Shared.BeatClock)
+local Night = require(ReplicatedStorage.Shared.Night)
 local Score = require(ReplicatedStorage.Shared.Score)
 local StationFx = require(script.Parent.StationFx)
 
@@ -167,6 +168,19 @@ function RhythmClient.start()
 		ZIndex = 3,
 		Parent = track,
 	})
+	-- Faint ticks on every beat, so off-beat notes (Burgers) stay readable.
+	local ticks: { Frame } = {}
+	for i = 1, BEATS_SHOWN + 2 do
+		ticks[i] = make("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = CREAM,
+			BackgroundTransparency = 0.75,
+			BorderSizePixel = 0,
+			Size = UDim2.new(0, 2, 0.6, 0),
+			Visible = false,
+			Parent = track,
+		})
+	end
 	local dots: { Frame } = {}
 	for i = 1, BEATS_SHOWN + 2 do
 		dots[i] = make("Frame", {
@@ -211,12 +225,12 @@ function RhythmClient.start()
 		TweenService:Create(hitStroke, fade, { Transparency = 1 }):Play()
 	end
 
-	local segment: { startTime: number, bpm: number }? = nil
+	local segment: { startTime: number, bpm: number, pattern: BeatClock.Pattern }? = nil
 	local function refreshSegment()
 		local startTime, bpm = player:GetAttribute("BeatStart"), player:GetAttribute("BeatBpm")
 		local previous = segment
 		segment = if typeof(startTime) == "number" and typeof(bpm) == "number"
-			then { startTime = startTime, bpm = bpm }
+			then { startTime = startTime, bpm = bpm, pattern = Night.pattern(player:GetAttribute("Station")) }
 			else nil
 		-- Tempo steps restart the beat half a second later, off the old grid: a deliberate
 		-- distraction, so announce it.
@@ -233,23 +247,36 @@ function RhythmClient.start()
 	player:GetAttributeChangedSignal("BeatBpm"):Connect(refreshSegment)
 	refreshSegment()
 
-	-- The audible beat: a thud each beat, a clap on skill beats (up to a frame late).
-	local clickStart, clickBeat = 0, -1
+	-- The audible beat: a thud every beat, a clap on each skill note (up to a frame late).
+	local clickStart, clickBeat, clapNote = 0, -1, -1
 	RunService.RenderStepped:Connect(function()
 		local current = segment
 		if current then
-			local beat =
-				math.floor((workspace:GetServerTimeNow() - current.startTime) * current.bpm / 60)
+			local now = workspace:GetServerTimeNow()
+			local beat = math.floor((now - current.startTime) * current.bpm / 60)
+			local note = BeatClock.nearest(current.startTime, current.bpm, now, current.pattern)
+			if BeatClock.noteTime(current.startTime, current.bpm, note, current.pattern) > now then
+				note -= 1
+			end
 			if current.startTime ~= clickStart then
-				clickStart, clickBeat = current.startTime, math.min(beat, -1)
+				clickStart, clickBeat, clapNote = current.startTime, math.min(beat, -1), math.min(note, -1)
 			end
 			if beat > clickBeat then
 				clickBeat = beat
-				StationFx.play(if BeatClock.isSkillBeat(beat) then "clap" else "kick")
+				StationFx.play("kick")
+			end
+			if note > clapNote then
+				clapNote = note
+				if BeatClock.isSkillBeat(note, current.pattern) then
+					StationFx.play("clap")
+				end
 			end
 		end
 		for _, dot in dots do
 			dot.Visible = false
+		end
+		for _, tick in ticks do
+			tick.Visible = false
 		end
 		-- Track and button only while practising (not at Dusk, Dawn or as a partier).
 		track.Visible = current ~= nil
@@ -260,13 +287,27 @@ function RhythmClient.start()
 		local now = workspace:GetServerTimeNow()
 		local interval = 60 / current.bpm
 		local span = track.AbsoluteSize.X - RING_X - 100
-		local first = math.max(0, math.ceil((now - current.startTime) / interval - 0.25))
+		local firstBeat = math.ceil((now - current.startTime) / interval - 0.25)
+		for i, tick in ticks do
+			local x = RING_X
+				+ (current.startTime + (firstBeat + i - 1) * interval - now)
+					/ (interval * BEATS_SHOWN)
+					* span
+			if x >= RING_X and x <= RING_X + span then
+				tick.Position = UDim2.new(0, x, 0.5, 0)
+				tick.Visible = true
+			end
+		end
+		local first =
+			BeatClock.nearest(current.startTime, current.bpm, now - interval * 0.25, current.pattern)
+		first = math.max(0, first)
 		for i, dot in dots do
 			local beat = first + i - 1
-			local ahead = current.startTime + beat * interval - now
+			local ahead = BeatClock.noteTime(current.startTime, current.bpm, beat, current.pattern)
+				- now
 			local x = RING_X + ahead / (interval * BEATS_SHOWN) * span
 			if x >= RING_X - 20 and x <= RING_X + span then
-				local skill = BeatClock.isSkillBeat(beat)
+				local skill = BeatClock.isSkillBeat(beat, current.pattern)
 				local size = if skill then 34 else 24
 				dot.Size = UDim2.fromOffset(size, size)
 				dot.BackgroundColor3 = if skill then ORANGE else CREAM

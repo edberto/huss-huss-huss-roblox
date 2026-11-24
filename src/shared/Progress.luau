@@ -47,6 +47,11 @@ end
 
 -- What one player earns for a night. `place` is 1 for whoever lasted longest; `players` is how
 -- many took part; `finished` means locked in until dawn.
+-- Practice points after the station's difficulty bonus (Night.stationInfo).
+function Progress.stationPoints(points: number, bonus: number): number
+	return math.floor(points * (1 + bonus))
+end
+
 function Progress.nightReward(
 	points: number,
 	partyPoints: number,

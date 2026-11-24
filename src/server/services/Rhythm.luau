@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage.Shared
 local BeatClock = require(Shared.BeatClock)
+local Night = require(Shared.Night)
 local Score = require(Shared.Score)
 local Analytics = require(script.Parent.Analytics)
 local Data = require(script.Parent.Data)
@@ -14,6 +15,7 @@ local Data = require(script.Parent.Data)
 type Session = {
 	startTime: number,
 	bpm: number,
+	pattern: BeatClock.Pattern,
 	lastBeat: number,
 	score: Score.State,
 	tapped: { [number]: boolean }, -- tapped beats not yet settled by the sweep
@@ -67,6 +69,7 @@ function Rhythm.start(player: Player, bpm: number, leadIn: number?)
 	sessions[player] = {
 		startTime = startTime,
 		bpm = bpm,
+		pattern = Night.pattern(player:GetAttribute("Station")),
 		lastBeat = -1,
 		tapped = {},
 		settled = -1,
@@ -109,10 +112,10 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 		tonumber(player:GetAttribute("TapOffset")) or 0,
 		Rhythm.tapTolerance
 	)
-	if judged < session.startTime - 60 / session.bpm / 2 then
+	if judged < BeatClock.noteTime(session.startTime, session.bpm, 0, session.pattern) - 0.3 then
 		return
 	end
-	local beat, offset = BeatClock.nearest(session.startTime, session.bpm, judged)
+	local beat, offset = BeatClock.nearest(session.startTime, session.bpm, judged, session.pattern)
 	-- One judged tap per beat: extra taps are ignored, which also caps tap spam at the BPM.
 	-- Beats the sweep already settled as skipped can't be tapped any more.
 	if beat <= session.lastBeat or beat <= session.settled then
@@ -121,7 +124,7 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 	session.lastBeat = beat
 	session.tapped[beat] = true
 	local grade = BeatClock.grade(offset)
-	local skill = BeatClock.isSkillBeat(beat)
+	local skill = BeatClock.isSkillBeat(beat, session.pattern)
 	local earned
 	session.score, earned = Score.apply(session.score, grade, skill)
 	resultEvent:FireClient(
@@ -140,21 +143,28 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 	end
 end)
 
--- Settle past beats: untapped ones break the combo and cost focus (Rhythm.onSkip).
+-- Settle past notes: untapped ones break the combo and cost focus (Rhythm.onSkip). A note
+-- closes once taps would map to the next one (halfway between them) plus settleDelay.
 RunService.Heartbeat:Connect(function()
 	local now = workspace:GetServerTimeNow()
 	for player, session in sessions do
-		local interval = 60 / session.bpm
-		local closed = math.floor((now - Rhythm.settleDelay - session.startTime) / interval - 0.5)
-		for beat = session.settled + 1, closed do
-			if session.tapped[beat] then
-				session.tapped[beat] = nil
+		while true do
+			local n = session.settled + 1
+			local closesAt = (
+				BeatClock.noteTime(session.startTime, session.bpm, n, session.pattern)
+				+ BeatClock.noteTime(session.startTime, session.bpm, n + 1, session.pattern)
+			) / 2 + Rhythm.settleDelay
+			if now < closesAt then
+				break
+			end
+			if session.tapped[n] then
+				session.tapped[n] = nil
 			else
 				session.score = Score.apply(session.score, "Miss")
 				Rhythm.onSkip(player)
 			end
+			session.settled = n
 		end
-		session.settled = math.max(session.settled, closed)
 	end
 end)
 

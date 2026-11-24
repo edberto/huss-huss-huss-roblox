@@ -84,15 +84,24 @@ function NightScreens.start()
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			Parent = card,
 		})
+		local info = Night.stationInfo[name]
 		label({
-			Position = UDim2.fromScale(0.08, 0.18),
-			Size = UDim2.fromScale(0.84, 0.36),
+			Position = UDim2.fromScale(0.08, 0.1),
+			Size = UDim2.fromScale(0.84, 0.32),
 			Text = name,
 			Parent = card,
 		})
+		label({
+			Position = UDim2.fromScale(0.08, 0.44),
+			Size = UDim2.fromScale(0.84, 0.18),
+			Text = if info.bonus > 0
+				then `{info.difficulty} · +{math.round(info.bonus * 100)}% Huss`
+				else info.difficulty,
+			Parent = card,
+		})
 		local status = label({
-			Position = UDim2.fromScale(0.1, 0.6),
-			Size = UDim2.fromScale(0.8, 0.22),
+			Position = UDim2.fromScale(0.1, 0.68),
+			Size = UDim2.fromScale(0.8, 0.18),
 			Text = "Tap to pick",
 			Parent = card,
 		})

@@ -6,8 +6,13 @@
 -- segment (new startTime + bpm) instead of this module tracking a tempo curve.
 
 export type Grade = "Perfect" | "Good" | "Almost" | "Miss"
+-- Note positions in eighth notes within a 4-beat bar (0-7, ascending). Notes are numbered
+-- 0, 1, 2... across bars; the last note of each bar is the skill move.
+export type Pattern = { number }
 
 local BeatClock = {}
+
+BeatClock.everyBeat = table.freeze({ 0, 2, 4, 6 }) :: Pattern
 
 -- Seconds either side of a beat. Tune from phone playtests (design doc: about 120 ms for lag).
 BeatClock.windows = table.freeze({
@@ -16,11 +21,29 @@ BeatClock.windows = table.freeze({
 	Almost = 0.2,
 })
 
--- Nearest beat index to time `t` and the offset from it in seconds (negative = early).
-function BeatClock.nearest(startTime: number, bpm: number, t: number): (number, number)
-	local interval = 60 / bpm
-	local beat = math.floor((t - startTime) / interval + 0.5)
-	return beat, t - (startTime + beat * interval)
+-- When note `n` is due.
+function BeatClock.noteTime(startTime: number, bpm: number, n: number, pattern: Pattern?): number
+	local p = pattern or BeatClock.everyBeat
+	return startTime + ((n // #p) * 8 + p[n % #p + 1]) * 30 / bpm
+end
+
+-- Nearest note to time `t` and the offset from it in seconds (negative = early).
+function BeatClock.nearest(
+	startTime: number,
+	bpm: number,
+	t: number,
+	pattern: Pattern?
+): (number, number)
+	local p = pattern or BeatClock.everyBeat
+	local bar = math.floor((t - startTime) / (240 / bpm))
+	local best, bestOffset = 0, math.huge
+	for n = (bar - 1) * #p, (bar + 2) * #p - 1 do
+		local offset = t - BeatClock.noteTime(startTime, bpm, n, p)
+		if math.abs(offset) < math.abs(bestOffset) then
+			best, bestOffset = n, offset
+		end
+	end
+	return best, bestOffset
 end
 
 function BeatClock.grade(offset: number): Grade
@@ -75,9 +98,10 @@ function BeatClock.averageOffset(
 	return if count >= minTaps then sum / count else nil
 end
 
--- Beats 0, 1, 2 of every bar are "huss" taps; beat 3 is the station's skill move.
-function BeatClock.isSkillBeat(beat: number): boolean
-	return beat % 4 == 3
+-- The last note of every bar is the station's skill move; the others are "huss" taps.
+function BeatClock.isSkillBeat(note: number, pattern: Pattern?): boolean
+	local count = #(pattern or BeatClock.everyBeat)
+	return note % count == count - 1
 end
 
 return BeatClock

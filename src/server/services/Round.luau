@@ -238,8 +238,9 @@ function Round.run()
 				local rewardPlace = if player:GetAttribute("UsedSecondWind") == true
 					then math.max(place, 2)
 					else place
+				local info = Night.stationInfo[result.station] or Night.stationInfo.Basketball
 				local hp = Progress.nightReward(
-					result.points,
+					Progress.stationPoints(result.points, info.bonus),
 					result.party,
 					rewardPlace,
 					#Players:GetPlayers(), -- placement bonuses count real players only

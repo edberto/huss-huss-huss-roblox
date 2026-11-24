@@ -44,4 +44,17 @@ describe("BeatClock", function()
 		expect(BeatClock.averageOffset(taps, beats, 0.25, 4)).toBeCloseTo(0.14)
 		expect(BeatClock.averageOffset({ 1.1, 1.7 }, beats, 0.25, 4)).toBe(nil)
 	end)
+
+	it("follows a station pattern: off-beat notes and the skill note", function()
+		local burgers = { 1, 3, 5, 7 } -- every "and"; 120 BPM = 0.25 s per eighth, start 10
+		expect(BeatClock.noteTime(10, 120, 0, burgers)).toBeCloseTo(10.25)
+		expect(BeatClock.noteTime(10, 120, 5, burgers)).toBeCloseTo(12.75)
+		local note, offset = BeatClock.nearest(10, 120, 10.78, burgers)
+		expect(note).toBe(1)
+		expect(offset).toBeCloseTo(0.03)
+		expect(BeatClock.isSkillBeat(3, burgers)).toBe(true)
+		local gym = { 0, 4, 6, 7 } -- the double rep: notes 2 and 3 are one eighth apart
+		note = BeatClock.nearest(10, 120, 11.70, gym)
+		expect(note).toBe(3)
+	end)
 end)

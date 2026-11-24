@@ -16,6 +16,17 @@ Night.bpmSteps = table.freeze({ 100, 108, 116, 124 })
 
 -- Practice stations, in picker order. Every home has all of them.
 Night.stations = table.freeze({ "Basketball", "Gym", "Burgers" })
+-- Each station's rhythm (BeatClock.Pattern) and difficulty; harder stations pay more Huss.
+Night.stationInfo = table.freeze({
+	Basketball = table.freeze({ difficulty = "Easy", bonus = 0, pattern = { 0, 2, 4, 6 } }),
+	Gym = table.freeze({ difficulty = "Medium", bonus = 0.1, pattern = { 0, 4, 6, 7 } }),
+	Burgers = table.freeze({ difficulty = "Hard", bonus = 0.25, pattern = { 1, 3, 5, 7 } }),
+})
+
+function Night.pattern(station: unknown): { number }
+	local info = Night.stationInfo[station :: any]
+	return if info then info.pattern else Night.stationInfo.Basketball.pattern
+end
 
 Night.focusStart = 100
 Night.missDrain = 2 -- focus lost per missed tap (doubled during a bass drop)

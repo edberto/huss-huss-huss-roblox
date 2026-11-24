@@ -258,7 +258,8 @@ function PartyClient.start()
 		end
 	end)
 
-	-- Fake beats sit half a beat off the real ones, sliding at the same speed, and you hear them.
+	-- Fake beats sit a quarter beat off the real ones (between notes on every station), sliding at
+	-- the same speed, and you hear them.
 	local fakeHeard = math.huge
 	RunService.RenderStepped:Connect(function()
 		local active = os.clock() < speakerUntil
@@ -272,15 +273,15 @@ function PartyClient.start()
 		end
 		local now = workspace:GetServerTimeNow()
 		local interval = 60 / bpm
-		local half = math.floor((now - startTime) / interval - 0.5)
+		local half = math.floor((now - startTime) / interval - 0.25)
 		if half > fakeHeard then
 			StationFx.play("kick", 1.15)
 		end
 		fakeHeard = half
 		local span = trackOverlay.AbsoluteSize.X - 34 - 100
-		local first = math.ceil((now - startTime) / interval - 0.5)
+		local first = math.ceil((now - startTime) / interval - 0.25)
 		for i, dot in fakeDots do
-			local ahead = startTime + (first + i - 0.5) * interval - now
+			local ahead = startTime + (first + i - 0.75) * interval - now
 			local x = 34 + ahead / (interval * 4) * span
 			if x >= 34 and x <= 34 + span then
 				dot.Position = UDim2.new(0, x, 0.5, 0)
