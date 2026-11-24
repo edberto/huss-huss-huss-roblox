@@ -24,7 +24,13 @@ function Analytics.step(player: Player, name: string)
 		return
 	end
 	done[name] = true
-	pcall(AnalyticsService.LogOnboardingFunnelStepEvent, AnalyticsService, player, Analytics.steps[name], name)
+	pcall(
+		AnalyticsService.LogOnboardingFunnelStepEvent,
+		AnalyticsService,
+		player,
+		Analytics.steps[name],
+		name
+	)
 end
 
 function Analytics.event(player: Player, name: string, value: number)

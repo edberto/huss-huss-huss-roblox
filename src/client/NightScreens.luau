@@ -339,22 +339,22 @@ function NightScreens.start()
 				topThree = true
 			end
 		end
-		local prompt: (() -> ())? = nil
+		local ask: (() -> ())? = nil
 		if topThree and not askedFavorite then
 			askedFavorite = true
-			prompt = function()
+			ask = function()
 				AvatarEditorService:PromptSetFavorite(game.PlaceId, Enum.AvatarItemType.Asset, true)
 			end
 		elseif not askedInvite then
 			askedInvite = true
-			prompt = function()
+			ask = function()
 				if SocialService:CanSendGameInviteAsync(player) then
 					SocialService:PromptGameInvite(player)
 				end
 			end
 		end
-		if prompt then
-			task.delay(4, pcall, prompt) -- after the Dawn card has had its moment
+		if ask then
+			task.delay(4, pcall, ask) -- after the Dawn card has had its moment
 		end
 	end)
 
