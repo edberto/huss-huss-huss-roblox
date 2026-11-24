@@ -93,6 +93,14 @@ function Focus.onGrade(player: Player, grade: string)
 	end
 end
 
+function Focus.onSkip(player: Player)
+	local state = states[player]
+	if state then
+		local bass = os.clock() < state.bassUntil
+		setFocus(player, state, state.focus - Night.skipDrain * (if bass then 2 else 1))
+	end
+end
+
 -- Called about once a second by the round; sends each trainer's next temptation when it's due.
 function Focus.tick(now: number, progress: number)
 	for player, state in states do

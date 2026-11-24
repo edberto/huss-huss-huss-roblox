@@ -19,6 +19,7 @@ Night.stations = table.freeze({ "Basketball", "Gym", "Burgers" })
 
 Night.focusStart = 100
 Night.missDrain = 2 -- focus lost per missed tap (doubled during a bass drop)
+Night.skipDrain = 1 -- focus lost per beat not tapped at all (idle all night = gives in)
 
 export type TemptationKind = "Doorbell" | "Phone" | "Friend" | "BassDrop"
 -- window: seconds to answer; taps: answers needed (0 = nothing to answer); drain: focus lost if

@@ -28,4 +28,13 @@ describe("BeatClock", function()
 		expect(BeatClock.isSkillBeat(3)).toBe(true)
 		expect(BeatClock.isSkillBeat(7)).toBe(true)
 	end)
+
+	it("trusts the reported tap time only near its arrival, then applies the calibration", function()
+		-- Honest: reported 50 ms before it arrived with 50 ms one-way delay -> unchanged.
+		expect(BeatClock.trustedTapTime(10.0, 10.05, 0.05, 0, 0.1)).toBeCloseTo(10.0)
+		-- Tampered: claims a time 0.4 s earlier than possible -> clamped to 0.1 s early.
+		expect(BeatClock.trustedTapTime(9.6, 10.05, 0.05, 0, 0.1)).toBeCloseTo(9.9)
+		-- Calibration of 0.2 s (late audio) moves the judged tap 0.2 s earlier.
+		expect(BeatClock.trustedTapTime(10.0, 10.05, 0.05, 0.2, 0.1)).toBeCloseTo(9.8)
+	end)
 end)

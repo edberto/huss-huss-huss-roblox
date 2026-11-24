@@ -35,6 +35,22 @@ function BeatClock.grade(offset: number): Grade
 	return "Miss"
 end
 
+-- The tap time the server judges. The client reports when it tapped; the server only trusts that
+-- within `tolerance` of when the tap actually arrived (minus the one-way network delay), so a
+-- tampered client can shift a tap by at most `tolerance`. `offset` is the player's saved timing
+-- calibration (positive = their audio runs late, e.g. Bluetooth earbuds).
+-- ponytail: a cheater still gains up to `tolerance`; tighten it if phone playtests allow.
+function BeatClock.trustedTapTime(
+	claimed: number,
+	received: number,
+	oneWay: number,
+	offset: number,
+	tolerance: number
+): number
+	local arrived = received - oneWay
+	return math.clamp(claimed, arrived - tolerance, arrived + tolerance) - offset
+end
+
 -- Beats 0, 1, 2 of every bar are "huss" taps; beat 3 is the station's skill move.
 function BeatClock.isSkillBeat(beat: number): boolean
 	return beat % 4 == 3

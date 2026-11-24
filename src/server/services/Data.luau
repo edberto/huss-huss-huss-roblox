@@ -24,6 +24,7 @@ export type Data = {
 	secondWinds: number, -- bought but not yet used
 	tutorialDone: boolean,
 	codes: { [string]: boolean }, -- redeem codes already used
+	tapOffset: number, -- timing calibration in seconds (positive = audio heard late)
 }
 
 local TEMPLATE: Data = {
@@ -38,6 +39,7 @@ local TEMPLATE: Data = {
 	secondWinds = 0,
 	tutorialDone = false,
 	codes = {},
+	tapOffset = 0,
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -75,6 +77,7 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("GroupClaimed", data.groupClaimed)
 	player:SetAttribute("SecondWinds", data.secondWinds)
 	player:SetAttribute("TutorialDone", data.tutorialDone)
+	player:SetAttribute("TapOffset", data.tapOffset)
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then
 		(stats:FindFirstChild("HP") :: IntValue).Value = data.hp;

@@ -94,6 +94,7 @@ Focus.onBroken = function(player: Player)
 	end
 end
 Rhythm.onGrade = Focus.onGrade
+Rhythm.onSkip = Focus.onSkip
 
 local function setLockedIn(player: Player, on: boolean)
 	local character = player.Character
