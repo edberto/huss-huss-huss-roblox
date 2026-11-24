@@ -147,6 +147,16 @@ function Npcs.tick(progress: number, clockText: string, bpm: number)
 	end
 end
 
+-- Night over: NPCs still training lasted until now (not 6 AM if the night ended early).
+function Npcs.finish(progress: number, clockText: string)
+	for _, npc in npcs do
+		if not npc.partier then
+			npc.progress = progress
+			npc.lasted = clockText
+		end
+	end
+end
+
 -- Ranking rows for the Dawn card (negative ids so they never match a real player).
 function Npcs.results(): { any }
 	local rows = {}

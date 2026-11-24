@@ -160,6 +160,8 @@ local function runNight()
 		task.wait(1)
 	end
 	ReplicatedStorage:SetAttribute("NightClock", Night.clockText(1))
+	local ended = math.min(1, progressNow())
+	Npcs.finish(ended, Night.clockText(ended))
 	for _, player in Players:GetPlayers() do
 		setLockedIn(player, false)
 		if Focus.isTrainer(player) then

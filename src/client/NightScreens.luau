@@ -1,6 +1,7 @@
 --!strict
 -- The approved night-cycle screens: Dusk station picker, temptation prompts, the give-in screen
 -- and the Dawn results card. Driven by ReplicatedStorage "Phase"/"PhaseEnds" and the remotes.
+local AvatarEditorService = game:GetService("AvatarEditorService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -325,6 +326,22 @@ function NightScreens.start()
 			Parent = line,
 		})
 	end
+
+	-- First top-3 finish this session: ask to favorite (no reward; Roblox forbids rewarding favorites).
+	-- ponytail: once per session, not once per account; save a flag if players find it nagging.
+	local askedFavorite = false
+	resultsEvent.OnClientEvent:Connect(function(results: { any })
+		for i, result in results do
+			if i <= 3 and result.userId == player.UserId and not askedFavorite then
+				askedFavorite = true
+				task.delay(4, function() -- after the Dawn card has had its moment
+					pcall(function()
+						AvatarEditorService:PromptSetFavorite(game.PlaceId, Enum.AvatarItemType.Asset, true)
+					end)
+				end)
+			end
+		end
+	end)
 
 	resultsEvent.OnClientEvent:Connect(function(results: { any })
 		for _, child in card:GetChildren() do
