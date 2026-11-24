@@ -79,10 +79,10 @@ Focus.onBroken = function(player: Player)
 	Party.creditGiveIn(player)
 	player:SetAttribute("Team", "Partier")
 	setMovement(player, true)
-	local root = player.Character
-		and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if root then
-		root.CFrame = PARTY_LAWN
+	if player.Character then
+		player.Character:PivotTo(
+			partyLawn.CFrame + Vector3.new(math.random(-6, 6), 3, math.random(-4, 4))
+		)
 	end
 end
 Rhythm.onGrade = Focus.onGrade

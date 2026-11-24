@@ -122,7 +122,7 @@ end
 -- Party house at the west end of the street, front facing east down the street.
 local party = Instance.new("Model")
 party.Name = "PartyHouse"
-local partyBase = CFrame.new(PARTY_CENTER) * CFrame.Angles(0, math.rad(90), 0) -- local -Z = world +X
+local partyBase = CFrame.new(PARTY_CENTER) * CFrame.Angles(0, math.rad(-90), 0) -- local -Z = world +X
 house(party, partyBase, C.partyWall, C.roof)
 for i, lx in { -8, 0, 8 } do
 	local color = if i == 2 then C.purple else C.pink

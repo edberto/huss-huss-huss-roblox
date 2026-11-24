@@ -8,6 +8,8 @@ Manual place changes that a code publish doesn't carry. Newest first.
   per side of the street) and the party house at the west end of the street (with side windows).
   Replaces the single workspace.Home. SpawnLocation moved to the street; players are placed on
   their home's PracticeSpot by code.
+- Turned the party house 180 degrees so its front, guests and lawn face down the street
+  (scene script fixed to match).
 - To do in Game Settings: max players 12.
 
 - Built the night town with `scripts/build_scene.luau` (Home with hoop, ball, practice camera;
