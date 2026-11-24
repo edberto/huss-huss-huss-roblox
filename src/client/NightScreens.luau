@@ -348,6 +348,23 @@ function NightScreens.start()
 				)
 			end
 		end
+		if mine and mine.earned then
+			local levelText = if (mine.levelAfter or 1) > (mine.levelBefore or 1)
+				then `LEVEL UP! {mine.station} Lv {mine.levelAfter}`
+				else `{mine.station} Lv {mine.levelAfter or 1}`
+			local reward = make("Frame", {
+				BackgroundTransparency = 1,
+				LayoutOrder = 52,
+				Size = UDim2.new(1, 0, 0, 30),
+				Parent = card,
+			})
+			label({
+				Size = UDim2.fromScale(1, 1),
+				Text = `+{mine.earned} HP · {levelText}`,
+				TextColor3 = C.orange,
+				Parent = reward,
+			})
+		end
 		if mine then
 			make("Frame", {
 				BackgroundColor3 = C.rule,

@@ -9,6 +9,8 @@ local Night = require(ReplicatedStorage.Shared.Night)
 local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
 local Party = require(script.Parent.Party)
+local Data = require(script.Parent.Data)
+local Progress = require(ReplicatedStorage.Shared.Progress)
 local Rhythm = require(script.Parent.Rhythm)
 
 export type Result = {
@@ -19,6 +21,10 @@ export type Result = {
 	lasted: string?, -- clock time the player gave in; nil = locked in all night
 	progress: number, -- how far through the night they lasted, 0-1
 	party: number, -- party points earned as a partier
+	station: string,
+	earned: number?, -- Huss Points credited at Dawn
+	levelBefore: number?,
+	levelAfter: number?,
 }
 
 local Round = {}
@@ -61,6 +67,7 @@ local function record(player: Player, lasted: string?, progress: number)
 		lasted = lasted,
 		progress = progress,
 		party = 0,
+		station = tostring(player:GetAttribute("Station") or "Basketball"),
 	}
 	-- The give-in screen shows these straight away; the full ranking comes at Dawn.
 	player:SetAttribute("NightPoints", results[player].points)
@@ -204,7 +211,25 @@ function Round.run()
 		runNight()
 
 		setPhase("Dawn", Night.dawnTime)
-		resultsEvent:FireAllClients(sortedResults())
+		local ranking = sortedResults()
+		-- Pay everyone: points, party points and placement bonuses become saved Huss Points,
+		-- and the night's points become XP for the station they practised.
+		for place, result in ranking do
+			local player = Players:GetPlayerByUserId(result.userId)
+			if player then
+				local hp = Progress.nightReward(
+					result.points,
+					result.party,
+					place,
+					#ranking,
+					result.lasted == nil
+				)
+				result.earned = hp
+				result.levelBefore, result.levelAfter =
+					Data.creditNight(player, hp, result.station, result.points)
+			end
+		end
+		resultsEvent:FireAllClients(ranking)
 		task.wait(Night.dawnTime)
 	end
 end

@@ -102,7 +102,7 @@ function RhythmClient.start()
 		BackgroundTransparency = 0,
 		Position = UDim2.new(1, -16, 0, 10),
 		Size = UDim2.fromOffset(120, 30),
-		Text = "0 HP",
+		Text = "",
 		TextColor3 = AMBER,
 		Parent = gui,
 	})
@@ -189,12 +189,25 @@ function RhythmClient.start()
 
 	gui.Parent = player:WaitForChild("PlayerGui")
 
+	-- Top right: saved Huss Points plus what this night has earned so far.
+	local sessionPoints = 0
+	local function refreshPoints()
+		local saved = tonumber(player:GetAttribute("HP")) or 0
+		points.Text = `{saved + sessionPoints} HP`
+	end
+	player:GetAttributeChangedSignal("HP"):Connect(refreshPoints)
+	refreshPoints()
+
 	local segment: { startTime: number, bpm: number }? = nil
 	local function refreshSegment()
 		local startTime, bpm = player:GetAttribute("BeatStart"), player:GetAttribute("BeatBpm")
 		segment = if typeof(startTime) == "number" and typeof(bpm) == "number"
 			then { startTime = startTime, bpm = bpm }
 			else nil
+		if not segment then
+			sessionPoints = 0
+			refreshPoints()
+		end
 	end
 	player:GetAttributeChangedSignal("BeatStart"):Connect(refreshSegment)
 	player:GetAttributeChangedSignal("BeatBpm"):Connect(refreshSegment)
@@ -259,7 +272,8 @@ function RhythmClient.start()
 			if not style then
 				return
 			end
-			points.Text = `{total} HP`
+			sessionPoints = total
+			refreshPoints()
 			combo.Text = if streak > 0 then `x{Score.multiplier(streak)} · {streak}` else ""
 			hitWord.Text = style.text
 			hitWord.TextColor3 = style.color

@@ -3,16 +3,31 @@
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {
-      "Shared": { "$path": "src/shared" },
-      "$attributes": { "DevelopmentPlaytest": true }
+      "Shared": {
+        "$path": "src/shared"
+      },
+      "$attributes": {
+        "DevelopmentPlaytest": true
+      }
     },
     "ServerScriptService": {
-      "Server": { "$path": "src/server" }
+      "Server": {
+        "$path": "src/server"
+      },
+      "ServerPackages": {
+        "$path": "ServerPackages"
+      }
     },
     "StarterPlayer": {
       "StarterPlayerScripts": {
-        "Client": { "$path": "src/client" }
+        "Client": {
+          "$path": "src/client"
+        }
       }
     }
-  }
+  },
+  "globIgnorePaths": [
+    "ServerPackages/**/*.server.luau",
+    "ServerPackages/**/*.server.lua"
+  ]
 }
