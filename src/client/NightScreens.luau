@@ -277,7 +277,6 @@ function NightScreens.start()
 	local card = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
 		BackgroundColor3 = C.cream,
-		AutomaticSize = Enum.AutomaticSize.Y,
 		Position = UDim2.fromScale(0.5, 0.18),
 		Size = UDim2.fromScale(0.5, 0),
 		Parent = dawn,
@@ -387,6 +386,14 @@ function NightScreens.start()
 				Parent = line,
 			})
 		end
+		-- Size the card to its rows (list padding 6, card padding 14 top and bottom).
+		local height = 28
+		for _, child in card:GetChildren() do
+			if child:IsA("Frame") then
+				height += child.Size.Y.Offset + 6
+			end
+		end
+		card.Size = UDim2.new(0.5, 0, 0, height)
 	end)
 
 	-- Phase changes: show the right screen, move the sky between night and dawn -----------------
