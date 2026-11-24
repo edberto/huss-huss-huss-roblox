@@ -4,6 +4,7 @@
 -- trees), fences, a cul-de-sac, a tree line and a distant skyline; the party (dancers, lights,
 -- speaker, beams, confetti) and parked cars. Also the partier look (glow sticks).
 -- Yard props don't collide: NPC partiers walk straight at trainers and must never get stuck.
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 
 local Decor = {}
@@ -194,19 +195,24 @@ function Decor.build()
 		})
 	end
 
-	-- Two light beams from the roof into the sky.
-	for i, z in { -16, 4 } do
-		part({
+	-- Four light beams from the roof ridge. Each client sweeps them (init.client: PartyBeam tag)
+	-- around their "Base"; the server only places them.
+	for i, z in { -18, -10, -2, 6 } do
+		local base = CFrame.new(-150, 17, z)
+		local beam = part({
 			Name = "Beam",
 			Size = Vector3.new(1.2, 60, 1.2),
-			CFrame = CFrame.new(-146, 46, z)
-				* CFrame.Angles(math.rad(if i == 1 then -14 else 14), 0, math.rad(-10)),
+			CFrame = base * CFrame.new(0, 30, 0),
 			Material = Enum.Material.Neon,
-			Color = PARTY_COLORS[i + 1],
+			Color = PARTY_COLORS[(i - 1) % #PARTY_COLORS + 1],
 			Transparency = 0.6,
 			CanCollide = false,
 			CanQuery = false,
+			CastShadow = false,
 		})
+		beam:SetAttribute("Base", base)
+		beam:SetAttribute("Phase", i * 1.7)
+		CollectionService:AddTag(beam, "PartyBeam")
 	end
 
 	-- Confetti over the lawn.

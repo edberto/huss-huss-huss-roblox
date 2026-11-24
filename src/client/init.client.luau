@@ -50,6 +50,19 @@ music.RollOffMaxDistance = 260
 music.Parent = workspace:WaitForChild("Town"):WaitForChild("PartyHouse"):WaitForChild("Lawn")
 music:Play()
 
+-- Party beams sweep the sky (built by the server's Decor; animated here so it's smooth and free).
+local CollectionService = game:GetService("CollectionService")
+game:GetService("RunService").RenderStepped:Connect(function()
+	local t = os.clock()
+	for _, beam in CollectionService:GetTagged("PartyBeam") do
+		local base, phase = beam:GetAttribute("Base"), beam:GetAttribute("Phase")
+		if typeof(base) == "CFrame" and typeof(phase) == "number" then
+			local tilt = CFrame.Angles(math.sin(t * 0.7 + phase) * 0.45, 0, -0.25 + math.cos(t * 0.5 + phase) * 0.3)
+			beam.CFrame = base * tilt * CFrame.new(0, 30, 0)
+		end
+	end
+end)
+
 -- The station picked at Dusk gets every hit; the others hide their props.
 local stations = {
 	Basketball = Basketball.start(home),
