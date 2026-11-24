@@ -57,7 +57,11 @@ game:GetService("RunService").RenderStepped:Connect(function()
 	for _, beam in CollectionService:GetTagged("PartyBeam") do
 		local base, phase = beam:GetAttribute("Base"), beam:GetAttribute("Phase")
 		if typeof(base) == "CFrame" and typeof(phase) == "number" then
-			local tilt = CFrame.Angles(math.sin(t * 0.7 + phase) * 0.45, 0, -0.25 + math.cos(t * 0.5 + phase) * 0.3)
+			local tilt = CFrame.Angles(
+				math.sin(t * 0.7 + phase) * 0.45,
+				0,
+				-0.25 + math.cos(t * 0.5 + phase) * 0.3
+			)
 			beam.CFrame = base * tilt * CFrame.new(0, 30, 0)
 		end
 	end
