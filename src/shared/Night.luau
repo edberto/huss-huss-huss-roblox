@@ -14,6 +14,9 @@ Night.clockEndMinutes = 30 * 60
 -- One BPM per quarter of the night: the beat gets faster towards dawn.
 Night.bpmSteps = table.freeze({ 100, 108, 116, 124 })
 
+-- Practice stations, in picker order. Every home has all of them.
+Night.stations = table.freeze({ "Basketball", "Gym", "Burgers" })
+
 Night.focusStart = 100
 Night.missDrain = 2 -- focus lost per missed tap (doubled during a bass drop)
 

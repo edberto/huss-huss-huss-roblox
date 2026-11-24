@@ -2,6 +2,8 @@
 local Players = game:GetService("Players")
 
 local Basketball = require(script.Basketball)
+local Burger = require(script.Burger)
+local Gym = require(script.Gym)
 local NightScreens = require(script.NightScreens)
 local PartyClient = require(script.PartyClient)
 local RhythmClient = require(script.RhythmClient)
@@ -30,7 +32,25 @@ end)
 player:GetAttributeChangedSignal("Team"):Connect(updateCamera)
 updateCamera()
 
-RhythmClient.onResult = Basketball.start(home)
+-- The station picked at Dusk gets every hit; the others hide their props.
+local stations = {
+	Basketball = Basketball.start(home),
+	Gym = Gym.start(),
+	Burgers = Burger.start(),
+}
+local function currentStation()
+	return stations[player:GetAttribute("Station")] or stations.Basketball
+end
+local function updateStation()
+	for _, station in stations do
+		station.setActive(station == currentStation())
+	end
+end
+player:GetAttributeChangedSignal("Station"):Connect(updateStation)
+updateStation()
+RhythmClient.onResult = function(grade, skill)
+	currentStation().onResult(grade, skill)
+end
 RhythmClient.start()
 NightScreens.start()
 PartyClient.start()

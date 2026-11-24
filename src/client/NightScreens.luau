@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local Night = require(ReplicatedStorage.Shared.Night)
 local Ui = require(script.Parent.Ui)
 
 local player = Players.LocalPlayer
@@ -22,11 +23,6 @@ local PROMPTS = {
 	Phone = { text = "New message: party at the end of the street", button = "Decline" },
 	Friend = { text = "Come on, just one hour!", button = "Not tonight" },
 	BassDrop = { text = "BASS DROP! Misses count double", button = nil },
-}
-local STATIONS = {
-	{ name = "Basketball", open = true },
-	{ name = "Gym", open = false },
-	{ name = "Burgers", open = false },
 }
 
 local NightScreens = {}
@@ -71,37 +67,55 @@ function NightScreens.start()
 			Padding = UDim.new(0.03, 0),
 		}),
 	})
-	for _, station in STATIONS do
+	local pickEvent = remotes:WaitForChild("PickStation") :: RemoteEvent
+	local cardParts: { [string]: { card: TextButton, stroke: UIStroke, status: TextLabel } } = {}
+	for _, name in Night.stations do
 		local card = make("TextButton", {
-			AutoButtonColor = station.open,
-			BackgroundColor3 = if station.open then C.orange else C.panel,
+			BackgroundColor3 = C.panel,
 			Size = UDim2.fromScale(0.3, 1),
 			Text = "",
 			Parent = cards,
 		}, { corner(12) })
-		if station.open then
-			make("UIStroke", {
-				Color = C.cream,
-				Thickness = 3,
-				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Parent = card,
-			})
-		end
+		local stroke = make("UIStroke", {
+			Color = C.cream,
+			Thickness = 3,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			Parent = card,
+		})
 		label({
 			Position = UDim2.fromScale(0.08, 0.18),
 			Size = UDim2.fromScale(0.84, 0.36),
-			Text = station.name,
-			TextColor3 = if station.open then C.navy else C.muted,
+			Text = name,
 			Parent = card,
 		})
-		label({
+		local status = label({
 			Position = UDim2.fromScale(0.1, 0.6),
 			Size = UDim2.fromScale(0.8, 0.22),
-			Text = if station.open then "Selected" else "Coming soon",
-			TextColor3 = if station.open then C.navy else C.muted,
+			Text = "Tap to pick",
 			Parent = card,
 		})
+		card.Activated:Connect(function()
+			pickEvent:FireServer(name)
+		end)
+		cardParts[name] = { card = card, stroke = stroke, status = status }
 	end
+	-- The picked card is orange with a cream outline; the others are dark.
+	local function refreshCards()
+		local picked = player:GetAttribute("Station")
+		for name, parts in cardParts do
+			local on = name == picked
+			parts.card.BackgroundColor3 = if on then C.orange else C.panel
+			parts.stroke.Enabled = on
+			parts.status.Text = if on then "Selected" else "Tap to pick"
+			for _, child in parts.card:GetChildren() do
+				if child:IsA("TextLabel") then
+					child.TextColor3 = if on then C.navy else C.cream
+				end
+			end
+		end
+	end
+	player:GetAttributeChangedSignal("Station"):Connect(refreshCards)
+	refreshCards()
 	label({
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.fromScale(0.5, 0.93),
