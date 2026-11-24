@@ -1,14 +1,14 @@
 import sys
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageFilter
 D='/tmp/claude-tool-results/71c6616f-0a7c-57cd-8cf7-4feeb9716fa9/'
-left=Image.open(D+'mcp-remote-devices-blob-1795504852206-2q44wj-b86adc47.jpg').convert('RGB')
-right=Image.open(D+'mcp-remote-devices-blob-1795504853624-uoskhu-faff50f0.jpg').convert('RGB')
+left=Image.open(D+'mcp-remote-devices-blob-1795505496423-xuvswr-60a2d1d5.jpg').convert('RGB')
+right=Image.open(D+'mcp-remote-devices-blob-1795505498149-rxongl-1ff69aca.jpg').convert('RGB')
 W,H=1920,1080
 def half(img, x0, x1):
     c=img.crop((x0,0,x1,img.height))
     return c.resize((int(c.width*H/c.height),H), Image.LANCZOS)
 L=half(left,560,1300)
-R=half(right,500,1280)
+R=half(right,560,1300)
 # cool the trainer side, push the party side
 blue=Image.new('RGB',L.size,(30,60,160))
 L=Image.blend(ImageEnhance.Brightness(L).enhance(0.85),blue,0.2)
