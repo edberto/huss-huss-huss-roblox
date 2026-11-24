@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Rewards = require(ReplicatedStorage.Shared.Rewards)
 local Data = require(script.Parent.Data)
+local RedeemCodes = require(script.Parent.RedeemCodes)
 
 -- The game's Roblox group. 0 turns the group reward off until the group exists.
 local GROUP_ID = 0
@@ -22,7 +23,27 @@ local claimGift = remote("ClaimGift") -- arg: minutes threshold; returns nil or 
 local claimGroup = remote("ClaimGroup") -- returns nil or a reason
 local completeTutorial = remote("CompleteTutorial") -- first Dawn reached; returns nil or a reason
 
+local redeemCode = remote("RedeemCode") -- arg: typed code; returns HP granted, or nil and a reason
+
 local TUTORIAL_HP = 100
+
+redeemCode.OnServerInvoke = function(player: Player, input: unknown): (number?, string?)
+	if typeof(input) ~= "string" or #input > 40 then
+		return nil, "Invalid"
+	end
+	local granted
+	local failure = Data.update(player, function(data)
+		local hp, keyOrReason = Rewards.redeem(RedeemCodes, data.codes, input, os.time())
+		if not hp then
+			return keyOrReason
+		end
+		data.codes[keyOrReason] = true
+		data.hp += hp
+		granted = hp
+		return nil
+	end)
+	return granted, failure
+end
 
 completeTutorial.OnServerInvoke = function(player: Player): string?
 	return Data.update(player, function(data)

@@ -42,4 +42,17 @@ describe("Rewards", function()
 		_, day = Rewards.claimDaily({ lastDay = 200, streak = 7 }, 201)
 		expect(day).toBe(1)
 	end)
+
+	it("redeems a code once per account, any case, and refuses unknown or expired codes", function()
+		local codes = { HUSS = { hp = 200 }, OLD = { hp = 50, expiresAt = 1000 } }
+		local used = {}
+		local hp, key = Rewards.redeem(codes, used, " huss-", 500)
+		expect(hp).toBe(200)
+		expect(key).toBe("HUSS")
+		used[key] = true
+		expect(select(2, Rewards.redeem(codes, used, "HUSS", 500))).toBe("AlreadyRedeemed")
+		expect(select(2, Rewards.redeem(codes, used, "NOPE", 500))).toBe("Invalid")
+		expect(Rewards.redeem(codes, used, "old", 999)).toBe(50)
+		expect(select(2, Rewards.redeem(codes, used, "old", 1001))).toBe("Invalid")
+	end)
 end)

@@ -23,6 +23,7 @@ export type Data = {
 	receipts: { string }, -- recent Robux purchase ids, so a receipt is never granted twice
 	secondWinds: number, -- bought but not yet used
 	tutorialDone: boolean,
+	codes: { [string]: boolean }, -- redeem codes already used
 }
 
 local TEMPLATE: Data = {
@@ -36,6 +37,7 @@ local TEMPLATE: Data = {
 	receipts = {},
 	secondWinds = 0,
 	tutorialDone = false,
+	codes = {},
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)

@@ -38,4 +38,29 @@ function Rewards.nextDailyDay(state: DailyState, today: number): number
 	return if state.lastDay == today - 1 then state.streak % #Rewards.daily + 1 else 1
 end
 
+export type Code = { hp: number, expiresAt: number? }
+
+-- Players type codes in any case, with or without spaces/dashes.
+function Rewards.normalizeCode(input: string): string
+	return (string.upper(input):gsub("[^%w]", ""))
+end
+
+-- Redeems a typed code against the server's code list. Returns the HP to grant and the key to
+-- mark as used, or nil and a reason. Each code pays once per account; expired = unknown.
+function Rewards.redeem(
+	codes: { [string]: Code },
+	used: { [string]: boolean },
+	input: string,
+	now: number
+): (number?, string)
+	local key = Rewards.normalizeCode(input)
+	local code = codes[key]
+	if not code or (code.expiresAt and now > code.expiresAt) then
+		return nil, "Invalid"
+	elseif used[key] then
+		return nil, "AlreadyRedeemed"
+	end
+	return code.hp, key
+end
+
 return Rewards
