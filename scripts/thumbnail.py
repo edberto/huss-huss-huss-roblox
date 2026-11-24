@@ -1,14 +1,14 @@
 import sys
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageFilter
 D='/tmp/claude-tool-results/71c6616f-0a7c-57cd-8cf7-4feeb9716fa9/'
-left=Image.open(D+'mcp-remote-devices-blob-1795500768974-cb5h8z-9a5ce57c.jpg').convert('RGB')
-right=Image.open(D+'mcp-remote-devices-blob-1795500746405-rtzz0j-e6de36f9.jpg').convert('RGB')
+left=Image.open(D+'mcp-remote-devices-blob-1795504852206-2q44wj-b86adc47.jpg').convert('RGB')
+right=Image.open(D+'mcp-remote-devices-blob-1795504853624-uoskhu-faff50f0.jpg').convert('RGB')
 W,H=1920,1080
 def half(img, x0, x1):
     c=img.crop((x0,0,x1,img.height))
     return c.resize((int(c.width*H/c.height),H), Image.LANCZOS)
 L=half(left,560,1300)
-R=half(right,560,1310)
+R=half(right,500,1280)
 # cool the trainer side, push the party side
 blue=Image.new('RGB',L.size,(30,60,160))
 L=Image.blend(ImageEnhance.Brightness(L).enhance(0.85),blue,0.2)
@@ -28,6 +28,5 @@ def text(xy,s,size,fill,anchor='mm',stroke=10):
 text((W//2,130),'HUSS HUSS HUSS',190,(255,255,255),stroke=14)
 text((250,H-110),'YOU',120,(120,220,255))
 text((1460,H-110),'THEY PARTY',120,(255,120,230))
-out.save('thumbnail_final.png')
-out.resize((480,270),Image.LANCZOS).save('thumbnail_final_small.png')
+out.save(sys.argv[1] if len(sys.argv) > 1 else 'thumbnail.png')
 print(out.size)
