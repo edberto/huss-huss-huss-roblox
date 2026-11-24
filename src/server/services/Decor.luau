@@ -275,7 +275,12 @@ local function fence(from: Vector3, to: Vector3)
 	local length = (to - from).Magnitude
 	local mid = (from + to) / 2
 	local along = CFrame.lookAt(mid, to)
-	part({ Name = "Fence", Size = Vector3.new(0.3, 3, length), CFrame = along + Vector3.new(0, 1.5, 0), Color = WOOD })
+	part({
+		Name = "Fence",
+		Size = Vector3.new(0.3, 3, length),
+		CFrame = along + Vector3.new(0, 1.5, 0),
+		Color = WOOD,
+	})
 	part({
 		Name = "FenceRail",
 		Size = Vector3.new(0.5, 0.4, length),
