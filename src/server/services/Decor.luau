@@ -92,12 +92,15 @@ local function dancer(at: CFrame, index: number)
 	track:Play()
 end
 
+-- Cars don't collide: NPC partiers walk straight at trainers (no pathfinding) and must not
+-- get stuck on one.
 local function car(at: CFrame, color: Color3)
 	part({
 		Name = "CarBody",
 		Size = Vector3.new(9, 2, 4.4),
 		CFrame = at * CFrame.new(0, 1.6, 0),
 		Color = color,
+		CanCollide = false,
 	})
 	part({
 		Name = "CarCabin",
@@ -106,6 +109,7 @@ local function car(at: CFrame, color: Color3)
 		Color = Color3.fromRGB(30, 40, 70),
 		Material = Enum.Material.Glass,
 		Transparency = 0.2,
+		CanCollide = false,
 	})
 	for _, x in { -3, 3 } do
 		for _, z in { -2.2, 2.2 } do
@@ -234,10 +238,10 @@ function Decor.build()
 		Color3.fromRGB(235, 235, 230),
 	}
 	for i, x in { -99, -27, 45 } do
-		car(CFrame.new(x, 0, -1.8), carColors[i])
+		car(CFrame.new(x, 0, -0.6), carColors[i])
 	end
 	for i, x in { -85, -13, 59 } do
-		car(CFrame.new(x, 0, -10.2) * CFrame.Angles(0, math.pi, 0), carColors[(i % 3) + 1])
+		car(CFrame.new(x, 0, -11.4) * CFrame.Angles(0, math.pi, 0), carColors[(i % 3) + 1])
 	end
 
 	-- Trees behind both rows of houses.
