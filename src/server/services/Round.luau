@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Night = require(ReplicatedStorage.Shared.Night)
 local Analytics = require(script.Parent.Analytics)
+local Decor = require(script.Parent.Decor)
 local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
 local Party = require(script.Parent.Party)
@@ -95,6 +96,7 @@ Focus.onBroken = function(player: Player)
 		player.Character:PivotTo(
 			partyLawn.CFrame + Vector3.new(math.random(-6, 6), 3, math.random(-4, 4))
 		)
+		Decor.dressPartier(player.Character)
 	end
 end
 Rhythm.onGrade = Focus.onGrade

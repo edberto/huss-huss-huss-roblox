@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Night = require(ReplicatedStorage.Shared.Night)
 local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
+local Decor = require(script.Parent.Decor)
 local Party = require(script.Parent.Party)
 
 local FILL_TO = 6 -- real players + NPC trainers per night
@@ -132,6 +133,7 @@ function Npcs.tick(progress: number, clockText: string, bpm: number)
 			npc.points += math.random(2, 4) * bpm / 60
 			if progress >= npc.giveInAt then
 				npc.partier = true
+				Decor.dressPartier(npc.model)
 				npc.lasted = clockText
 				npc.progress = progress
 				npc.humanoid.WalkSpeed = Night.partierSpeed

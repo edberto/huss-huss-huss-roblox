@@ -7,6 +7,7 @@ require(script.services.Shop)
 require(script.services.RewardService)
 require(script.services.Store)
 local Round = require(script.services.Round)
+task.spawn(require(script.services.Decor).build)
 
 local isPlaytest = ReplicatedStorage:GetAttribute("DevelopmentPlaytest") == true
 print(`[Huss] server started{if isPlaytest then " (PLAYTEST)" else ""}`)
