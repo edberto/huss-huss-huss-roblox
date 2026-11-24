@@ -409,8 +409,8 @@ function ShopClient.start()
 	-- Code row under the gifts: box + Redeem, result on the line below.
 	local codeRow = make("Frame", {
 		BackgroundTransparency = 1,
-		Position = UDim2.fromScale(0, 0.8),
-		Size = UDim2.fromScale(1, 0.2),
+		Position = UDim2.fromScale(0, 0.83),
+		Size = UDim2.fromScale(1, 0.17),
 		ZIndex = 21,
 		Parent = rewardsBody,
 	})
@@ -422,7 +422,8 @@ function ShopClient.start()
 		Size = UDim2.fromScale(0.66, 0.6),
 		Text = "",
 		TextColor3 = C.navy,
-		TextScaled = true,
+		TextSize = 22,
+		TextXAlignment = Enum.TextXAlignment.Left,
 		ZIndex = 22,
 		Parent = codeRow,
 	}, { corner(10), make("UIPadding", { PaddingLeft = UDim.new(0.02, 0) }) }) :: TextBox
