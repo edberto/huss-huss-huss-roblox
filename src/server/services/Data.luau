@@ -11,6 +11,7 @@ local Progress = require(ReplicatedStorage.Shared.Progress)
 local Products = require(ReplicatedStorage.Shared.Products)
 local Rewards = require(ReplicatedStorage.Shared.Rewards)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
+local Analytics = require(script.Parent.Analytics)
 
 export type Data = {
 	hp: number,
@@ -159,6 +160,7 @@ local function onPlayerAdded(player: Player)
 	if player.Parent == Players then
 		profiles[player] = profile
 		publish(player, profile.Data)
+		Analytics.step(player, "Joined")
 	else
 		profile:EndSession()
 	end

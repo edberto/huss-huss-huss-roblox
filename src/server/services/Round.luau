@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Night = require(ReplicatedStorage.Shared.Night)
+local Analytics = require(script.Parent.Analytics)
 local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
 local Party = require(script.Parent.Party)
@@ -76,6 +77,7 @@ local function record(player: Player, lasted: string?, progress: number)
 end
 
 local function startTraining(player: Player)
+	Analytics.step(player, "Training")
 	player:SetAttribute("Team", "Trainer")
 	Focus.begin(player, os.clock())
 	Rhythm.start(player, Night.bpm(progressNow()))
@@ -84,6 +86,8 @@ end
 -- Focus hit 0: the player walks over to the party and plays as a partier until Dawn.
 Focus.onBroken = function(player: Player)
 	record(player, Night.clockText(progressNow()), progressNow())
+	Analytics.step(player, "NightOver")
+	Analytics.event(player, "GiveInProgress", math.floor(progressNow() * 100)) -- % of the night
 	Party.creditGiveIn(player)
 	player:SetAttribute("Team", "Partier")
 	setMovement(player, true)
@@ -240,6 +244,9 @@ function Round.run()
 					result.lasted == nil
 				)
 				result.earned = hp
+				Analytics.step(player, "NightOver") -- no-op if they already gave in
+				Analytics.step(player, "Dawn")
+				Analytics.event(player, "DawnPlace", place)
 				result.levelBefore, result.levelAfter =
 					Data.creditNight(player, hp, result.station, result.points)
 			end

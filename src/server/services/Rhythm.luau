@@ -8,6 +8,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage.Shared
 local BeatClock = require(Shared.BeatClock)
 local Score = require(Shared.Score)
+local Analytics = require(script.Parent.Analytics)
 local Data = require(script.Parent.Data)
 
 type Session = {
@@ -133,6 +134,10 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 		skill
 	)
 	Rhythm.onGrade(player, grade)
+	Analytics.step(player, "FirstTap")
+	if Score.multiplier(session.score.combo) >= 2 then
+		Analytics.step(player, "Combo")
+	end
 end)
 
 -- Settle past beats: untapped ones break the combo and cost focus (Rhythm.onSkip).
