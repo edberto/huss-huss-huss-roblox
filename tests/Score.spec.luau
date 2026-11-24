@@ -1,0 +1,32 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local JestGlobals = require(ReplicatedStorage.DevPackages.JestGlobals)
+local Score = require(ReplicatedStorage.Shared.Score)
+
+local describe, expect, it = JestGlobals.describe, JestGlobals.expect, JestGlobals.it
+
+describe("Score", function()
+	it("pays Perfect 3 and Good 1 at the base multiplier", function()
+		local state, earned = Score.apply(Score.new(), "Perfect")
+		expect(earned).toBe(3)
+		state, earned = Score.apply(state, "Good")
+		expect(earned).toBe(1)
+		expect(state.points).toBe(4)
+		expect(state.combo).toBe(2)
+	end)
+
+	it("raises the multiplier every 8 hits, capped at x4", function()
+		expect(Score.multiplier(7)).toBe(1)
+		expect(Score.multiplier(8)).toBe(2)
+		expect(Score.multiplier(100)).toBe(4)
+		local _, earned = Score.apply({ points = 0, combo = 16 }, "Perfect")
+		expect(earned).toBe(9)
+	end)
+
+	it("keeps the combo on Almost and resets it on Miss", function()
+		local state = Score.apply({ points = 10, combo = 5 }, "Almost")
+		expect(state.combo).toBe(5)
+		state = Score.apply(state, "Miss")
+		expect(state.combo).toBe(0)
+		expect(state.points).toBe(10)
+	end)
+end)
