@@ -89,9 +89,15 @@ function Basketball.start(home: Model): (grade: string, skill: boolean) -> ()
 			:Play()
 	end
 
-	-- Where the ball rests: in front of the player's right side, at about hand height.
+	-- Where the ball rests: just below the right hand, or in front of the player's right side for
+	-- avatars without one.
 	local function handPosition(): Vector3?
 		local character = player.Character
+		local hand = character
+			and (character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm"))
+		if hand and hand:IsA("BasePart") then
+			return hand.Position - Vector3.new(0, hand.Size.Y / 2 + 0.6, 0)
+		end
 		local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 		if not root then
 			return nil
