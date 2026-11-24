@@ -20,13 +20,31 @@ end
 function Homes.assign(player: Player): Model?
 	for i = 1, #homesFolder:GetChildren() do
 		local home = homesFolder:FindFirstChild(`Home{i}`) :: Model?
-		if home and not isTaken(home) then
+		if home and not isTaken(home) and not npcHomes[home] then
 			owners[player] = home
 			player:SetAttribute("Home", home.Name)
 			return home
 		end
 	end
 	return nil -- more players than homes; MaxPlayers should prevent this
+end
+
+local npcHomes: { [Model]: boolean } = {}
+
+-- Homes for NPCs come from the far end of the street, so players (from Home1 up) keep theirs.
+function Homes.claimForNpc(): Model?
+	for i = #homesFolder:GetChildren(), 1, -1 do
+		local home = homesFolder:FindFirstChild(`Home{i}`) :: Model?
+		if home and not isTaken(home) and not npcHomes[home] then
+			npcHomes[home] = true
+			return home
+		end
+	end
+	return nil
+end
+
+function Homes.releaseNpcHomes()
+	table.clear(npcHomes)
 end
 
 function Homes.of(player: Player): Model?

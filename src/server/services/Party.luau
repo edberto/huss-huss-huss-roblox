@@ -27,11 +27,6 @@ local function root(player: Player): BasePart?
 	return character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 end
 
-local function inRange(a: Player, b: Player): boolean
-	local ra, rb = root(a), root(b)
-	return ra ~= nil and rb ~= nil and (ra.Position - rb.Position).Magnitude <= Night.abilityRange
-end
-
 local function addPoints(player: Player, points: number)
 	player:SetAttribute("PartyPoints", (tonumber(player:GetAttribute("PartyPoints")) or 0) + points)
 end
@@ -52,40 +47,84 @@ function Party.reset(player: Player)
 	player:SetAttribute("PartyPoints", 0)
 end
 
+local function rootOfSource(source: Player | Model): BasePart?
+	local character = if source:IsA("Player") then source.Character else source
+	return character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+end
+
+local function sourceInRange(source: Player | Model, trainer: Player): boolean
+	local a, b = rootOfSource(source), root(trainer)
+	return a ~= nil and b ~= nil and (a.Position - b.Position).Magnitude <= Night.abilityRange
+end
+
+-- Applies an ability from a partier (player or NPC model) to a trainer. Checks the phase, range
+-- and the trainer's shield; returns true when it landed. Cooldowns are the caller's job.
+-- `onDrain` receives focus drained by a Dance (party points for player partiers).
+function Party.apply(
+	source: Player | Model,
+	trainer: Player,
+	ability: string,
+	onDrain: ((number) -> ())?
+): boolean
+	local spec = Night.abilities[ability]
+	if
+		not spec
+		or not Focus.isTrainer(trainer)
+		or ReplicatedStorage:GetAttribute("Phase") ~= "Night"
+	then
+		return false
+	end
+	local now = os.clock()
+	if now < (shields[trainer] or 0) or not sourceInRange(source, trainer) then
+		return false
+	end
+	shields[trainer] = now + Night.shieldTime
+	effectEvent:FireClient(trainer, ability, spec.duration)
+	if ability == "Dance" then
+		-- Drains while the partier stays close; stops if they walk away or the trainer gives in.
+		task.spawn(function()
+			local ends = now + spec.duration
+			while
+				os.clock() < ends
+				and Focus.isTrainer(trainer)
+				and sourceInRange(source, trainer)
+			do
+				local drained = Focus.drain(trainer, (spec.drainPerSecond or 0) * 0.5)
+				if onDrain then
+					onDrain(drained)
+				end
+				task.wait(0.5)
+			end
+		end)
+	end
+	return true
+end
+
 abilityEvent.OnServerEvent:Connect(function(partier: Player, ability: unknown, target: unknown)
 	if typeof(ability) ~= "string" or typeof(target) ~= "Instance" or not target:IsA("Player") then
 		return
 	end
 	local spec = Night.abilities[ability]
-	local trainer = target :: Player
-	if not spec or partier:GetAttribute("Team") ~= "Partier" or not Focus.isTrainer(trainer) then
-		return
-	end
-	if ReplicatedStorage:GetAttribute("Phase") ~= "Night" or not inRange(partier, trainer) then
+	if not spec or partier:GetAttribute("Team") ~= "Partier" then
 		return
 	end
 	local now = os.clock()
 	local mine = cooldowns[partier] or {}
 	cooldowns[partier] = mine
-	if now < (mine[ability] or 0) or now < (shields[trainer] or 0) then
+	if now < (mine[ability] or 0) then
+		return
+	end
+	local trainer = target :: Player
+	if
+		not Party.apply(partier, trainer, ability, function(drained)
+			addPoints(partier, drained)
+		end)
+	then
 		return
 	end
 	mine[ability] = now + spec.cooldown
-	shields[trainer] = now + Night.shieldTime
 	lastTempter[trainer] = partier
 	addPoints(partier, spec.points)
-	effectEvent:FireClient(trainer, ability, spec.duration, partier)
-
-	if ability == "Dance" then
-		-- Drains while the partier stays close; stops if they walk away or the trainer gives in.
-		task.spawn(function()
-			local ends = now + spec.duration
-			while os.clock() < ends and Focus.isTrainer(trainer) and inRange(partier, trainer) do
-				addPoints(partier, Focus.drain(trainer, (spec.drainPerSecond or 0) * 0.5))
-				task.wait(0.5)
-			end
-		end)
-	end
 end)
 
 Players.PlayerRemoving:Connect(function(player)

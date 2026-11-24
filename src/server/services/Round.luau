@@ -10,6 +10,7 @@ local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
 local Party = require(script.Parent.Party)
 local Data = require(script.Parent.Data)
+local Npcs = require(script.Parent.Npcs)
 local Progress = require(ReplicatedStorage.Shared.Progress)
 local Rhythm = require(script.Parent.Rhythm)
 
@@ -127,6 +128,7 @@ local function runNight()
 		player:SetAttribute("UsedSecondWind", false)
 		startTraining(player)
 	end
+	Npcs.beginNight()
 	local bpm = Night.bpm(0)
 	while os.clock() - nightStart < Night.nightTime do
 		local progress = progressNow()
@@ -140,6 +142,7 @@ local function runNight()
 			end
 		end
 		Focus.tick(os.clock(), progress)
+		Npcs.tick(progress, Night.clockText(progress), bpm)
 		-- The last few trainers glow for everyone (only meaningful with more players than that).
 		local left = trainersLeft()
 		for _, player in Players:GetPlayers() do
@@ -172,6 +175,9 @@ local function sortedResults(): { Result }
 		result.party = math.floor(tonumber(player:GetAttribute("PartyPoints")) or 0)
 		table.insert(list, result)
 	end
+	for _, row in Npcs.results() do
+		table.insert(list, row)
+	end
 	-- Whoever lasted longest first (locked in all night = 1); points break ties.
 	table.sort(list, function(a, b)
 		if a.progress ~= b.progress then
@@ -202,6 +208,7 @@ function Round.run()
 	while true do
 		setPhase("Dusk", Night.duskTime)
 		ReplicatedStorage:SetAttribute("NightClock", nil)
+		Npcs.clear()
 		for _, player in Players:GetPlayers() do
 			player:SetAttribute("Team", "Trainer")
 			player:SetAttribute("Focus", Night.focusStart)
@@ -226,7 +233,7 @@ function Round.run()
 					result.points,
 					result.party,
 					rewardPlace,
-					#ranking,
+					#Players:GetPlayers(), -- placement bonuses count real players only
 					result.lasted == nil
 				)
 				result.earned = hp
