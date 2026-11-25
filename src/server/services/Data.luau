@@ -85,6 +85,10 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("TapOffset", data.tapOffset)
 	player:SetAttribute("BoostNights", data.boostNights)
+	-- Own leaderboard values, so the Ranks panel can pin the player's row.
+	for _, category in Stats.categories do
+		player:SetAttribute(`Stat_{category.key}`, Stats.value(data.hp, data.stats, category.key))
+	end
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then
 		(stats:FindFirstChild("Huss") :: IntValue).Value = data.hp;
@@ -155,6 +159,7 @@ function Data.recordStats(player: Player, change: Stats.Change)
 	local data = Data.get(player)
 	if data then
 		Stats.apply(data.stats, change)
+		publish(player, data)
 	end
 end
 

@@ -10,6 +10,7 @@ local Cosmetics = require(ReplicatedStorage.Shared.Cosmetics)
 local Products = require(ReplicatedStorage.Shared.Products)
 local BeatClock = require(ReplicatedStorage.Shared.BeatClock)
 local Rewards = require(ReplicatedStorage.Shared.Rewards)
+local Ranks = require(script.Parent.Ranks)
 local StationFx = require(script.Parent.StationFx)
 local Ui = require(script.Parent.Ui)
 
@@ -597,24 +598,25 @@ function ShopClient.start()
 	local side = make("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
 		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 28, 0.45, 0), -- room for the labels spilling past the tiles
-		Size = UDim2.fromScale(0.1, 0.62),
+		Position = UDim2.new(0, 28, 0.46, 0), -- room for the labels spilling past the tiles
+		Size = UDim2.fromScale(0.09, 0.74),
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Parent = gui,
-	}, { make("UIListLayout", { Padding = UDim.new(0.07, 0) }) })
+	}, { make("UIListLayout", { Padding = UDim.new(0.05, 0) }) })
 	local dots: { [string]: Frame } = {}
 	local SIDE = {
 		{ "Shop", "74703712629649", "FF9628", "EB5A14" },
 		{ "Daily", "85898827711145", "5AD278", "28A05A" },
 		{ "Gifts", "77368354228555", "BE6EFF", "8246DC" },
 		{ "Timing", "126839820801921", "46C8FF", "1E8CDC" },
+		{ "Ranks", "108570200348915", "FFD23C", "E6A014" },
 	}
 	for i, spec in SIDE do
 		local side_button = make("TextButton", {
 			AutoButtonColor = true,
 			BackgroundColor3 = Color3.new(1, 1, 1),
 			LayoutOrder = i,
-			Size = UDim2.fromScale(1, 0.2),
+			Size = UDim2.fromScale(1, 0.16),
 			Text = "",
 			ZIndex = 5,
 			Parent = side,
@@ -667,7 +669,10 @@ function ShopClient.start()
 			}),
 		})
 		side_button.Activated:Connect(function()
-			if spec[1] == "Timing" then
+			if spec[1] == "Ranks" then
+				shop.Visible, rewards.Visible, timing.Visible = false, false, false
+				Ranks.toggle()
+			elseif spec[1] == "Timing" then
 				shop.Visible, rewards.Visible = false, false
 				timing.Visible = not timing.Visible
 				timingNote.Text = ""
