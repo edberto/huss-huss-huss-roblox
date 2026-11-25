@@ -184,11 +184,11 @@ local function button(
 			Color = BLACK,
 			Thickness = 2,
 		}),
-		make("Frame", { -- gloss
+		make("Frame", { -- gloss, kept thin so it never strikes through the text
 			BackgroundColor3 = WHITE,
-			BackgroundTransparency = 0.75,
-			Position = UDim2.fromScale(0.06, 0.08),
-			Size = UDim2.fromScale(0.88, 0.22),
+			BackgroundTransparency = 0.78,
+			Position = UDim2.new(0.08, 0, 0, 4),
+			Size = UDim2.new(0.84, 0, 0, 5),
 			ZIndex = 22,
 		}, { corner() }),
 		make("UIPadding", {
