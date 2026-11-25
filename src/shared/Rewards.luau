@@ -12,7 +12,7 @@ Rewards.gifts = table.freeze({ -- minutes played this session -> HP
 	{ minutes = 60, hp = 250 },
 })
 Rewards.groupHp = 250
-Rewards.groupBonus = 0.1 -- +10% night HP while in the group
+Rewards.groupBonus = 0.5 -- +50% night HP while in the group
 
 export type DailyState = { lastDay: number, streak: number }
 
