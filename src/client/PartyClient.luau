@@ -126,14 +126,21 @@ function PartyClient.start()
 			}),
 		})
 		buttons[spec.ability] = button
-		button.Activated:Connect(function()
+		local function use()
 			local target = nearestTrainer()
 			if not target or os.clock() < (readyAt[spec.ability] or 0) then
 				return
 			end
 			readyAt[spec.ability] = os.clock() + Night.abilities[spec.ability].cooldown
 			abilityEvent:FireServer(spec.ability, target)
-		end)
+		end
+		button.Activated:Connect(use)
+		Ui.bind(
+			button,
+			{ ({ Enum.KeyCode.Q, Enum.KeyCode.E, Enum.KeyCode.R })[i] },
+			{ ({ Enum.KeyCode.ButtonX, Enum.KeyCode.ButtonY, Enum.KeyCode.ButtonB })[i] },
+			use
+		)
 	end
 
 	-- Marker over the nearest trainer in range.

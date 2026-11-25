@@ -1152,7 +1152,7 @@ function ShopClient.start()
 	secondWind.Size = UDim2.fromScale(0.2, 0.08)
 	secondWind.ZIndex = 8
 	secondWind.Visible = false
-	secondWind.Activated:Connect(function()
+	local function useSecondWind()
 		if (tonumber(player:GetAttribute("SecondWinds")) or 0) > 0 then
 			remotes:WaitForChild("UseSecondWind"):InvokeServer()
 		else
@@ -1161,7 +1161,9 @@ function ShopClient.start()
 				secondWind.Text = note
 			end
 		end
-	end)
+	end
+	secondWind.Activated:Connect(useSecondWind)
+	Ui.bind(secondWind, { Enum.KeyCode.G }, { Enum.KeyCode.ButtonY }, useSecondWind)
 	local function refreshSecondWind()
 		local focus = tonumber(player:GetAttribute("Focus")) or 100
 		secondWind.Visible = player:GetAttribute("Team") == "Trainer"

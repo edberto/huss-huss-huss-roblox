@@ -6,6 +6,7 @@ local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SocialService = game:GetService("SocialService")
+local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
 local Night = require(ReplicatedStorage.Shared.Night)
@@ -84,6 +85,52 @@ function NightScreens.start()
 			Padding = UDim.new(0.035, 0),
 		}),
 	})
+	-- After picking, DONE (or a click anywhere off the cards) folds the picker away; the title pill
+	-- stays with the countdown and opens it again.
+	local done = make("TextButton", {
+		AnchorPoint = Vector2.new(0.5, 0),
+		BackgroundColor3 = Color3.fromHex("5AD278"),
+		FontFace = Ui.display,
+		Position = UDim2.fromScale(0.5, 0.75),
+		Size = UDim2.fromScale(0.16, 0.08),
+		Text = "DONE",
+		TextColor3 = Color3.new(1, 1, 1),
+		TextScaled = true,
+		Parent = dusk,
+	}, {
+		corner(),
+		outline(4),
+		make("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+			Color = BLACK,
+			Thickness = 2.5,
+		}),
+		make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0) }),
+	})
+	local reopen = make("TextButton", { -- over the title pill
+		AnchorPoint = Vector2.new(0.5, 0),
+		BackgroundTransparency = 1,
+		Position = UDim2.fromScale(0.5, 0.04),
+		Size = UDim2.fromScale(0.5, 0.08),
+		Text = "",
+		Visible = false,
+		ZIndex = 5,
+		Parent = dusk,
+	})
+	local function setPickerOpen(open: boolean)
+		cards.Visible = open
+		done.Visible = open
+		reopen.Visible = not open
+	end
+	done.Activated:Connect(function()
+		setPickerOpen(false)
+	end)
+	Ui.bind(done, { Enum.KeyCode.Return }, { Enum.KeyCode.ButtonB }, function()
+		setPickerOpen(false)
+	end)
+	reopen.Activated:Connect(function()
+		setPickerOpen(true)
+	end)
 	local pickEvent = remotes:WaitForChild("PickStation") :: RemoteEvent
 	type CardParts = {
 		card: TextButton,
@@ -264,10 +311,17 @@ function NightScreens.start()
 		card.MouseLeave:Connect(function()
 			TweenService:Create(scale, TweenInfo.new(0.12), { Scale = 1 }):Play()
 		end)
-		card.Activated:Connect(function()
+		local function pick()
 			StationFx.play("clap", 1.3)
 			pickEvent:FireServer(name)
-		end)
+		end
+		card.Activated:Connect(pick)
+		Ui.bind(
+			card,
+			{ ({ Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three })[i] },
+			{ ({ Enum.KeyCode.DPadLeft, Enum.KeyCode.DPadUp, Enum.KeyCode.DPadRight })[i] },
+			pick
+		)
 		cardParts[name] =
 			{ card = card, stroke = stroke, glow = glow, badge = badge, scale = scale }
 	end
@@ -344,7 +398,7 @@ function NightScreens.start()
 		promptButtonText.Text =
 			string.upper(if tapsLeft > 1 then `{buttonText} ({tapsLeft})` else buttonText)
 	end
-	promptButton.Activated:Connect(function()
+	local function answer()
 		if tapsLeft <= 0 then
 			return
 		end
@@ -355,7 +409,9 @@ function NightScreens.start()
 		else
 			refreshButton()
 		end
-	end)
+	end
+	promptButton.Activated:Connect(answer)
+	Ui.bind(promptButton, { Enum.KeyCode.E }, { Enum.KeyCode.ButtonX }, answer)
 
 	temptationEvent.OnClientEvent:Connect(function(id: number, kind: string, window: number)
 		local spec = PROMPTS[kind]
@@ -479,6 +535,62 @@ function NightScreens.start()
 		Parent = dawn,
 	})
 	make("UISizeConstraint", { MinSize = Vector2.new(420, 0), Parent = card })
+	-- Close the results with the X (or a click off the card); the RESULTS pill brings them back.
+	local closeResults = make("TextButton", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Color3.fromHex("FF505A"),
+		Size = UDim2.fromOffset(40, 40),
+		Text = "",
+		ZIndex = 4,
+		Parent = dawn,
+	}, {
+		corner(),
+		outline(3),
+		Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "X", Thickness = 2.5, ZIndex = 5 }),
+	})
+	-- The X sits on the card's top-right corner (outside the card, so its list layout skips it).
+	local function placeClose()
+		local p, s = card.AbsolutePosition - dawn.AbsolutePosition, card.AbsoluteSize
+		closeResults.Position = UDim2.fromOffset(p.X + s.X - 6, p.Y + 6)
+	end
+	card:GetPropertyChangedSignal("AbsoluteSize"):Connect(placeClose)
+	card:GetPropertyChangedSignal("AbsolutePosition"):Connect(placeClose)
+	local showResults = make("TextButton", {
+		AnchorPoint = Vector2.new(0.5, 0),
+		BackgroundColor3 = Color3.fromHex("3C2878"),
+		FontFace = Ui.display,
+		Position = UDim2.fromScale(0.5, 0.14),
+		Size = UDim2.fromScale(0.16, 0.065),
+		Text = "RESULTS",
+		TextColor3 = GOLD,
+		TextScaled = true,
+		Visible = false,
+		Parent = dawn,
+	}, {
+		corner(),
+		outline(4),
+		make("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+			Color = BLACK,
+			Thickness = 2.5,
+		}),
+		make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0) }),
+	})
+	local function setResultsOpen(open: boolean)
+		card.Visible = open
+		closeResults.Visible = open
+		showResults.Visible = not open
+		placeClose()
+	end
+	closeResults.Activated:Connect(function()
+		setResultsOpen(false)
+	end)
+	showResults.Activated:Connect(function()
+		setResultsOpen(true)
+	end)
+	Ui.bind(closeResults, { Enum.KeyCode.Return }, { Enum.KeyCode.ButtonB }, function()
+		setResultsOpen(false)
+	end)
 	make("UIPadding", {
 		PaddingTop = UDim.new(0, 12),
 		PaddingBottom = UDim.new(0, 14),
@@ -552,7 +664,18 @@ function NightScreens.start()
 					else "",
 				Position = UDim2.new(0, 44, 0.5, 0),
 				Size = UDim2.fromOffset(30, 30),
-			}, { corner(), make("UIStroke", { Color = BLACK, Thickness = 2 }) }),
+			}, {
+				corner(),
+				make("UIStroke", { Color = BLACK, Thickness = 2 }),
+				-- Fill-in townsfolk have no Roblox avatar: show their initial instead.
+				if result.userId > 0
+					then nil
+					else Ui.shout({
+						Size = UDim2.fromScale(1, 1),
+						Text = string.sub(result.name, 1, 1),
+						Thickness = 2,
+					}),
+			}),
 			label({
 				Position = UDim2.new(0, 84, 0.2, 0),
 				Size = UDim2.new(0.45, -84, 0.6, 0),
@@ -730,11 +853,36 @@ function NightScreens.start()
 		card.Size = UDim2.new(0.4, 0, 0, height)
 	end)
 
+	-- A click or tap on the world (not on any button) folds away the picker or the results.
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if
+			gameProcessed
+			or (
+				input.UserInputType ~= Enum.UserInputType.MouseButton1
+				and input.UserInputType ~= Enum.UserInputType.Touch
+			)
+		then
+			return
+		end
+		local function inside(frame: GuiObject): boolean
+			local p, s = frame.AbsolutePosition, frame.AbsoluteSize
+			local x, y = input.Position.X, input.Position.Y
+			return x >= p.X and x <= p.X + s.X and y >= p.Y and y <= p.Y + s.Y
+		end
+		if dusk.Visible and cards.Visible and not inside(cards) then
+			setPickerOpen(false)
+		elseif dawn.Visible and card.Visible and not inside(card) then
+			setResultsOpen(false)
+		end
+	end)
+
 	-- Phase changes: show the right screen, move the sky between night and dawn -----------------
 	local function onPhase()
 		local phase = ReplicatedStorage:GetAttribute("Phase")
 		dusk.Visible = phase == "Dusk"
 		dawn.Visible = phase == "Dawn"
+		setPickerOpen(true) -- each Dusk and Dawn starts open
+		setResultsOpen(true)
 		if phase ~= "Night" then
 			prompt.Visible = false
 		end

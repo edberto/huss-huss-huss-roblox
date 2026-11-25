@@ -90,4 +90,102 @@ function Ui.countdown(endsAt: number): string
 	return string.format("%d:%02d", left // 60, left % 60)
 end
 
+
+-- Keybinds ----------------------------------------------------------------------------------------
+-- `Ui.bind(button, pcKeys, padKeys, run)`: pressing any listed key runs `run` while the button is
+-- on screen, and a small badge in the button's corner names the key for the current device
+-- (keyboard key, or the controller button in its usual colour; hidden on touch).
+local UserInputService = game:GetService("UserInputService")
+
+local PAD = { -- label and colour for controller buttons
+	ButtonA = { "A", "3CC864" },
+	ButtonB = { "B", "E6463C" },
+	ButtonX = { "X", "3C8CF0" },
+	ButtonY = { "Y", "F0C83C" },
+	ButtonR2 = { "RT", "5A5A64" },
+	DPadLeft = { "◀", "5A5A64" },
+	DPadUp = { "▲", "5A5A64" },
+	DPadRight = { "▶", "5A5A64" },
+}
+local KEY_NAMES = { Space = "SPACE", One = "1", Two = "2", Three = "3" }
+
+local function device(): string
+	local last = UserInputService:GetLastInputType()
+	if last == Enum.UserInputType.Touch then
+		return "touch"
+	elseif string.find(last.Name, "^Gamepad") then
+		return "pad"
+	end
+	return if UserInputService.KeyboardEnabled then "pc" else "touch"
+end
+
+local function onScreen(gui: GuiObject): boolean
+	local node: Instance? = gui
+	while node and not node:IsA("LayerCollector") do
+		if node:IsA("GuiObject") and not node.Visible then
+			return false
+		end
+		node = node.Parent
+	end
+	return node ~= nil and (not node:IsA("ScreenGui") or node.Enabled)
+end
+
+local badges: { () -> () } = {}
+UserInputService.LastInputTypeChanged:Connect(function()
+	for _, refresh in badges do
+		refresh()
+	end
+end)
+
+function Ui.bind(button: GuiObject, pcKeys: { Enum.KeyCode }, padKeys: { Enum.KeyCode }, run: () -> ())
+	local text = Ui.make("TextLabel", {
+		BackgroundTransparency = 1,
+		FontFace = Ui.display,
+		Size = UDim2.fromScale(1, 1),
+		TextColor3 = Color3.new(0, 0, 0),
+		TextScaled = true,
+		ZIndex = button.ZIndex + 3,
+	}, { Ui.make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }) })
+	local badge = Ui.make("Frame", {
+		AnchorPoint = Vector2.new(0.3, 0.3),
+		AutomaticSize = Enum.AutomaticSize.None,
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		Name = "KeyBadge",
+		Position = UDim2.fromScale(0, 0),
+		Size = UDim2.new(0, 30, 0, 26),
+		ZIndex = button.ZIndex + 2,
+		Parent = button,
+	}, {
+		Ui.corner(8),
+		Ui.make("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2.5, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }),
+		text,
+	})
+	local function refresh()
+		local kind = device()
+		badge.Visible = kind ~= "touch"
+		if kind == "pad" then
+			local spec = PAD[padKeys[1].Name]
+			text.Text = spec[1]
+			text.TextColor3 = Color3.new(1, 1, 1)
+			badge.BackgroundColor3 = Color3.fromHex(spec[2])
+		else
+			local name = pcKeys[1].Name
+			text.Text = KEY_NAMES[name] or name
+			text.TextColor3 = Color3.new(0, 0, 0)
+			badge.BackgroundColor3 = Color3.new(1, 1, 1)
+		end
+		badge.Size = UDim2.new(0, if #text.Text > 2 then 62 else 30, 0, 26)
+	end
+	table.insert(badges, refresh)
+	refresh()
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed or not onScreen(button) then
+			return
+		end
+		if table.find(pcKeys, input.KeyCode) or table.find(padKeys, input.KeyCode) then
+			run()
+		end
+	end)
+end
+
 return Ui

@@ -92,6 +92,8 @@ function GiveIn.play(done: () -> ())
 			input.UserInputType == Enum.UserInputType.MouseButton1
 			or input.UserInputType == Enum.UserInputType.Touch
 			or input.KeyCode == Enum.KeyCode.Space
+			or input.KeyCode == Enum.KeyCode.ButtonA
+			or input.KeyCode == Enum.KeyCode.ButtonB
 		then
 			finish()
 		end

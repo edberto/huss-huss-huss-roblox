@@ -5,7 +5,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local BeatClock = require(ReplicatedStorage.Shared.BeatClock)
 local Night = require(ReplicatedStorage.Shared.Night)
@@ -481,15 +480,8 @@ function RhythmClient.start()
 		end
 	end
 	tapButton.Activated:Connect(tap)
-	UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		-- gameProcessed is true while typing in chat, so taps never fire from chat.
-		if gameProcessed then
-			return
-		end
-		if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
-			tap()
-		end
-	end)
+	-- Keys are ignored while typing in chat (Ui.bind skips game-processed input).
+	Ui.bind(tapButton, { Enum.KeyCode.Space }, { Enum.KeyCode.ButtonA, Enum.KeyCode.ButtonR2 }, tap)
 
 	resultEvent.OnClientEvent:Connect(
 		function(
