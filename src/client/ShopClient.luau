@@ -621,7 +621,7 @@ function ShopClient.start()
 			key = "music",
 			name = "MUSIC",
 			color = "FF2E93",
-			hint = "The party next door, outside of practice",
+			hint = "The party next door (faint through the wall while you practise)",
 		},
 		{
 			key = "beat",

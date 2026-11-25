@@ -1,9 +1,8 @@
 --!strict
 -- The party next door as a DJ set: a shuffled playlist from the house lawn, each song
--- crossfading into the next over its last FADE seconds. It plays for everyone except trainers
--- during the Night (they hear their own training groove), so it carries on through Dawn and
--- Dusk into the next night. Outside the Night it is heard the same everywhere; at Night it
--- comes from the lawn. Now-playing pop-up for each new song. Licensed Creator Store tracks.
+-- crossfading into the next over its last FADE seconds. It plays full for everyone outside the
+-- Night and for partiers at Night (from the lawn). Trainers at Night hear it faint and muffled,
+-- like bass through the wall, under their training groove; a Bass Drop swells it for a moment. Now-playing pop-up for each new song. Licensed Creator Store tracks.
 -- ponytail: each client shuffles on its own, so two partiers may hear different songs.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -28,6 +27,8 @@ type Track = typeof(TRACKS[1])
 local FADE = 5
 local VOLUME = 0.65
 local NEAR_NIGHT, NEAR_DAY = 25, 600 -- RollOffMinDistance: from the lawn at Night, everywhere else
+local THROUGH_WALL = 0.15 -- trainers at Night: level of the party under the groove
+local BASS_DROP = 0.6 -- ... while a Bass Drop temptation is on
 local LOAD_TIMEOUT = 10 -- a song that won't load (moderation, outage) is skipped
 
 local player = Players.LocalPlayer
@@ -37,10 +38,11 @@ local function isPartier(): boolean
 	return player:GetAttribute("Team") == "Partier"
 end
 
--- Trainers don't hear the party during the Night; everyone else does.
+-- Trainers only hear the party through the wall during the Night; everyone else hears it full.
 local function hearsParty(): boolean
 	return isPartier() or ReplicatedStorage:GetAttribute("Phase") ~= "Night"
 end
+local bassDropUntil = 0
 
 -- Shuffle bag: every song once before any repeats, and never the same song twice in a row.
 local bag: { Track } = {}
@@ -160,10 +162,17 @@ function PartyMusic.showNowPlaying(track: Track)
 end
 
 -- Two decks on the lawn, like a DJ: one playing, one fading out.
-type Deck = { sound: Sound, track: Track?, startedAt: number, fadingSince: number? }
+type Deck = {
+	sound: Sound,
+	eq: EqualizerSoundEffect,
+	track: Track?,
+	startedAt: number,
+	fadingSince: number?,
+}
 local decks: { Deck } = {}
 local live = 1
 local level = 0
+local muffle = 0 -- 0 = clear, 1 = through the wall
 local current: Track? = nil
 
 local function play(deck: Deck)
@@ -189,11 +198,15 @@ end
 
 local function step(dt: number)
 	local night = ReplicatedStorage:GetAttribute("Phase") == "Night"
-	local target = if hearsParty() then 1 else 0
-	level += (target - level) * math.min(1, dt * 0.8) -- eases over a few seconds
+	local dropping = os.clock() < bassDropUntil
+	local target = if hearsParty() then 1 elseif dropping then BASS_DROP else THROUGH_WALL
+	local muffleTarget = if hearsParty() then 0 elseif dropping then 0.4 else 1
+	level += (target - level) * math.min(1, dt * (if dropping then 3 else 0.8)) -- eases in a few seconds
+	muffle += (muffleTarget - muffle) * math.min(1, dt * 1.5)
 	local setting = tonumber(player:GetAttribute("Vol_music")) or 1
 	local gain = VOLUME * level * setting
-	local near = if night then NEAR_NIGHT else NEAR_DAY
+	-- Partiers hear it from the lawn at Night; trainers hear it through their own walls.
+	local near = if night and isPartier() then NEAR_NIGHT else NEAR_DAY
 
 	local deck = decks[live]
 	local sound = deck.sound
@@ -219,6 +232,8 @@ local function step(dt: number)
 			weight = 0
 		end
 		d.sound.Volume = gain * weight
+		d.eq.HighGain = -30 * muffle
+		d.eq.MidGain = -12 * muffle
 		d.sound.RollOffMinDistance += (near - d.sound.RollOffMinDistance) * math.min(1, dt * 0.5)
 	end
 end
@@ -235,13 +250,26 @@ function PartyMusic.start()
 			RollOffMaxDistance = 1000,
 			Parent = lawn,
 		}) :: Sound
-		decks[i] = { sound = sound, track = nil, startedAt = 0, fadingSince = nil }
+		local eq = Ui.make("EqualizerSoundEffect", {
+			LowGain = 0,
+			MidGain = 0,
+			HighGain = 0,
+			Parent = sound,
+		}) :: EqualizerSoundEffect
+		decks[i] = { sound = sound, eq = eq, track = nil, startedAt = 0, fadingSince = nil }
 	end
 	play(decks[live])
 	-- Becoming a partier mid-song: show what's on.
 	player:GetAttributeChangedSignal("Team"):Connect(function()
 		if isPartier() and current and ReplicatedStorage:GetAttribute("Phase") == "Night" then -- gave in
 			PartyMusic.showNowPlaying(current)
+		end
+	end)
+	-- A Bass Drop temptation turns the party up through the wall for its window.
+	local temptation = ReplicatedStorage:WaitForChild("RhythmRemotes"):WaitForChild("Temptation") :: RemoteEvent
+	temptation.OnClientEvent:Connect(function(_id: number, kind: string, window: number)
+		if kind == "BassDrop" then
+			bassDropUntil = os.clock() + window
 		end
 	end)
 	-- Dawn: trainers hear the party again, so show what's on.
