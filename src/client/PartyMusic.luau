@@ -266,7 +266,8 @@ function PartyMusic.start()
 		end
 	end)
 	-- A Bass Drop temptation turns the party up through the wall for its window.
-	local temptation = ReplicatedStorage:WaitForChild("RhythmRemotes"):WaitForChild("Temptation") :: RemoteEvent
+	local temptation =
+		ReplicatedStorage:WaitForChild("RhythmRemotes"):WaitForChild("Temptation") :: RemoteEvent
 	temptation.OnClientEvent:Connect(function(_id: number, kind: string, window: number)
 		if kind == "BassDrop" then
 			bassDropUntil = os.clock() + window
