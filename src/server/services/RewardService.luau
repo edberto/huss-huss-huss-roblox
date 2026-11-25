@@ -9,7 +9,7 @@ local Data = require(script.Parent.Data)
 local RedeemCodes = require(script.Parent.RedeemCodes)
 
 -- The game's Roblox group. 0 turns the group reward off until the group exists.
-local GROUP_ID = 0
+local GROUP_ID = 962391373 -- Flamingo Skies Pier
 
 local remotes = ReplicatedStorage:WaitForChild("RhythmRemotes")
 local function remote(name: string): RemoteFunction
