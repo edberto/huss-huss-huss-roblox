@@ -1,5 +1,6 @@
 --!strict
--- Gym station: a dumbbell curl on every hit and a barbell press on the skill beat. A skill-beat
+-- Gym station: every hit pulls the barbell up to the chest (and curls the dumbbell); the skill
+-- beat presses it overhead. A skill-beat
 -- "Almost" gets the bar halfway up, then it drops with a clank: "ahh almost almost".
 -- Props are local to the player's own screen, like the basketball's dribble.
 local RunService = game:GetService("RunService")
@@ -103,6 +104,10 @@ function Gym.start(): StationFx.Station
 			if p >= 1 then
 				motion = nil
 			end
+		elseif current and current.kind == "curl" then
+			-- A quick pull to the chest, so every hit shows on the big bar.
+			local p = math.clamp(elapsed / CURL_TIME, 0, 1)
+			placeBarbell(barRest:Lerp(barChest, math.sin(p * math.pi)))
 		else
 			placeBarbell(barRest)
 		end

@@ -45,3 +45,4 @@ Manual place changes that a code publish doesn't carry. Newest first.
 - 2026-11-25 Huss Boost icon added (assets/icons/huss_boost.png). Uploaded 2026-11-25 via Studio MCP (Open Cloud): VIP pass + 6 product icons, thumbnail as homepage thumbnail (asset 90884851085639, approved). Spare image asset 135196325607800 also uploaded, unused. Experience icon still missing.
 - 2026-11-25 Production published as version 7: Huss Boost + group bonus +50% live.
 - 2026-11-25 Experience icon set (image 135129487613355, Open Use) and detail-page thumbnail set (image 99786376501858, Open Use) via Assets API updateMask=icon/previews. Earlier non-Open-Use uploads 119525705898812 and 135196325607800 are unused.
+- 2026-11-25 Uploaded via Studio MCP: beat kick audio 128535338677323 (assets/audio/beat_kick.wav, our own synth; was in moderation review at upload) and Settings icon 111747124734544 (assets/ui/settings.png). Night Huss is now practice points / 10 (Progress.hussPerPoint).
