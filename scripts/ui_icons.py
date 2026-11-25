@@ -64,7 +64,18 @@ def trophy(d, cx, cy):
     d.polygon([(cx, cy - 170), (cx + 22, cy - 120), (cx + 75, cy - 115), (cx + 35, cy - 82), (cx + 48, cy - 30), (cx, cy - 58), (cx - 48, cy - 30), (cx - 35, cy - 82), (cx - 75, cy - 115), (cx - 22, cy - 120)], fill=W, outline=INK)
 
 
-for name, fn in (('shop', cart), ('daily', calendar), ('gifts', gift), ('timing', metronome), ('ranks', trophy)):
+def gear(d, cx, cy):
+    import math
+    pts = []
+    for k in range(8):
+        base = math.pi * 2 * k / 8
+        for off, r in ((-0.3, 160), (-0.2, 215), (0.2, 215), (0.3, 160)):
+            pts.append((cx + r * math.cos(base + off), cy + r * math.sin(base + off)))
+    d.polygon(pts, fill=W, outline=INK, width=18)
+    d.ellipse([cx - 65, cy - 65, cx + 65, cy + 65], fill=(70, 200, 255, 255), outline=INK, width=18)
+
+
+for name, fn in (('shop', cart), ('daily', calendar), ('gifts', gift), ('timing', metronome), ('ranks', trophy), ('settings', gear)):
     icon(name, fn)
 print('ok')
 

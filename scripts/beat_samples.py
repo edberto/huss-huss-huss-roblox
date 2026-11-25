@@ -64,3 +64,11 @@ for _ in range(70):
     crackle[start:start + n] += rng.uniform(-1, 1, n) * np.exp(-np.arange(n) / (n / 4)) * rng.uniform(0.3, 1)
 save('firework', boom + body + crackle * np.exp(-(tt - 0.25).clip(0) * 2.5) * 0.7)
 print('firework ok')
+
+# Kick: punchy sine drop (150 -> 50 Hz) with a click and soft clipping, so it still cuts
+# through on phone speakers that can't play the low end. 0.35 s.
+tt = t(0.35)
+body = np.sin(2 * np.pi * np.cumsum(50 + 100 * np.exp(-tt * 30)) / SR) * np.exp(-tt * 9)
+click = rng.uniform(-1, 1, tt.size) * np.exp(-tt * 400) * 0.6
+save('beat_kick', np.tanh(2.5 * (body + click)))
+print('ok')
