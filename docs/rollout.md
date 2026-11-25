@@ -42,3 +42,4 @@ Manual place changes that a code publish doesn't carry. Newest first.
 - Not yet in Production: run the same script there before the first Production publish.
 - 2026-11-25 Production social links: Discord https://discord.gg/rCDG7sVwAa ("Flamingo Skies Pier Discord"), Roblox Community 962391373 ("Join Flamingo Skies Pier (+50% Huss)"). Group bonus raised to +50% (Rewards.groupBonus 0.5)..
 - 2026-11-25 Huss Boost icon added (assets/icons/huss_boost.png). Icons + thumbnail not uploaded yet: waiting on Studio upload-folder approval.
+- 2026-11-25 Production published as version 7: Huss Boost + group bonus +50% live.
