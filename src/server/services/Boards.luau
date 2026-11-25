@@ -1,6 +1,6 @@
 --!strict
--- The floating leaderboards over the party house: three in a row facing the street (skill,
--- Most Huss, practices) with the partier board above the middle. Each is a real part with a
+-- The floating leaderboards over the party house: four in a row facing the street (partiers,
+-- skill, Most Huss, practices). Each is a real part with a
 -- SurfaceGui showing the top 10 of its current category; boards with several categories rotate
 -- every ROTATE seconds. Clients make them bob and flip (tag "FloatBoard"), and tapping one opens
 -- the Ranks panel (ClickDetector).
@@ -252,27 +252,20 @@ function Boards.build()
 	-- Face the street: from the house's middle towards its lawn, kept level.
 	local toLawn = lawn.Position - box.Position
 	local front = Vector3.new(toLawn.X, 0, toLawn.Z).Unit
-	local middle = Vector3.new(box.Position.X, box.Position.Y + extents.Y / 2 + 16, box.Position.Z)
+	-- Just behind the house and above its roof, where the tilted trainer camera shows sky.
+	local middle = Vector3.new(box.Position.X, box.Position.Y + extents.Y / 2 + 13, box.Position.Z)
+		- front * 10
 	local facing = CFrame.lookAt(middle, middle + front)
-	-- Board-space +X is the viewer's left.
+	-- Board-space +X is the viewer's left: [Party] [Skill] [Most Huss] [Practices].
 	local groups: { [string]: { typeof(Stats.categories[1]) } } = {}
 	for _, category in Stats.categories do
 		groups[category.board] = groups[category.board] or {}
 		table.insert(groups[category.board], category)
 	end
 	table.insert(boards, build("Center", facing, Vector2.new(22, 22), groups.Center))
-	table.insert(
-		boards,
-		build("Left", facing * CFrame.new(21, -2, -2), Vector2.new(17, 18), groups.Left)
-	)
-	table.insert(
-		boards,
-		build("Right", facing * CFrame.new(-21, -2, -2), Vector2.new(17, 18), groups.Right)
-	)
-	table.insert(
-		boards,
-		build("Party", facing * CFrame.new(0, 21, -4), Vector2.new(17, 18), groups.Party)
-	)
+	table.insert(boards, build("Left", facing * CFrame.new(23, -2, 0), Vector2.new(18, 19), groups.Left))
+	table.insert(boards, build("Right", facing * CFrame.new(-23, -2, 0), Vector2.new(18, 19), groups.Right))
+	table.insert(boards, build("Party", facing * CFrame.new(43, -4, 0), Vector2.new(16, 17), groups.Party))
 
 	for _, board in boards do
 		render(board)

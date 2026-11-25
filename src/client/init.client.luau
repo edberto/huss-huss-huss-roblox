@@ -24,6 +24,7 @@ local home = workspace:WaitForChild("Homes"):WaitForChild(player:GetAttribute("H
 
 -- Fixed view of the player's driveway with the party house behind them (design doc: camera).
 local camera = workspace.CurrentCamera
+local CAMERA_TILT = 12 -- degrees
 local cameraPoint = home:WaitForChild("PracticeCamera") :: BasePart
 -- Trainers get the fixed practice view; partiers walk around with the normal camera.
 local function updateCamera()
@@ -34,7 +35,8 @@ local function updateCamera()
 		camera.CameraType = Enum.CameraType.Custom
 	else
 		camera.CameraType = Enum.CameraType.Scriptable
-		camera.CFrame = cameraPoint.CFrame
+		-- Tilted up so the floating leaderboards over the party house are in view.
+		camera.CFrame = cameraPoint.CFrame * CFrame.Angles(math.rad(CAMERA_TILT), 0, 0)
 	end
 end
 player.CharacterAdded:Connect(function()
