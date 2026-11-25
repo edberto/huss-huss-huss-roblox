@@ -420,7 +420,7 @@ local function buildHome(index: number, lot: CFrame)
 		)
 	end
 	roomCamera(home, "PracticeCamera_Gym", lot, gymSpot, Vector3.new(-5, 5.6, 37.5))
-	roomCamera(home, "PracticeCamera_Burgers", lot, burgerSpot, Vector3.new(8.5, 5.8, 36.8))
+	roomCamera(home, "PracticeCamera_Burgers", lot, burgerSpot, Vector3.new(10, 5.8, 37.6))
 	home.Parent = homes
 end
 

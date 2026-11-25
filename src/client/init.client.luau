@@ -41,8 +41,11 @@ local function updateCamera()
 		camera.CameraType = Enum.CameraType.Custom
 	else
 		camera.CameraType = Enum.CameraType.Scriptable
-		-- Tilted up so the floating leaderboards over the party house are in view.
-		camera.CFrame = cameraPoint().CFrame * CFrame.Angles(math.rad(CAMERA_TILT), 0, 0)
+		-- The driveway view tilts up so the floating leaderboards over the party house are in
+		-- view; the room views have a ceiling, so they keep their own aim.
+		local point = cameraPoint()
+		local tilt = if point.Name == "PracticeCamera" then CAMERA_TILT else 0
+		camera.CFrame = point.CFrame * CFrame.Angles(math.rad(tilt), 0, 0)
 	end
 end
 player.CharacterAdded:Connect(function()
