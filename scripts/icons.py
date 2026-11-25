@@ -139,7 +139,28 @@ def throw_party():
     save(img, 'throw_party')
 
 
+def huss_boost():
+    img = background()
+    d = ImageDraw.Draw(img)
+    # A glowing cyan ring with a big x2, three moons for three nights.
+    cx, cy, r = S / 2, S * 0.5, 120
+    glow = Image.new('RGBA', (S, S), (0, 0, 0, 0))
+    ImageDraw.Draw(glow).ellipse([cx - r - 18, cy - r - 18, cx + r + 18, cy + r + 18], outline=CYAN + (200,), width=22)
+    img.alpha_composite(glow.filter(ImageFilter.GaussianBlur(10)))
+    d = ImageDraw.Draw(img)
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(30, 20, 70), outline=CYAN, width=10)
+    text(d, (cx, cy - 4), 'x2', 150, GOLD, 10)
+    for i in range(3):
+        mx, my = cx - 70 + i * 70, S * 0.79
+        d.ellipse([mx - 20, my - 20, mx + 20, my + 20], fill=(255, 245, 210), outline=INK, width=4)
+        d.ellipse([mx - 8, my - 26, mx + 28, my + 12], fill=(30, 20, 70))
+    text(d, (S / 2, S * 0.15), 'BOOST', 84, CYAN, 9)
+    text(d, (S / 2, S * 0.9), '3 NIGHTS', 46)
+    save(img, 'huss_boost')
+
+
 vip()
+huss_boost()
 huss_pack('huss_500', '500', [1, 2])
 huss_pack('huss_1750', '1,750', [2, 3, 2])
 huss_pack('huss_5000', '5,000', [3, 5, 3])
@@ -147,12 +168,12 @@ second_wind()
 throw_party()
 
 # Contact sheet with the circular crop, for review.
-names = ['vip_pass', 'huss_500', 'huss_1750', 'huss_5000', 'second_wind', 'throw_party']
-sheet = Image.new('RGB', (3 * 260, 2 * 260), (240, 240, 240))
+names = ['vip_pass', 'huss_500', 'huss_1750', 'huss_5000', 'second_wind', 'throw_party', 'huss_boost']
+sheet = Image.new('RGB', (4 * 260, 2 * 260), (240, 240, 240))
 mask = Image.new('L', (250, 250), 0)
 ImageDraw.Draw(mask).ellipse([0, 0, 250, 250], fill=255)
 for i, n in enumerate(names):
     icon = Image.open(f'{OUT}/{n}.png').resize((250, 250), Image.LANCZOS)
-    sheet.paste(icon, (5 + (i % 3) * 260, 5 + (i // 3) * 260), mask)
+    sheet.paste(icon, (5 + (i % 4) * 260, 5 + (i // 4) * 260), mask)
 sheet.save('/tmp/icon_sheet.png')
 print('ok')
