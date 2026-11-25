@@ -617,9 +617,24 @@ function ShopClient.start()
 	-- Volume rows: NAME ... 100%, then − [bar] +, then a hint. 0-200%, saved shortly after the
 	-- last change. The attribute is set locally at once so the sound follows the slider.
 	local VOLUME_ROWS = {
-		{ key = "music", name = "MUSIC", color = "FF2E93", hint = "The party next door, outside of practice" },
-		{ key = "beat", name = "BEAT", color = "3DFFB0", hint = "Your practice groove: kick, hats, bass" },
-		{ key = "sfx", name = "SOUNDS", color = "50DCFF", hint = "Your huss voice, ball, doorbell, phone" },
+		{
+			key = "music",
+			name = "MUSIC",
+			color = "FF2E93",
+			hint = "The party next door, outside of practice",
+		},
+		{
+			key = "beat",
+			name = "BEAT",
+			color = "3DFFB0",
+			hint = "Your practice groove: kick, hats, bass",
+		},
+		{
+			key = "sfx",
+			name = "SOUNDS",
+			color = "50DCFF",
+			hint = "Your huss voice, ball, doorbell, phone",
+		},
 	}
 	local volumeRefreshers: { () -> () } = {}
 	for i, row in VOLUME_ROWS do

@@ -57,7 +57,11 @@ setVolume.Parent = remotes
 remotes.Parent = ReplicatedStorage
 
 setVolume.OnServerInvoke = function(player: Player, kind: unknown, value: unknown): string?
-	if (kind ~= "music" and kind ~= "beat" and kind ~= "sfx") or typeof(value) ~= "number" or value ~= value then
+	if
+		(kind ~= "music" and kind ~= "beat" and kind ~= "sfx")
+		or typeof(value) ~= "number"
+		or value ~= value
+	then
 		return "Invalid"
 	end
 	return Data.update(player, function(data)
