@@ -9,6 +9,7 @@ local SocialService = game:GetService("SocialService")
 local TweenService = game:GetService("TweenService")
 
 local Night = require(ReplicatedStorage.Shared.Night)
+local StationFx = require(script.Parent.StationFx)
 local Ui = require(script.Parent.Ui)
 
 local player = Players.LocalPlayer
@@ -56,73 +57,197 @@ function NightScreens.start()
 		"UIPadding",
 		{ PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0), Parent = duskTitle }
 	)
+	-- Station cards: art, difficulty colour (green / blue / red), bonus chip and a 3-pip meter.
+	local STYLE = {
+		Basketball = { art = "131564544711416", top = "5AD278", bottom = "1E8C50", pips = 1 },
+		Gym = { art = "113372981054456", top = "50C3FF", bottom = "1E6ED2", pips = 2 },
+		Burgers = { art = "107620291266706", top = "FF6464", bottom = "C81E3C", pips = 3 },
+	}
 	local cards = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
-		Position = UDim2.fromScale(0.5, 0.45),
-		Size = UDim2.fromScale(0.6, 0.24),
+		Position = UDim2.fromScale(0.5, 0.47),
+		Size = UDim2.fromScale(0.62, 0.5),
 		Parent = dusk,
 	}, {
 		make("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,
 			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			Padding = UDim.new(0.03, 0),
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+			Padding = UDim.new(0.035, 0),
 		}),
 	})
 	local pickEvent = remotes:WaitForChild("PickStation") :: RemoteEvent
-	local cardParts: { [string]: { card: TextButton, stroke: UIStroke, status: TextLabel } } = {}
-	for _, name in Night.stations do
+	type CardParts = { card: TextButton, stroke: UIStroke, glow: UIStroke, badge: Frame, scale: UIScale }
+	local cardParts: { [string]: CardParts } = {}
+	for i, name in Night.stations do
+		local info = Night.stationInfo[name]
+		local style = STYLE[name]
+		local scale = make("UIScale", {})
+		local stroke = make("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			Color = C.navy,
+			Thickness = 4,
+		})
 		local card = make("TextButton", {
-			BackgroundColor3 = C.panel,
-			Size = UDim2.fromScale(0.3, 1),
+			AutoButtonColor = false,
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			LayoutOrder = i,
+			Size = UDim2.fromScale(0.3, 0.92),
 			Text = "",
 			Parent = cards,
-		}, { corner(12) })
-		local stroke = make("UIStroke", {
-			Color = C.cream,
-			Thickness = 3,
+		}, {
+			corner(18),
+			stroke,
+			scale,
+			make("UIGradient", {
+				Color = ColorSequence.new(Color3.fromHex(style.top), Color3.fromHex(style.bottom)),
+				Rotation = 90,
+			}),
+			make("Frame", { -- glossy top highlight
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 0.7,
+				Position = UDim2.fromScale(0.06, 0.03),
+				Size = UDim2.fromScale(0.88, 0.05),
+			}, { corner() }),
+			make("Frame", { -- soft spotlight behind the art
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 0.75,
+				Position = UDim2.fromScale(0.5, 0.34),
+				Size = UDim2.fromScale(0.78, 0.78),
+				SizeConstraint = Enum.SizeConstraint.RelativeXX,
+			}, { corner() }),
+			make("ImageLabel", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundTransparency = 1,
+				Image = "rbxassetid://" .. style.art,
+				Position = UDim2.fromScale(0.5, 0.34),
+				Size = UDim2.fromScale(0.68, 0.68),
+				SizeConstraint = Enum.SizeConstraint.RelativeXX,
+			}),
+			label({
+				AnchorPoint = Vector2.new(0.5, 0),
+				Position = UDim2.fromScale(0.5, 0.64),
+				Size = UDim2.fromScale(0.9, 0.13),
+				Text = string.upper(name),
+				TextColor3 = Color3.new(1, 1, 1),
+			}, { make("UIStroke", { Color = C.navy, Thickness = 3 }) }),
+			make("Frame", { -- difficulty pill (+ bonus chip)
+				AnchorPoint = Vector2.new(0.5, 0),
+				BackgroundTransparency = 1,
+				Position = UDim2.fromScale(0.5, 0.79),
+				Size = UDim2.fromScale(0.9, 0.08),
+			}, {
+				make("UIListLayout", {
+					FillDirection = Enum.FillDirection.Horizontal,
+					HorizontalAlignment = Enum.HorizontalAlignment.Center,
+					Padding = UDim.new(0.04, 0),
+				}),
+				label({
+					BackgroundColor3 = C.navy,
+					BackgroundTransparency = 0,
+					LayoutOrder = 1,
+					Size = UDim2.fromScale(0.44, 1),
+					Text = string.upper(info.difficulty),
+					TextColor3 = Color3.new(1, 1, 1),
+				}, { corner(), make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }) }),
+				if info.bonus > 0
+					then label({
+						BackgroundColor3 = Color3.fromHex("FFE63C"),
+						BackgroundTransparency = 0,
+						LayoutOrder = 2,
+						Size = UDim2.fromScale(0.48, 1),
+						Text = `+{math.round(info.bonus * 100)}% HUSS`,
+						TextColor3 = C.navy,
+					}, {
+						corner(),
+						make("UIStroke", { Color = C.navy, Thickness = 2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }),
+						make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }),
+					})
+					else nil,
+			}),
+		})
+		-- Difficulty meter: filled white pips with a dark outline.
+		local meter = make("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0),
+			BackgroundTransparency = 1,
+			Position = UDim2.fromScale(0.5, 0.895),
+			Size = UDim2.fromScale(0.4, 0.05),
+			Parent = card,
+		}, {
+			make("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				Padding = UDim.new(0.08, 0),
+			}),
+		})
+		for pip = 1, 3 do
+			make("Frame", {
+				BackgroundColor3 = if pip <= style.pips then Color3.new(1, 1, 1) else C.navy,
+				BackgroundTransparency = if pip <= style.pips then 0 else 0.6,
+				LayoutOrder = pip,
+				Size = UDim2.fromScale(0.27, 1),
+				Parent = meter,
+			}, { corner(), make("UIStroke", { Color = C.navy, Thickness = 2 }) })
+		end
+		local glow = make("UIStroke", {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Parent = card,
+			Color = Color3.fromHex("FFE63C"),
+			Thickness = 8,
+			Transparency = 1,
 		})
-		local info = Night.stationInfo[name]
-		label({
-			Position = UDim2.fromScale(0.08, 0.1),
-			Size = UDim2.fromScale(0.84, 0.32),
-			Text = name,
+		make("Frame", { -- glow ring around the selected card
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(-6, -6),
+			Size = UDim2.new(1, 12, 1, 12),
+			ZIndex = 0,
 			Parent = card,
-		})
-		label({
-			Position = UDim2.fromScale(0.08, 0.44),
-			Size = UDim2.fromScale(0.84, 0.18),
-			Text = if info.bonus > 0
-				then `{info.difficulty} · +{math.round(info.bonus * 100)}% Huss`
-				else info.difficulty,
+		}, { corner(24), glow })
+		local badge = make("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromHex("FFE63C"),
+			Position = UDim2.fromScale(0.5, 0),
+			Size = UDim2.fromScale(0.66, 0.08),
+			Visible = false,
+			ZIndex = 3,
 			Parent = card,
+		}, {
+			corner(),
+			make("UIStroke", { Color = C.navy, Thickness = 3, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }),
+			label({
+				Size = UDim2.fromScale(1, 1),
+				Text = "✓ SELECTED",
+				TextColor3 = C.navy,
+				ZIndex = 4,
+			}, { make("UIPadding", { PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0) }) }),
 		})
-		local status = label({
-			Position = UDim2.fromScale(0.1, 0.68),
-			Size = UDim2.fromScale(0.8, 0.18),
-			Text = "Tap to pick",
-			Parent = card,
-		})
+		-- Press feedback: squash on press, pop on release.
+		card.MouseButton1Down:Connect(function()
+			TweenService:Create(scale, TweenInfo.new(0.08), { Scale = 0.94 }):Play()
+		end)
+		card.MouseLeave:Connect(function()
+			TweenService:Create(scale, TweenInfo.new(0.12), { Scale = 1 }):Play()
+		end)
 		card.Activated:Connect(function()
+			StationFx.play("clap", 1.3)
 			pickEvent:FireServer(name)
 		end)
-		cardParts[name] = { card = card, stroke = stroke, status = status }
+		cardParts[name] = { card = card, stroke = stroke, glow = glow, badge = badge, scale = scale }
 	end
-	-- The picked card is orange with a cream outline; the others are dark.
+	-- The picked card lifts, glows and gets the SELECTED badge; the others sit back a little.
 	local function refreshCards()
 		local picked = player:GetAttribute("Station")
 		for name, parts in cardParts do
 			local on = name == picked
-			parts.card.BackgroundColor3 = if on then C.orange else C.panel
-			parts.stroke.Enabled = on
-			parts.status.Text = if on then "Selected" else "Tap to pick"
-			for _, child in parts.card:GetChildren() do
-				if child:IsA("TextLabel") then
-					child.TextColor3 = if on then C.navy else C.cream
-				end
-			end
+			parts.badge.Visible = on
+			parts.stroke.Color = if on then Color3.new(1, 1, 1) else C.navy
+			TweenService:Create(parts.glow, TweenInfo.new(0.2), { Transparency = if on then 0.15 else 1 }):Play()
+			TweenService:Create(
+				parts.scale,
+				TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+				{ Scale = if on then 1.06 else 0.97 }
+			):Play()
 		end
 	end
 	player:GetAttributeChangedSignal("Station"):Connect(refreshCards)
