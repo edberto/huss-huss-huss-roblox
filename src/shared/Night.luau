@@ -4,7 +4,7 @@
 local Night = {}
 
 Night.duskTime = 30
-Night.nightTime = 240
+Night.nightTime = 150 -- 2.5 min; a full Dusk-Night-Dawn cycle is 3.5 min
 Night.dawnTime = 30
 
 -- The night clock runs from 9:00 PM to 6:00 AM over the Party Night phase.

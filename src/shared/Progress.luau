@@ -17,11 +17,11 @@ Progress.ranks = table.freeze({
 })
 
 -- Dawn rewards in Huss Points (design doc).
-Progress.lastStandingBonus = 500
-Progress.topThreeBonus = 250
-Progress.finishBonus = 50
+Progress.lastStandingBonus = 300
+Progress.topThreeBonus = 150
+Progress.finishBonus = 30
 Progress.placementMinPlayers = 3 -- placement bonuses need a real field to beat
--- Practice points become Huss at this rate: a strong night is ~300-500 Huss, in line with the
+-- Practice points become Huss at this rate: a strong 2.5-minute night is ~200-300 Huss, in line with the
 -- daily reward, gifts and the Robux packs. (1:1 paid ~3,000 a night and emptied the shop in four.)
 Progress.hussPerPoint = 0.1
 
