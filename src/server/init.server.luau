@@ -7,6 +7,8 @@ require(script.services.Shop)
 require(script.services.RewardService)
 require(script.services.Store)
 local Round = require(script.services.Round)
+require(script.services.Leaderboards).start()
+task.spawn(require(script.services.Boards).build)
 task.spawn(require(script.services.Decor).build)
 
 local isPlaytest = ReplicatedStorage:GetAttribute("DevelopmentPlaytest") == true

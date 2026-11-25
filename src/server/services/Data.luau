@@ -10,6 +10,7 @@ local Night = require(ReplicatedStorage.Shared.Night)
 local Progress = require(ReplicatedStorage.Shared.Progress)
 local Products = require(ReplicatedStorage.Shared.Products)
 local Rewards = require(ReplicatedStorage.Shared.Rewards)
+local Stats = require(ReplicatedStorage.Shared.Stats)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 local Analytics = require(script.Parent.Analytics)
 
@@ -27,6 +28,7 @@ export type Data = {
 	codes: { [string]: boolean }, -- redeem codes already used
 	tapOffset: number, -- timing calibration in seconds (positive = audio heard late)
 	boostNights: number, -- nights of x2 Huss left from Huss Boost purchases
+	stats: Stats.Stats, -- lifetime stats for the leaderboards
 }
 
 local TEMPLATE: Data = {
@@ -43,6 +45,7 @@ local TEMPLATE: Data = {
 	codes = {},
 	tapOffset = 0,
 	boostNights = 0,
+	stats = Stats.new(),
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -147,7 +150,26 @@ function Data.creditNight(
 	return before, Progress.level(data.stationXp[station]), credited, boosted
 end
 
+-- Lifetime leaderboard stats (best combo, dawns, drag-ins, party points).
+function Data.recordStats(player: Player, change: Stats.Change)
+	local data = Data.get(player)
+	if data then
+		Stats.apply(data.stats, change)
+	end
+end
+
+-- Playtime counts from join; banked at each Dawn and when the player leaves.
+local sessionStart: { [Player]: number } = {}
+function Data.bankPlaytime(player: Player)
+	local started = sessionStart[player]
+	if started then
+		sessionStart[player] = os.clock()
+		Data.recordStats(player, { seconds = os.clock() - started })
+	end
+end
+
 local function onPlayerAdded(player: Player)
+	sessionStart[player] = os.clock()
 	local stats = Instance.new("Folder")
 	stats.Name = "leaderstats"
 	Instance.new("IntValue", stats).Name = "Huss"
@@ -182,7 +204,13 @@ for _, player in Players:GetPlayers() do
 	task.spawn(onPlayerAdded, player)
 end
 Players.PlayerAdded:Connect(onPlayerAdded)
+-- Set by Leaderboards: runs while the save is still loaded.
+function Data.beforeLeave(_player: Player) end
+
 Players.PlayerRemoving:Connect(function(player)
+	Data.bankPlaytime(player)
+	Data.beforeLeave(player)
+	sessionStart[player] = nil
 	local profile = profiles[player]
 	if profile then
 		profile:EndSession()

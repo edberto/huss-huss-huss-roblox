@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Night = require(ReplicatedStorage.Shared.Night)
+local Data = require(script.Parent.Data)
 local Focus = require(script.Parent.Focus)
 
 local Party = {}
@@ -37,6 +38,7 @@ function Party.creditGiveIn(trainer: Player)
 	lastTempter[trainer] = nil
 	if tempter and tempter.Parent then
 		addPoints(tempter, Night.giveInBonus)
+		Data.recordStats(tempter, { draggedIn = 1 })
 	end
 end
 

@@ -12,6 +12,7 @@ local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
 local Party = require(script.Parent.Party)
 local Data = require(script.Parent.Data)
+local Leaderboards = require(script.Parent.Leaderboards)
 local Npcs = require(script.Parent.Npcs)
 local Progress = require(ReplicatedStorage.Shared.Progress)
 local Rhythm = require(script.Parent.Rhythm)
@@ -62,6 +63,9 @@ end
 
 local function record(player: Player, lasted: string?, progress: number)
 	local score = Rhythm.stop(player)
+	if score then
+		Data.recordStats(player, { combo = score.best })
+	end
 	results[player] = {
 		userId = player.UserId,
 		name = player.DisplayName,
@@ -250,11 +254,20 @@ function Round.run()
 				Analytics.step(player, "NightOver") -- no-op if they already gave in
 				Analytics.step(player, "Dawn")
 				Analytics.event(player, "DawnPlace", place)
+				Data.recordStats(player, {
+					dawnAt = if result.lasted == nil then result.station else nil,
+					partyPoints = result.party,
+				})
+				Data.bankPlaytime(player)
 				result.levelBefore, result.levelAfter, result.earned, result.boosted =
 					Data.creditNight(player, hp, result.station, result.points)
 			end
 		end
 		resultsEvent:FireAllClients(ranking)
+		for _, player in Players:GetPlayers() do
+			Leaderboards.write(player)
+		end
+		Leaderboards.dawnFireworks()
 		task.wait(Night.dawnTime)
 	end
 end

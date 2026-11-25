@@ -49,7 +49,22 @@ def metronome(d, cx, cy):
     d.ellipse([cx + 25, cy - 75, cx + 105, cy + 5], fill=(255, 200, 40, 255), outline=INK, width=14)
 
 
-for name, fn in (('shop', cart), ('daily', calendar), ('gifts', gift), ('timing', metronome)):
+def trophy(d, cx, cy):
+    gold, shade = (255, 210, 60, 255), (230, 160, 30, 255)
+    for sx in (-1, 1):  # handles
+        d.ellipse([cx + sx * 150 - 75, cy - 150, cx + sx * 150 + 75, cy - 10], outline=INK, width=44)
+        d.ellipse([cx + sx * 150 - 62, cy - 137, cx + sx * 150 + 62, cy - 23], outline=gold, width=20)
+    d.chord([cx - 150, cy - 300, cx + 150, cy + 60], 0, 180, fill=gold, outline=INK, width=18)
+    d.rectangle([cx - 150, cy - 210, cx + 150, cy - 120], fill=gold)
+    d.line([(cx - 150, cy - 210), (cx - 150, cy - 120)], fill=INK, width=18)
+    d.line([(cx + 150, cy - 210), (cx + 150, cy - 120)], fill=INK, width=18)
+    d.line([(cx - 159, cy - 210), (cx + 159, cy - 210)], fill=INK, width=18)
+    d.rectangle([cx - 40, cy + 50, cx + 40, cy + 130], fill=shade, outline=INK, width=16)
+    d.rounded_rectangle([cx - 130, cy + 125, cx + 130, cy + 200], 18, fill=gold, outline=INK, width=18)
+    d.polygon([(cx, cy - 170), (cx + 22, cy - 120), (cx + 75, cy - 115), (cx + 35, cy - 82), (cx + 48, cy - 30), (cx, cy - 58), (cx - 48, cy - 30), (cx - 35, cy - 82), (cx - 75, cy - 115), (cx - 22, cy - 120)], fill=W, outline=INK)
+
+
+for name, fn in (('shop', cart), ('daily', calendar), ('gifts', gift), ('timing', metronome), ('ranks', trophy)):
     icon(name, fn)
 print('ok')
 
