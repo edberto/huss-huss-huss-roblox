@@ -93,7 +93,8 @@ function Tutorial.start()
 		card.Text = HINTS[key]
 		card.Visible = true
 		cardScale.Scale = 0.8
-		TweenService:Create(cardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		TweenService:Create(cardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 })
+			:Play()
 		task.delay(seconds, function()
 			if token == mine then
 				card.Visible = false
