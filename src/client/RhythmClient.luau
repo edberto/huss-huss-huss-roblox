@@ -252,7 +252,11 @@ function RhythmClient.start()
 	refreshSegment()
 
 	-- The audible beat: a thud every beat, a clap on each skill note (up to a frame late).
-	local clickStart, clickBeat, clapNote = 0, -1, -1
+	-- On top, a training groove on eighth notes that builds as the tempo steps up:
+	-- step 2 adds hi-hats, step 3 the bassline, step 4 a stab on every bar.
+	-- Bassline: 2 bars of eighths, semitones from C2 (nil = rest).
+	local BASSLINE = { 0, nil, 0, 3, nil, 0, nil, 5, 7, nil, 7, 5, nil, 3, nil, nil }
+	local clickStart, clickBeat, clapNote, eighth = 0, -1, -1, -1
 	RunService.RenderStepped:Connect(function()
 		local current = segment
 		if current then
@@ -262,9 +266,24 @@ function RhythmClient.start()
 			if BeatClock.noteTime(current.startTime, current.bpm, note, current.pattern) > now then
 				note -= 1
 			end
+			local step = math.floor((now - current.startTime) * current.bpm / 30)
 			if current.startTime ~= clickStart then
-				clickStart, clickBeat, clapNote =
-					current.startTime, math.min(beat, -1), math.min(note, -1)
+				clickStart, clickBeat, clapNote, eighth =
+					current.startTime, math.min(beat, -1), math.min(note, -1), math.min(step, -1)
+			end
+			if step > eighth and step >= 0 then
+				eighth = step
+				local layers = table.find(Night.bpmSteps, current.bpm) or 1
+				if layers >= 2 and (step % 2 == 1 or layers >= 4) then
+					StationFx.play("hat", if step % 2 == 1 then 1 else 1.15)
+				end
+				local semitone = BASSLINE[step % #BASSLINE + 1]
+				if layers >= 3 and semitone then
+					StationFx.play("bass", 2 ^ (semitone / 12))
+				end
+				if layers >= 4 and step % 8 == 0 then
+					StationFx.play("stab")
+				end
 			end
 			if beat > clickBeat then
 				clickBeat = beat

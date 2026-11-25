@@ -19,6 +19,9 @@ local SOUND_IDS = {
 	huss5 = "rbxassetid://71587162942892",
 	huss6 = "rbxassetid://97272623021431",
 	almost = "rbxassetid://71905871777804", -- our "ahh almost almost"
+	hat = "rbxassetid://83093406318494", -- training groove, synthesized (scripts/beat_samples.py)
+	bass = "rbxassetid://114400841827078",
+	stab = "rbxassetid://103199292468203",
 	bounce = "rbxassetid://377958030", -- basketball bounce
 	rim = "rbxassetid://81912260477958", -- brick rim hit
 	clank = "rbxassetid://9116717775", -- Pro Sound Effects: metal knock
@@ -42,7 +45,7 @@ for name, id in SOUND_IDS do
 	local sound = Instance.new("Sound")
 	sound.Name = name
 	sound.SoundId = id
-	sound.Volume = if string.find(name, "^huss") then 0.6 else 0.7
+	sound.Volume = if string.find(name, "^huss") then 0.6 elseif name == "hat" then 0.3 elseif name == "bass" then 0.55 elseif name == "stab" then 0.35 else 0.7
 	sound.Parent = SoundService
 	sounds[name] = sound
 end
