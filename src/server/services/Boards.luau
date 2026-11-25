@@ -253,7 +253,7 @@ function Boards.build()
 	local toLawn = lawn.Position - box.Position
 	local front = Vector3.new(toLawn.X, 0, toLawn.Z).Unit
 	-- Just behind the house and above its roof, where the tilted trainer camera shows sky.
-	local middle = Vector3.new(box.Position.X, box.Position.Y + extents.Y / 2 + 13, box.Position.Z)
+	local middle = Vector3.new(box.Position.X, box.Position.Y + extents.Y / 2 + 7, box.Position.Z)
 		- front * 10
 	local facing = CFrame.lookAt(middle, middle + front)
 	-- Board-space +X is the viewer's left: [Party] [Skill] [Most Huss] [Practices].

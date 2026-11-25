@@ -38,15 +38,15 @@ function Tutorial.start()
 		DisplayOrder = 6,
 		Parent = player:WaitForChild("PlayerGui"),
 	})
-	-- Hint card: bottom middle, above the beat track and the Dusk tagline, clear of the side
-	-- buttons, the HUSS button and the temptation prompt up top. Pops in when it changes.
+	-- Hint card: bottom left, above the beat track and beside the side buttons, so it never
+	-- covers the player's avatar, the HUSS button or the temptation prompt. Pops in when it changes.
 	local cardScale = Ui.make("UIScale", {})
 	local card = Ui.label({
-		AnchorPoint = Vector2.new(0.5, 1),
+		AnchorPoint = Vector2.new(0, 1),
 		BackgroundColor3 = Ui.colors.cream,
 		BackgroundTransparency = 0,
-		Position = UDim2.fromScale(0.5, 0.83),
-		Size = UDim2.fromScale(0.42, 0.075),
+		Position = UDim2.new(0, 150, 0.86, 0),
+		Size = UDim2.fromScale(0.34, 0.07),
 		TextColor3 = Ui.colors.navy,
 		TextWrapped = true,
 		Visible = false,
