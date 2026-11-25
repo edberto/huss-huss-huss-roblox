@@ -263,9 +263,18 @@ function Boards.build()
 		table.insert(groups[category.board], category)
 	end
 	table.insert(boards, build("Center", facing, Vector2.new(22, 22), groups.Center))
-	table.insert(boards, build("Left", facing * CFrame.new(23, -2, 0), Vector2.new(18, 19), groups.Left))
-	table.insert(boards, build("Right", facing * CFrame.new(-23, -2, 0), Vector2.new(18, 19), groups.Right))
-	table.insert(boards, build("Party", facing * CFrame.new(43, -4, 0), Vector2.new(16, 17), groups.Party))
+	table.insert(
+		boards,
+		build("Left", facing * CFrame.new(23, -2, 0), Vector2.new(18, 19), groups.Left)
+	)
+	table.insert(
+		boards,
+		build("Right", facing * CFrame.new(-23, -2, 0), Vector2.new(18, 19), groups.Right)
+	)
+	table.insert(
+		boards,
+		build("Party", facing * CFrame.new(43, -4, 0), Vector2.new(16, 17), groups.Party)
+	)
 
 	for _, board in boards do
 		render(board)

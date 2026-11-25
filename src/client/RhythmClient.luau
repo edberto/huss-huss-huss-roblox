@@ -130,7 +130,8 @@ function RhythmClient.start()
 	refreshFocus()
 	local function refreshClock()
 		local text = ReplicatedStorage:GetAttribute("NightClock")
-		topBar.Visible = typeof(text) == "string" and ReplicatedStorage:GetAttribute("Phase") == "Night"
+		topBar.Visible = typeof(text) == "string"
+			and ReplicatedStorage:GetAttribute("Phase") == "Night"
 		clock.Text = if typeof(text) == "string" then text else ""
 	end
 	ReplicatedStorage:GetAttributeChangedSignal("NightClock"):Connect(refreshClock)
