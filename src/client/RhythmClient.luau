@@ -19,8 +19,7 @@ local resultEvent = remotes:WaitForChild("Result") :: RemoteEvent
 
 local Ui = require(script.Parent.Ui)
 local NAVY, CREAM, AMBER = Ui.colors.navy, Ui.colors.cream, Ui.colors.amber
-local ORANGE, MINT, PINK, PANEL = Ui.colors.orange, Ui.colors.mint, Ui.colors.pink, Ui.colors.panel
-local FONT = Ui.font
+local ORANGE, MINT, PINK = Ui.colors.orange, Ui.colors.mint, Ui.colors.pink
 
 local GRADE_STYLE = {
 	Perfect = { text = "PERFECT", color = MINT },
@@ -43,122 +42,216 @@ function RhythmClient.start()
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 	})
 
-	-- Top left: focus bar. FocusService will set the player's "Focus" attribute (0-100).
-	local focusFill = make(
-		"Frame",
-		{ BackgroundColor3 = MINT, Size = UDim2.fromScale(1, 1) },
-		{ corner() }
-	)
-	local focusText = label({
-		Text = "Focus 100",
-		Size = UDim2.new(1, 0, 0, 16),
-		TextXAlignment = Enum.TextXAlignment.Left,
+	local BLACK = Color3.new(0, 0, 0)
+	local function stroke(thickness: number): UIStroke
+		return make("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			Color = BLACK,
+			Thickness = thickness,
+		})
+	end
+	local function gradient(top: string, bottom: string): UIGradient
+		return make(
+			"UIGradient",
+			{ Color = ColorSequence.new(Color3.fromHex(top), Color3.fromHex(bottom)), Rotation = 90 }
+		)
+	end
+
+	-- Top bar: moon + night clock, and the focus meter while practising. The top-left corner
+	-- belongs to Roblox's menu buttons, so it sits in the middle.
+	local clock = Ui.shout({
+		LayoutOrder = 2,
+		Size = UDim2.fromOffset(104, 30),
+		Text = "",
+		Thickness = 2.5,
 	})
-	-- Under the clock: the top-left corner belongs to Roblox's menu buttons. Only while
-	-- practising, so it never sits behind the Dusk title.
+	local focusFill = make("Frame", { BackgroundColor3 = Color3.fromHex("46EBA0"), Size = UDim2.fromScale(1, 1) }, {
+		corner(),
+		make("Frame", { -- gloss
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 0.45,
+			Position = UDim2.fromScale(0.03, 0.12),
+			Size = UDim2.fromScale(0.94, 0.28),
+		}, { corner() }),
+	})
+	local focusText = Ui.label({
+		Size = UDim2.fromScale(1, 1),
+		Text = "FOCUS 100",
+		TextColor3 = NAVY,
+		ZIndex = 3,
+	}, { make("UIPadding", { PaddingTop = UDim.new(0.12, 0), PaddingBottom = UDim.new(0.12, 0) }) })
 	local focusBar = make("Frame", {
+		BackgroundColor3 = Color3.fromHex("140C28"),
+		LayoutOrder = 4,
+		Size = UDim2.fromOffset(190, 24),
+	}, { corner(), stroke(2.5), focusFill, focusText })
+	local topBar = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0.5, 0, 0, 46),
-		Size = UDim2.fromOffset(170, 36),
+		AutomaticSize = Enum.AutomaticSize.X,
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		Position = UDim2.new(0.5, 0, 0, 8),
+		Size = UDim2.fromOffset(0, 46),
+		Visible = false,
 		Parent = gui,
 	}, {
-		focusText,
-		make("Frame", {
-			BackgroundColor3 = PANEL,
-			Position = UDim2.fromOffset(0, 20),
-			Size = UDim2.new(1, 0, 0, 12),
-		}, { corner(), focusFill }),
+		corner(),
+		stroke(3),
+		gradient("3C2878", "1E1446"),
+		make("UIPadding", { PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 14) }),
+		make("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			Padding = UDim.new(0, 10),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+		}),
+		Ui.label({ LayoutOrder = 1, Size = UDim2.fromOffset(30, 30), Text = "🌙" }),
+		clock,
+		Ui.label({
+			LayoutOrder = 3,
+			Size = UDim2.fromOffset(18, 24),
+			Text = "⚡",
+			TextColor3 = Color3.fromHex("FFE63C"),
+		}),
+		focusBar,
 	})
 	local function refreshFocus()
 		local focus = math.clamp(tonumber(player:GetAttribute("Focus")) or 100, 0, 100)
 		focusFill.Size = UDim2.fromScale(focus / 100, 1)
-		focusText.Text = `Focus {math.round(focus)}`
+		focusFill.BackgroundColor3 = if focus > 35 then Color3.fromHex("46EBA0") else Color3.fromHex("FF5064")
+		focusText.Text = `FOCUS {math.round(focus)}`
 	end
 	player:GetAttributeChangedSignal("Focus"):Connect(refreshFocus)
 	refreshFocus()
-
-	-- Top middle: night clock. RoundService will set ReplicatedStorage's "NightClock" attribute.
-	local clock = label({
-		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundColor3 = PANEL,
-		BackgroundTransparency = 0,
-		Position = UDim2.new(0.5, 0, 0, 10),
-		Size = UDim2.fromOffset(110, 30),
-		Parent = gui,
-	})
-	make(
-		"UIPadding",
-		{ PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5), Parent = clock }
-	)
-	corner(10).Parent = clock
 	local function refreshClock()
 		local text = ReplicatedStorage:GetAttribute("NightClock")
-		clock.Visible = typeof(text) == "string"
+		topBar.Visible = typeof(text) == "string"
 		clock.Text = if typeof(text) == "string" then text else ""
 	end
 	ReplicatedStorage:GetAttributeChangedSignal("NightClock"):Connect(refreshClock)
 	refreshClock()
 
-	-- Top right: Huss Points earned this session.
-	local points = label({
-		AnchorPoint = Vector2.new(1, 0),
-		BackgroundColor3 = PANEL,
-		BackgroundTransparency = 0,
-		Position = UDim2.new(1, -16, 0, 10),
-		Size = UDim2.fromOffset(120, 30),
+	-- Top right: Huss total in a gold pill with a coin; pops when it goes up.
+	local pointsScale = make("UIScale", {})
+	local points = Ui.shout({
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -12, 0.5, 0),
+		Size = UDim2.new(1, -56, 0.7, 0),
 		Text = "",
-		TextColor3 = AMBER,
-		Parent = gui,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		Thickness = 2.5,
 	})
-	make(
-		"UIPadding",
-		{ PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5), Parent = points }
-	)
-	corner(10).Parent = points
-
-	-- Right: tap button, a third of the screen height.
-	local tapButton = make("TextButton", {
-		AnchorPoint = Vector2.new(1, 1),
-		BackgroundColor3 = ORANGE,
-		FontFace = FONT,
-		Position = UDim2.new(1, -20, 1, -16),
-		Size = UDim2.fromScale(0.33, 0.33),
-		SizeConstraint = Enum.SizeConstraint.RelativeYY,
-		Text = "HUSS",
-		TextColor3 = NAVY,
-		TextScaled = true,
+	make("Frame", {
+		AnchorPoint = Vector2.new(1, 0),
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		Position = UDim2.new(1, -16, 0, 8),
+		Size = UDim2.fromOffset(168, 46),
 		Parent = gui,
 	}, {
 		corner(),
-		make(
-			"UIStroke",
-			{ Color = CREAM, Thickness = 4, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }
-		),
-		make("UIPadding", {
-			PaddingTop = UDim.new(0.3, 0),
-			PaddingBottom = UDim.new(0.3, 0),
-			PaddingLeft = UDim.new(0.15, 0),
-			PaddingRight = UDim.new(0.15, 0),
+		stroke(3),
+		gradient("FFD246", "EB9614"),
+		pointsScale,
+		make("Frame", { -- the coin
+			AnchorPoint = Vector2.new(0, 0.5),
+			BackgroundColor3 = Color3.fromHex("FFF096"),
+			Position = UDim2.new(0, 6, 0.5, 0),
+			Size = UDim2.fromOffset(36, 36),
+		}, {
+			corner(),
+			stroke(3),
+			Ui.label({
+				Size = UDim2.fromScale(1, 1),
+				FontFace = Ui.display,
+				Text = "H",
+				TextColor3 = Color3.fromHex("B4640A"),
+			}, { make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }) }),
+		}),
+		points,
+	})
+
+	-- Right: the HUSS button, a third of the screen height. Glossy, pulses on every beat
+	-- and flashes mint on a hit, pink on a miss.
+	local tapScale = make("UIScale", {})
+	local tapStroke = stroke(6)
+	local tapGlow = make("UIStroke", {
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Color = AMBER,
+		Thickness = 10,
+		Transparency = 0.6,
+	})
+	local tapButton = make("TextButton", {
+		AnchorPoint = Vector2.new(1, 1),
+		AutoButtonColor = false,
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		Position = UDim2.new(1, -24, 1, -20),
+		Size = UDim2.fromScale(0.33, 0.33),
+		SizeConstraint = Enum.SizeConstraint.RelativeYY,
+		Text = "",
+		Parent = gui,
+	}, {
+		corner(),
+		tapStroke,
+		tapScale,
+		gradient("FF9632", "E1460A"),
+		make("Frame", { -- glow ring just outside the button
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundTransparency = 1,
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.new(1, 18, 1, 18),
+		}, { corner(), tapGlow }),
+		make("Frame", { -- gloss
+			AnchorPoint = Vector2.new(0.5, 0),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 0.72,
+			Position = UDim2.fromScale(0.5, 0.07),
+			Size = UDim2.fromScale(0.7, 0.36),
+		}, { corner() }),
+		Ui.shout({
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.53),
+			Rotation = -5,
+			Size = UDim2.fromScale(0.9, 0.36),
+			Text = "HUSS",
+			Thickness = 5,
 		}),
 	})
+	tapButton.MouseButton1Down:Connect(function()
+		TweenService:Create(tapScale, TweenInfo.new(0.06), { Scale = 0.92 }):Play()
+	end)
+	tapButton.MouseButton1Up:Connect(function()
+		TweenService:Create(tapScale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	end)
+	tapButton.MouseLeave:Connect(function()
+		tapScale.Scale = 1
+	end)
 
 	-- Bottom: beat track. Dots slide right to left into the ring; orange = skill move.
 	local track = make("Frame", {
 		AnchorPoint = Vector2.new(0, 1),
-		BackgroundColor3 = PANEL,
+		BackgroundColor3 = Color3.new(1, 1, 1),
 		Position = UDim2.new(0, 16, 1, -16),
-		Size = UDim2.new(0.62, 0, 0, 56),
+		Size = UDim2.new(0.62, 0, 0, 60),
 		Parent = gui,
-	}, { corner() })
-	local RING_X = 34
-	make("Frame", {
+	}, { corner(), stroke(3), gradient("2D1E5A", "190F37") })
+	local RING_X = 36
+	local ringGlow = make("UIStroke", { Color = Color3.fromHex("50DCFF"), Thickness = 8, Transparency = 0.5 })
+	make("Frame", { -- hit ring: white with a cyan glow that flares on every beat
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0, RING_X, 0.5, 0),
-		Size = UDim2.fromOffset(40, 40),
+		Size = UDim2.fromOffset(44, 44),
+		ZIndex = 3,
 		Parent = track,
-	}, { corner(), make("UIStroke", { Color = CREAM, Thickness = 3 }) })
+	}, {
+		corner(),
+		make("UIStroke", { Color = Color3.new(1, 1, 1), Thickness = 4 }),
+		make("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundTransparency = 1,
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.new(1, 10, 1, 10),
+		}, { corner(), ringGlow }),
+	})
 	local combo = label({
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -18, 0.5, 0),
@@ -190,12 +283,17 @@ function RhythmClient.start()
 			Visible = false,
 			ZIndex = 2,
 			Parent = track,
-		}, { corner() })
+		}, {
+			corner(),
+			make("UIStroke", { Color = BLACK, Thickness = 3 }),
+			Ui.label({ Name = "Star", Size = UDim2.fromScale(1, 1), Text = "★", ZIndex = 2 }),
+		})
 	end
 
 	-- Hit word over the player, e.g. PERFECT.
 	local hitWord = label({
 		AnchorPoint = Vector2.new(0.5, 0.5),
+		FontFace = Ui.display,
 		Position = UDim2.fromScale(0.5, 0.38),
 		Size = UDim2.fromScale(0.3, 0.09),
 		Text = "",
@@ -203,7 +301,7 @@ function RhythmClient.start()
 		Parent = gui,
 	})
 	local hitStroke =
-		make("UIStroke", { Color = NAVY, Thickness = 3, Transparency = 1, Parent = hitWord })
+		make("UIStroke", { Color = BLACK, Thickness = 4, Transparency = 1, Parent = hitWord })
 
 	gui.Parent = player:WaitForChild("PlayerGui")
 
@@ -211,7 +309,12 @@ function RhythmClient.start()
 	local sessionPoints = 0
 	local function refreshPoints()
 		local saved = tonumber(player:GetAttribute("HP")) or 0
-		points.Text = `{saved + sessionPoints} Huss`
+		local text = tostring(saved + sessionPoints)
+		if text ~= points.Text and points.Text ~= "" then
+			pointsScale.Scale = 1.12
+			TweenService:Create(pointsScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		end
+		points.Text = text
 	end
 	player:GetAttributeChangedSignal("HP"):Connect(refreshPoints)
 	refreshPoints()
@@ -289,6 +392,11 @@ function RhythmClient.start()
 			if beat > clickBeat then
 				clickBeat = beat
 				StationFx.play("kick")
+				-- Pulse the button glow and the hit ring on the beat.
+				tapGlow.Transparency = 0.1
+				ringGlow.Transparency = 0.05
+				TweenService:Create(tapGlow, TweenInfo.new(0.35), { Transparency = 0.7 }):Play()
+				TweenService:Create(ringGlow, TweenInfo.new(0.35), { Transparency = 0.6 }):Play()
 			end
 			if note > clapNote then
 				clapNote = note
@@ -338,9 +446,10 @@ function RhythmClient.start()
 			local x = RING_X + ahead / (interval * BEATS_SHOWN) * span
 			if x >= RING_X - 20 and x <= RING_X + span then
 				local skill = BeatClock.isSkillBeat(beat, current.pattern)
-				local size = if skill then 34 else 24
+				local size = if skill then 36 else 24
 				dot.Size = UDim2.fromOffset(size, size)
 				dot.BackgroundColor3 = if skill then ORANGE else CREAM
+				(dot :: any).Star.Visible = skill
 				dot.Position = UDim2.new(0, x, 0.5, 0)
 				dot.Visible = true
 			end
@@ -380,6 +489,8 @@ function RhythmClient.start()
 			refreshPoints()
 			combo.Text = if streak > 0 then `x{Score.multiplier(streak)} · {streak}` else ""
 			flashWord(style.text, style.color, 0.5)
+			tapStroke.Color = if grade == "Miss" then PINK else MINT
+			TweenService:Create(tapStroke, TweenInfo.new(0.3), { Color = BLACK }):Play()
 			RhythmClient.onResult(grade, skill)
 		end
 	)
