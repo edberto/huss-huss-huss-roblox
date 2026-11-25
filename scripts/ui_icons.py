@@ -52,3 +52,50 @@ def metronome(d, cx, cy):
 for name, fn in (('shop', cart), ('daily', calendar), ('gifts', gift), ('timing', metronome)):
     icon(name, fn)
 print('ok')
+
+
+# Practice picker art (512, transparent): basketball, dumbbell, burger.
+def station(name, draw):
+    img = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
+    draw(ImageDraw.Draw(img), 512, 512)
+    img.resize((512, 512), Image.LANCZOS).save(f'assets/ui/station_{name}.png')
+
+
+def basketball(d, cx, cy):
+    r, w, seam = 380, 26, INK
+    d.ellipse([cx - r - 30, cy - r - 30, cx + r + 30, cy + r + 30], fill=INK)
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(245, 120, 35, 255))
+    d.ellipse([cx - r * 0.85, cy - r * 0.9, cx + r * 0.6, cy + r * 0.5], fill=(255, 145, 60, 255))
+    d.line([(cx - r, cy), (cx + r, cy)], fill=seam, width=w)
+    d.line([(cx, cy - r), (cx, cy + r)], fill=seam, width=w)
+    d.arc([cx - r * 1.55, cy - r, cx - r * 0.35, cy + r], -62, 62, fill=seam, width=w)
+    d.arc([cx + r * 0.35, cy - r, cx + r * 1.55, cy + r], 118, 242, fill=seam, width=w)
+    d.ellipse([cx - r * 0.62, cy - r * 0.72, cx - r * 0.3, cy - r * 0.45], fill=(255, 205, 150, 255))
+
+
+def dumbbell(d, cx, cy):
+    d.rounded_rectangle([cx - 420, cy - 45, cx + 420, cy + 45], 30, fill=(205, 210, 225, 255), outline=INK, width=26)
+    d.rectangle([cx - 400, cy - 30, cx + 400, cy - 12], fill=(240, 244, 255, 255))
+    for sx in (-1, 1):
+        for k, (w, h) in enumerate(((110, 440), (100, 330))):
+            x = cx + sx * (230 + k * 115)
+            d.rounded_rectangle([x - w / 2, cy - h / 2, x + w / 2, cy + h / 2], 34, fill=(70, 72, 100, 255), outline=INK, width=26)
+            d.rounded_rectangle([x - w / 2 + 24, cy - h / 2 + 30, x - w / 2 + 46, cy + h / 2 - 30], 10, fill=(120, 124, 160, 255))
+
+
+def burger(d, cx, cy):
+    def layer(box, fill, rad):
+        d.rounded_rectangle(box, rad, fill=fill, outline=INK, width=24)
+    d.chord([cx - 400, cy - 400, cx + 400, cy + 40], 180, 360, fill=(240, 170, 70, 255), outline=INK, width=26)
+    for k in range(6):
+        sx = cx - 230 + k * 92
+        d.ellipse([sx, cy - 280 + (k % 2) * 40, sx + 34, cy - 256 + (k % 2) * 40], fill=(255, 240, 200, 255))
+    layer([cx - 420, cy - 200, cx + 420, cy - 120], (90, 195, 70, 255), 40)
+    layer([cx - 400, cy - 120, cx + 400, cy - 10], (130, 65, 35, 255), 50)
+    d.polygon([(cx - 400, cy - 10), (cx + 400, cy - 10), (cx + 300, cy + 60), (cx + 150, cy + 20), (cx - 50, cy + 70), (cx - 330, cy + 40)], fill=(255, 210, 60, 255), outline=INK)
+    layer([cx - 390, cy + 30, cx + 390, cy + 170], (235, 160, 60, 255), 70)
+
+
+for name, fn in (('basketball', basketball), ('gym', dumbbell), ('burgers', burger)):
+    station(name, fn)
+print('stations ok')
