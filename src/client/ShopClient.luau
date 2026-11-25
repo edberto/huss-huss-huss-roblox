@@ -3,6 +3,7 @@
 -- and the rewards panel. All state comes from player attributes the server publishes.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local MarketplaceService = game:GetService("MarketplaceService")
 
@@ -79,46 +80,70 @@ local function owned(): { [string]: boolean }
 	return set
 end
 
+local BLACK, WHITE, GOLD = Color3.new(0, 0, 0), Color3.new(1, 1, 1), Color3.fromHex("FFD75A")
+local PURPLE, CARD, IDLE = Color3.fromHex("23164B"), Color3.fromHex("32235F"), Color3.fromHex("3C2D6E")
+local GREEN = Color3.fromHex("5AD278")
+
+local function outline(thickness: number): UIStroke
+	return make("UIStroke", {
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Color = BLACK,
+		Thickness = thickness,
+	})
+end
+
+-- A purple panel with a big title, a note on the right and a round X; pops in when opened.
 local function panel(gui: ScreenGui, title: string): (Frame, Frame, TextLabel)
+	local scale = make("UIScale", {})
 	local frame = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = C.cream,
+		BackgroundColor3 = PURPLE,
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.7, 0.72),
+		Size = UDim2.fromScale(0.7, 0.74),
 		Visible = false,
 		ZIndex = 20,
 		Parent = gui,
-	}, { corner(16) })
-	label({
-		Position = UDim2.fromScale(0.04, 0.04),
-		Size = UDim2.fromScale(0.4, 0.1),
-		Text = title,
-		TextColor3 = C.navy,
+	}, { corner(24), outline(5), scale })
+	frame:GetPropertyChangedSignal("Visible"):Connect(function()
+		if frame.Visible then
+			scale.Scale = 0.85
+			TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		end
+	end)
+	Ui.shout({
+		Position = UDim2.fromScale(0.04, 0.035),
+		Size = UDim2.fromScale(0.4, 0.11),
+		Text = string.upper(title),
+		TextColor3 = GOLD,
 		TextXAlignment = Enum.TextXAlignment.Left,
+		Thickness = 4,
 		ZIndex = 21,
 		Parent = frame,
 	})
-	local note = label({
-		Position = UDim2.fromScale(0.45, 0.05),
-		Size = UDim2.fromScale(0.38, 0.08),
+	local note = Ui.shout({
+		Position = UDim2.fromScale(0.42, 0.055),
+		Size = UDim2.fromScale(0.42, 0.07),
 		Text = "",
-		TextColor3 = Color3.fromHex("854F0B"),
+		TextColor3 = GOLD,
 		TextXAlignment = Enum.TextXAlignment.Right,
+		Thickness = 2.5,
 		ZIndex = 21,
 		Parent = frame,
 	})
 	local close = make("TextButton", {
 		AnchorPoint = Vector2.new(1, 0),
-		BackgroundColor3 = C.navy,
-		FontFace = Ui.font,
-		Position = UDim2.fromScale(0.97, 0.04),
-		Size = UDim2.fromScale(0.08, 0.1),
-		Text = "X",
-		TextColor3 = C.cream,
-		TextScaled = true,
+		BackgroundColor3 = Color3.fromHex("FF505A"),
+		Position = UDim2.fromScale(0.975, 0.035),
+		Size = UDim2.fromScale(0.1, 0.1),
+		SizeConstraint = Enum.SizeConstraint.RelativeYY,
+		Text = "",
 		ZIndex = 21,
 		Parent = frame,
-	}, { corner(10) })
+	}, {
+		corner(),
+		outline(3),
+		Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "X", Thickness = 2.5, ZIndex = 22 }),
+	})
 	close.Activated:Connect(function()
 		frame.Visible = false
 	end)
@@ -132,23 +157,38 @@ local function panel(gui: ScreenGui, title: string): (Frame, Frame, TextLabel)
 	return frame, body, note
 end
 
-local function button(parent: Instance, text: string, color: Color3, textColor: Color3): TextButton
+-- A chunky button: solid colour, black outline, gloss, white outlined text. `_textColor` is
+-- kept for callers; text is always white with a black outline now.
+local function button(parent: Instance, text: string, color: Color3, _textColor: Color3?): TextButton
 	return make("TextButton", {
 		AutoButtonColor = true,
 		BackgroundColor3 = color,
-		FontFace = Ui.font,
+		FontFace = Ui.display,
 		Text = text,
-		TextColor3 = textColor,
+		TextColor3 = WHITE,
 		TextScaled = true,
 		ZIndex = 22,
 		Parent = parent,
 	}, {
-		corner(10),
+		corner(12),
+		outline(3),
+		make("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+			Color = BLACK,
+			Thickness = 2,
+		}),
+		make("Frame", { -- gloss
+			BackgroundColor3 = WHITE,
+			BackgroundTransparency = 0.75,
+			Position = UDim2.fromScale(0.06, 0.08),
+			Size = UDim2.fromScale(0.88, 0.22),
+			ZIndex = 22,
+		}, { corner() }),
 		make("UIPadding", {
-			PaddingTop = UDim.new(0.15, 0),
-			PaddingBottom = UDim.new(0.15, 0),
-			PaddingLeft = UDim.new(0.1, 0),
-			PaddingRight = UDim.new(0.1, 0),
+			PaddingTop = UDim.new(0.17, 0),
+			PaddingBottom = UDim.new(0.13, 0),
+			PaddingLeft = UDim.new(0.08, 0),
+			PaddingRight = UDim.new(0.08, 0),
 		}),
 	})
 end
@@ -216,10 +256,9 @@ function ShopClient.start()
 	renderShop = function()
 		shopNote.Text = if shopNote.Text ~= ""
 			then shopNote.Text
-			else `{player:GetAttribute("HP") or 0} HP`
+			else `{player:GetAttribute("HP") or 0} HUSS`
 		for slot, tab in tabButtons do
-			tab.BackgroundColor3 = if slot == currentTab then C.navy else C.rule
-			tab.TextColor3 = if slot == currentTab then C.cream else C.navy
+			tab.BackgroundColor3 = if slot == currentTab then Color3.fromHex("FFBE28") else IDLE
 		end
 		for _, child in grid:GetChildren() do
 			if child:IsA("Frame") then
@@ -229,32 +268,32 @@ function ShopClient.start()
 		if currentTab == "robux" then
 			for order, card in ROBUX_CARDS do
 				local frame = make("Frame", {
-					BackgroundColor3 = Color3.new(1, 1, 1),
+					BackgroundColor3 = CARD,
 					LayoutOrder = order,
 					ZIndex = 22,
 					Parent = grid,
-				}, { corner(10) })
+				}, { corner(14), outline(3) })
 				make("Frame", {
 					BackgroundColor3 = Color3.fromHex(card.color),
 					Position = UDim2.fromScale(0.08, 0.08),
 					Size = UDim2.fromScale(0.84, 0.3),
 					ZIndex = 23,
 					Parent = frame,
-				}, { corner(6) })
+				}, { corner(10), outline(2.5) })
 				label({
 					Position = UDim2.fromScale(0.05, 0.42),
 					Size = UDim2.fromScale(0.9, 0.22),
-					Text = card.name,
-					TextColor3 = C.navy,
+					FontFace = Ui.display,
+					Text = string.upper(card.name),
+					TextColor3 = WHITE,
 					ZIndex = 23,
 					Parent = frame,
 				})
 				local owns = card.key == "vip" and player:GetAttribute("VIP") == true
 				local action = button(
 					frame,
-					if owns then "Owned" else `R$ {card.robux}`,
-					if owns then Color3.fromHex("C0DD97") else C.orange,
-					C.navy
+					if owns then "OWNED" else `R$ {card.robux}`,
+					if owns then GREEN else C.orange
 				)
 				action.Position = UDim2.fromScale(0.08, 0.7)
 				action.Size = UDim2.fromScale(0.84, 0.24)
@@ -284,31 +323,31 @@ function ShopClient.start()
 				elseif mine[id] then "Owned"
 				else `{item.price} Huss`
 			local card = make("Frame", {
-				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundColor3 = CARD,
 				LayoutOrder = order,
 				ZIndex = 22,
 				Parent = grid,
-			}, { corner(10) })
+			}, { corner(14), outline(3) })
 			make("Frame", {
 				BackgroundColor3 = if item.colors then Color3.fromHex(item.colors[1]) else C.navy,
 				Position = UDim2.fromScale(0.08, 0.08),
 				Size = UDim2.fromScale(0.84, 0.3),
 				ZIndex = 23,
 				Parent = card,
-			}, { corner(6) })
+			}, { corner(10), outline(2.5) })
 			label({
 				Position = UDim2.fromScale(0.05, 0.42),
 				Size = UDim2.fromScale(0.9, 0.22),
-				Text = item.name,
-				TextColor3 = C.navy,
+				FontFace = Ui.display,
+				Text = string.upper(item.name),
+				TextColor3 = WHITE,
 				ZIndex = 23,
 				Parent = card,
 			})
 			local action = button(
 				card,
-				status,
-				if equipped then Color3.fromHex("C0DD97") else C.orange,
-				C.navy
+				string.upper(status),
+				if equipped then GREEN elseif mine[id] then Color3.fromHex("50AAFF") else C.orange
 			)
 			action.Position = UDim2.fromScale(0.08, 0.7)
 			action.Size = UDim2.fromScale(0.84, 0.24)
@@ -319,7 +358,7 @@ function ShopClient.start()
 	end
 
 	for _, tab in TABS do
-		local tabButton = button(tabRow, tab.name, C.rule, C.navy)
+		local tabButton = button(tabRow, string.upper(tab.name), IDLE)
 		tabButton.Size = UDim2.fromScale(0.18, 1)
 		tabButton.Activated:Connect(function()
 			currentTab = tab.slot
@@ -377,7 +416,7 @@ function ShopClient.start()
 	-- never lost to a rebuild while the countdowns tick.
 	local dayCells: { TextButton } = {}
 	for day, hp in Rewards.daily do
-		local cell = button(calendar, "", C.rule, C.navy)
+		local cell = button(calendar, "", IDLE)
 		cell.Size = UDim2.fromScale(0.13, 1)
 		cell.Activated:Connect(function()
 			local state = {
@@ -393,7 +432,7 @@ function ShopClient.start()
 	end
 	local giftCells: { TextButton } = {}
 	for i, gift in Rewards.gifts do
-		local cell = button(gifts, "", C.rule, C.navy)
+		local cell = button(gifts, "", IDLE)
 		cell.LayoutOrder = i
 		cell.Activated:Connect(function()
 			local reason = giftRemote:InvokeServer(gift.minutes)
@@ -404,7 +443,7 @@ function ShopClient.start()
 		end)
 		giftCells[i] = cell
 	end
-	local groupButton = button(gifts, `Join the group · {Rewards.groupHp} Huss`, C.navy, C.cream)
+	local groupButton = button(gifts, `JOIN THE GROUP · {Rewards.groupHp} HUSS`, Color3.fromHex("FF50C8"))
 	groupButton.LayoutOrder = #Rewards.gifts + 1
 	groupButton.Activated:Connect(function()
 		local reason = groupRemote:InvokeServer()
@@ -431,15 +470,15 @@ function ShopClient.start()
 		TextXAlignment = Enum.TextXAlignment.Left,
 		ZIndex = 22,
 		Parent = codeRow,
-	}, { corner(10), make("UIPadding", { PaddingLeft = UDim.new(0.02, 0) }) }) :: TextBox
-	local redeemButton = button(codeRow, "Redeem", C.orange, C.navy)
+	}, { corner(12), outline(3), make("UIPadding", { PaddingLeft = UDim.new(0.03, 0) }) }) :: TextBox
+	local redeemButton = button(codeRow, "REDEEM", C.orange)
 	redeemButton.Position = UDim2.fromScale(0.68, 0)
 	redeemButton.Size = UDim2.fromScale(0.32, 0.6)
 	local codeResult = label({
 		Position = UDim2.fromScale(0, 0.62),
 		Size = UDim2.fromScale(0.66, 0.38),
 		Text = "",
-		TextColor3 = Color3.fromHex("854F0B"),
+		TextColor3 = GOLD,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		ZIndex = 22,
 		Parent = codeRow,
@@ -477,8 +516,8 @@ function ShopClient.start()
 				else `Day {day}\n{hp}{if day == 7 then " + trail" else ""}`
 			cell.BackgroundColor3 = if claimable
 				then C.orange
-				elseif done then Color3.fromHex("C0DD97")
-				else C.rule
+				elseif done then GREEN
+				else IDLE
 		end
 		local now = workspace:GetServerTimeNow()
 		local joined = tonumber(player:GetAttribute("JoinedAt")) or now
@@ -493,7 +532,7 @@ function ShopClient.start()
 				else `{gift.minutes} min · Claim {gift.hp} Huss`
 			cell.BackgroundColor3 = if left <= 0 and not claimedGifts[gift.minutes]
 				then C.orange
-				else C.rule
+				else IDLE
 		end
 		groupButton.Visible = player:GetAttribute("GroupClaimed") ~= true
 	end
@@ -504,7 +543,7 @@ function ShopClient.start()
 	label({
 		Size = UDim2.fromScale(1, 0.2),
 		Text = "Using earbuds? Tap along to the beat so we can match your sound.",
-		TextColor3 = C.navy,
+		TextColor3 = WHITE,
 		TextWrapped = true,
 		ZIndex = 22,
 		Parent = timingBody,
@@ -513,29 +552,29 @@ function ShopClient.start()
 	for i = 1, CAL_BEATS do
 		calDots[i] = make("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = C.rule,
+			BackgroundColor3 = IDLE,
 			Position = UDim2.fromScale(0.15 + (i - 1) * 0.1, 0.3),
 			Size = UDim2.fromScale(0.06, 0.06),
 			SizeConstraint = Enum.SizeConstraint.RelativeXX,
 			ZIndex = 22,
 			Parent = timingBody,
-		}, { corner() })
+		}, { corner(), outline(2.5) })
 	end
-	local calTap = button(timingBody, "TAP", C.orange, C.navy)
+	local calTap = button(timingBody, "TAP", C.orange)
 	calTap.Position = UDim2.fromScale(0.3, 0.4)
 	calTap.Size = UDim2.fromScale(0.4, 0.25)
 	local calResult = label({
 		Position = UDim2.fromScale(0, 0.68),
 		Size = UDim2.fromScale(1, 0.12),
 		Text = "",
-		TextColor3 = C.navy,
+		TextColor3 = GOLD,
 		ZIndex = 22,
 		Parent = timingBody,
 	})
-	local calRetry = button(timingBody, "Retry", C.rule, C.navy)
+	local calRetry = button(timingBody, "RETRY", IDLE)
 	calRetry.Position = UDim2.fromScale(0.2, 0.84)
 	calRetry.Size = UDim2.fromScale(0.25, 0.15)
-	local calSave = button(timingBody, "Save", C.navy, C.cream)
+	local calSave = button(timingBody, "SAVE", GREEN)
 	calSave.Position = UDim2.fromScale(0.55, 0.84)
 	calSave.Size = UDim2.fromScale(0.25, 0.15)
 
@@ -555,7 +594,7 @@ function ShopClient.start()
 		local first = os.clock() + 1.5
 		for i = 1, CAL_BEATS do
 			calBeats[i] = first + (i - 1) * 60 / CAL_BPM
-			calDots[i].BackgroundColor3 = C.rule
+			calDots[i].BackgroundColor3 = IDLE
 		end
 		for i, at in calBeats do
 			task.wait(math.max(0, at - os.clock()))
