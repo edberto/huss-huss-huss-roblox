@@ -78,7 +78,13 @@ function NightScreens.start()
 		}),
 	})
 	local pickEvent = remotes:WaitForChild("PickStation") :: RemoteEvent
-	type CardParts = { card: TextButton, stroke: UIStroke, glow: UIStroke, badge: Frame, scale: UIScale }
+	type CardParts = {
+		card: TextButton,
+		stroke: UIStroke,
+		glow: UIStroke,
+		badge: Frame,
+		scale: UIScale,
+	}
 	local cardParts: { [string]: CardParts } = {}
 	for i, name in Night.stations do
 		local info = Night.stationInfo[name]
@@ -151,7 +157,13 @@ function NightScreens.start()
 					Size = UDim2.fromScale(0.44, 1),
 					Text = string.upper(info.difficulty),
 					TextColor3 = Color3.new(1, 1, 1),
-				}, { corner(), make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }) }),
+				}, {
+					corner(),
+					make(
+						"UIPadding",
+						{ PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }
+					),
+				}),
 				if info.bonus > 0
 					then label({
 						BackgroundColor3 = Color3.fromHex("FFE63C"),
@@ -162,8 +174,15 @@ function NightScreens.start()
 						TextColor3 = C.navy,
 					}, {
 						corner(),
-						make("UIStroke", { Color = C.navy, Thickness = 2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }),
-						make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }),
+						make("UIStroke", {
+							Color = C.navy,
+							Thickness = 2,
+							ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						}),
+						make(
+							"UIPadding",
+							{ PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }
+						),
 					})
 					else nil,
 			}),
@@ -214,13 +233,21 @@ function NightScreens.start()
 			Parent = card,
 		}, {
 			corner(),
-			make("UIStroke", { Color = C.navy, Thickness = 3, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }),
+			make(
+				"UIStroke",
+				{ Color = C.navy, Thickness = 3, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }
+			),
 			label({
 				Size = UDim2.fromScale(1, 1),
 				Text = "✓ SELECTED",
 				TextColor3 = C.navy,
 				ZIndex = 4,
-			}, { make("UIPadding", { PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0) }) }),
+			}, {
+				make(
+					"UIPadding",
+					{ PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0) }
+				),
+			}),
 		})
 		-- Press feedback: squash on press, pop on release.
 		card.MouseButton1Down:Connect(function()
@@ -233,7 +260,8 @@ function NightScreens.start()
 			StationFx.play("clap", 1.3)
 			pickEvent:FireServer(name)
 		end)
-		cardParts[name] = { card = card, stroke = stroke, glow = glow, badge = badge, scale = scale }
+		cardParts[name] =
+			{ card = card, stroke = stroke, glow = glow, badge = badge, scale = scale }
 	end
 	-- The picked card lifts, glows and gets the SELECTED badge; the others sit back a little.
 	local function refreshCards()
@@ -242,7 +270,9 @@ function NightScreens.start()
 			local on = name == picked
 			parts.badge.Visible = on
 			parts.stroke.Color = if on then Color3.new(1, 1, 1) else C.navy
-			TweenService:Create(parts.glow, TweenInfo.new(0.2), { Transparency = if on then 0.15 else 1 }):Play()
+			TweenService
+				:Create(parts.glow, TweenInfo.new(0.2), { Transparency = if on then 0.15 else 1 })
+				:Play()
 			TweenService:Create(
 				parts.scale,
 				TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
