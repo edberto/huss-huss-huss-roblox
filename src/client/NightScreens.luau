@@ -20,6 +20,20 @@ local resultsEvent = remotes:WaitForChild("NightResults") :: RemoteEvent
 
 local C = Ui.colors
 local make, corner, label = Ui.make, Ui.corner, Ui.label
+local BLACK, WHITE = Color3.new(0, 0, 0), Color3.new(1, 1, 1)
+local GOLD = Color3.fromHex("FFD75A")
+local MEDALS = { Color3.fromHex("FFD23C"), Color3.fromHex("D2D7E6"), Color3.fromHex("E18C46") }
+local function outline(thickness: number): UIStroke
+	return make("UIStroke", {
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Color = BLACK,
+		Thickness = thickness,
+	})
+end
+local function purplePanel(props: { [string]: any }): Frame
+	props.BackgroundColor3 = Color3.fromHex("23164B")
+	return make("Frame", props, { corner(22), outline(5) })
+end
 
 local PROMPTS = {
 	Doorbell = { text = "Ding dong! Party's next door", button = "Ignore" },
@@ -44,18 +58,26 @@ function NightScreens.start()
 		"Frame",
 		{ BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, Parent = gui }
 	)
-	local duskTitle = label({
+	local duskTitle = Ui.shout({
 		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundColor3 = C.navy,
-		BackgroundTransparency = 0.15,
-		Position = UDim2.fromScale(0.5, 0.05),
+		BackgroundColor3 = WHITE,
+		BackgroundTransparency = 0,
+		Position = UDim2.fromScale(0.5, 0.04),
 		Size = UDim2.fromScale(0.5, 0.08),
+		Text = "",
+		Thickness = 3,
 		Parent = dusk,
-	}, nil)
+	})
 	corner().Parent = duskTitle
+	outline(4).Parent = duskTitle
+	make("UIGradient", {
+		Color = ColorSequence.new(Color3.fromHex("3C2878"), Color3.fromHex("1E1446")),
+		Rotation = 90,
+		Parent = duskTitle,
+	})
 	make(
 		"UIPadding",
-		{ PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0), Parent = duskTitle }
+		{ PaddingTop = UDim.new(0.17, 0), PaddingBottom = UDim.new(0.13, 0), Parent = duskTitle }
 	)
 	-- Station cards: art, difficulty colour (green / blue / red), bonus chip and a 3-pip meter.
 	local STYLE = {
@@ -296,23 +318,24 @@ function NightScreens.start()
 	local prompt = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
 		BackgroundColor3 = C.cream,
-		Position = UDim2.fromScale(0.5, 0.1),
-		Size = UDim2.fromScale(0.42, 0.24),
+		Position = UDim2.fromScale(0.5, 0.11),
+		Size = UDim2.fromScale(0.42, 0.25),
 		Visible = false,
 		Parent = gui,
-	}, { corner(14) })
+	}, { corner(18), outline(5) })
 	local promptText = label({
+		FontFace = Ui.display,
 		Position = UDim2.fromScale(0.06, 0.1),
 		Size = UDim2.fromScale(0.88, 0.26),
 		TextColor3 = C.navy,
 		Parent = prompt,
 	})
 	local timerBack = make("Frame", {
-		BackgroundColor3 = C.rule,
-		Position = UDim2.fromScale(0.06, 0.44),
-		Size = UDim2.fromScale(0.88, 0.06),
+		BackgroundColor3 = Color3.fromHex("140C28"),
+		Position = UDim2.fromScale(0.06, 0.43),
+		Size = UDim2.fromScale(0.88, 0.08),
 		Parent = prompt,
-	}, { corner() })
+	}, { corner(), outline(2.5) })
 	local timerFill = make(
 		"Frame",
 		{ BackgroundColor3 = C.pink, Size = UDim2.fromScale(1, 1), Parent = timerBack },
@@ -320,16 +343,26 @@ function NightScreens.start()
 	)
 	local promptButton = make("TextButton", {
 		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundColor3 = C.navy,
-		FontFace = Ui.font,
+		BackgroundColor3 = WHITE,
+		FontFace = Ui.display,
 		Position = UDim2.fromScale(0.5, 0.6),
-		Size = UDim2.fromScale(0.5, 0.3),
-		TextColor3 = C.cream,
+		Size = UDim2.fromScale(0.56, 0.3),
+		TextColor3 = WHITE,
 		TextScaled = true,
 		Parent = prompt,
 	}, {
-		corner(10),
-		make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }),
+		corner(14),
+		outline(4),
+		make("UIGradient", {
+			Color = ColorSequence.new(Color3.fromHex("5AD278"), Color3.fromHex("1E8C50")),
+			Rotation = 90,
+		}),
+		make("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+			Color = BLACK,
+			Thickness = 2.5,
+		}),
+		make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0) }),
 	})
 
 	local activeId = 0
@@ -381,32 +414,49 @@ function NightScreens.start()
 	-- 3. Gave in to the party ---------------------------------------------------------------------
 	local gaveIn = make("Frame", {
 		BackgroundColor3 = C.partyWall,
-		BackgroundTransparency = 0.15,
+		BackgroundTransparency = 0.25,
 		Size = UDim2.fromScale(1, 1),
 		Visible = false,
 		Parent = gui,
 	})
-	label({
+	local gaveInScale = make("UIScale", {})
+	local gaveInTitle = Ui.shout({
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.38),
-		Size = UDim2.fromScale(0.7, 0.12),
-		Text = "You gave in to the party",
-		TextColor3 = C.pink,
+		Position = UDim2.fromScale(0.5, 0.36),
+		Rotation = -4,
+		Size = UDim2.fromScale(0.75, 0.15),
+		Text = "YOU GAVE IN TO THE PARTY!",
+		TextColor3 = Color3.fromHex("FF50C8"),
+		Thickness = 6,
 		Parent = gaveIn,
 	})
-	local gaveInStats = label({
+	gaveInScale.Parent = gaveInTitle
+	local gaveInStats = Ui.shout({
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.53),
-		Size = UDim2.fromScale(0.5, 0.06),
+		Size = UDim2.fromScale(0.5, 0.065),
+		Text = "",
+		Thickness = 3,
 		Parent = gaveIn,
 	})
-	label({
+	local tempt = Ui.shout({
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.82),
-		Size = UDim2.fromScale(0.5, 0.05),
-		Text = "Now tempt the others until dawn",
+		BackgroundColor3 = WHITE,
+		BackgroundTransparency = 0,
+		Position = UDim2.fromScale(0.5, 0.8),
+		Size = UDim2.fromScale(0.44, 0.075),
+		Text = "NOW DRAG THE OTHERS IN UNTIL DAWN",
+		Thickness = 3,
 		Parent = gaveIn,
 	})
+	corner().Parent = tempt
+	outline(4).Parent = tempt
+	make("UIGradient", {
+		Color = ColorSequence.new(Color3.fromHex("FF64D2"), Color3.fromHex("B42896")),
+		Rotation = 90,
+		Parent = tempt,
+	})
+	make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = tempt })
 	player:GetAttributeChangedSignal("Team"):Connect(function()
 		if player:GetAttribute("Team") ~= "Partier" then
 			return
@@ -414,82 +464,136 @@ function NightScreens.start()
 		prompt.Visible = false
 		activeId = 0
 		gaveInStats.Text =
-			`You lasted until {player:GetAttribute("LastedUntil") or "?"} · {player:GetAttribute(
+			`LASTED UNTIL {player:GetAttribute("LastedUntil") or "?"} · {player:GetAttribute(
 				"NightPoints"
-			) or 0} Huss`
+			) or 0} HUSS`
 		gaveIn.Visible = true
+		gaveInScale.Scale = 1.4
+		TweenService:Create(gaveInScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 		task.delay(4, function()
 			gaveIn.Visible = false
 		end)
 	end)
 
 	-- 4. Dawn results -----------------------------------------------------------------------------
+	-- Sun + banner, the night's top 5 (who lasted longest) with your row highlighted, then your
+	-- reward: Huss earned with a coin, Perfects, level, and a next-night countdown.
 	local dawn = make(
 		"Frame",
 		{ BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, Parent = gui }
 	)
-	label({
+	make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.fromScale(0.5, 0.06),
-		Size = UDim2.fromScale(0.4, 0.07),
-		Text = "Dawn · 6:00 AM",
-		TextColor3 = C.navy,
-		BackgroundColor3 = C.dawn,
-		BackgroundTransparency = 0,
+		BackgroundTransparency = 1,
+		Position = UDim2.fromScale(0.5, 0.02),
+		Size = UDim2.fromScale(0.5, 0.1),
 		Parent = dawn,
 	}, {
-		corner(),
-		make("UIPadding", { PaddingTop = UDim.new(0.15, 0), PaddingBottom = UDim.new(0.15, 0) }),
-	})
-	local card = make("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundColor3 = C.cream,
-		Position = UDim2.fromScale(0.5, 0.18),
-		Size = UDim2.fromScale(0.5, 0),
-		Parent = dawn,
-	}, {
-		corner(14),
-		make("UIPadding", {
-			PaddingTop = UDim.new(0.05, 0),
-			PaddingBottom = UDim.new(0.05, 0),
-			PaddingLeft = UDim.new(0.05, 0),
-			PaddingRight = UDim.new(0.05, 0),
+		make("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Center,
+			Padding = UDim.new(0.02, 0),
+			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
-		make(
-			"UIListLayout",
-			{ Padding = UDim.new(0.02, 0), SortOrder = Enum.SortOrder.LayoutOrder }
-		),
+		make("Frame", { -- the sun
+			BackgroundColor3 = Color3.fromHex("FFC83C"),
+			LayoutOrder = 1,
+			Size = UDim2.fromScale(0.8, 0.8),
+			SizeConstraint = Enum.SizeConstraint.RelativeYY,
+		}, { corner(), outline(4) }),
+		Ui.shout({
+			LayoutOrder = 2,
+			Size = UDim2.fromScale(0.75, 0.85),
+			Text = "DAWN · 6:00 AM",
+			TextColor3 = GOLD,
+			Thickness = 5,
+		}),
 	})
-	local nextNight = label({
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.fromScale(0.5, 0.93),
-		Size = UDim2.fromScale(0.3, 0.05),
-		TextColor3 = C.navy,
+	local card = purplePanel({
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.fromScale(0.5, 0.14),
+		Size = UDim2.new(0.4, 0, 0, 0),
 		Parent = dawn,
 	})
+	make("UISizeConstraint", { MinSize = Vector2.new(420, 0), Parent = card })
+	make("UIPadding", {
+		PaddingTop = UDim.new(0, 12),
+		PaddingBottom = UDim.new(0, 14),
+		PaddingLeft = UDim.new(0, 16),
+		PaddingRight = UDim.new(0, 16),
+		Parent = card,
+	})
+	make("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = card })
+	local nextNight = Ui.shout({
+		AnchorPoint = Vector2.new(0.5, 1),
+		BackgroundColor3 = Color3.fromHex("3C2878"),
+		BackgroundTransparency = 0,
+		Position = UDim2.fromScale(0.5, 0.95),
+		Size = UDim2.fromScale(0.2, 0.065),
+		Text = "",
+		Thickness = 3,
+		Parent = dawn,
+	})
+	corner().Parent = nextNight
+	outline(4).Parent = nextNight
+	make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = nextNight })
 
-	local function row(order: number, left: string, right: string, bold: boolean)
-		local line = make("Frame", {
+	local function line(order: number, height: number): Frame
+		return make("Frame", {
 			BackgroundTransparency = 1,
 			LayoutOrder = order,
-			Size = UDim2.new(1, 0, 0, 30),
+			Size = UDim2.new(1, 0, 0, height),
 			Parent = card,
 		})
-		label({
-			Size = UDim2.fromScale(0.55, 1),
-			Text = left,
-			TextColor3 = C.navy,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			FontFace = if bold then Ui.font else Font.fromEnum(Enum.Font.Gotham),
-			Parent = line,
-		})
-		label({
-			Position = UDim2.fromScale(0.55, 0),
-			Size = UDim2.fromScale(0.45, 1),
-			Text = right,
-			TextColor3 = C.navy,
-			TextXAlignment = Enum.TextXAlignment.Right,
-			Parent = line,
+	end
+
+	local function row(place: number, result: any)
+		local me = result.userId == player.UserId
+		make("Frame", {
+			BackgroundColor3 = if me then GOLD else Color3.fromHex("32235F"),
+			LayoutOrder = place + 1,
+			Size = UDim2.new(1, 0, 0, 40),
+			Parent = card,
+		}, {
+			corner(12),
+			if me then outline(3) else nil,
+			make("Frame", {
+				AnchorPoint = Vector2.new(0, 0.5),
+				BackgroundColor3 = MEDALS[place] or Color3.fromHex("5A5082"),
+				Position = UDim2.new(0, 8, 0.5, 0),
+				Size = UDim2.fromOffset(28, 28),
+			}, {
+				corner(),
+				make("UIStroke", { Color = BLACK, Thickness = 2 }),
+				label({ Size = UDim2.fromScale(1, 1), Text = tostring(place), TextColor3 = BLACK }, {
+					make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.2, 0) }),
+				}),
+			}),
+			make("ImageLabel", {
+				AnchorPoint = Vector2.new(0, 0.5),
+				BackgroundColor3 = Color3.fromHex("C8AA8C"),
+				Image = if result.userId > 0
+					then `rbxthumb://type=AvatarHeadShot&id={result.userId}&w=48&h=48`
+					else "",
+				Position = UDim2.new(0, 44, 0.5, 0),
+				Size = UDim2.fromOffset(30, 30),
+			}, { corner(), make("UIStroke", { Color = BLACK, Thickness = 2 }) }),
+			label({
+				Position = UDim2.new(0, 84, 0.2, 0),
+				Size = UDim2.new(0.45, -84, 0.6, 0),
+				Text = if me then "You" else result.name,
+				TextColor3 = if me then BLACK else WHITE,
+				TextXAlignment = Enum.TextXAlignment.Left,
+			}),
+			Ui.shout({
+				AnchorPoint = Vector2.new(1, 0),
+				Position = UDim2.new(1, -12, 0.18, 0),
+				Size = UDim2.fromScale(0.5, 0.64),
+				Text = string.upper(result.lasted or "Locked in all night"),
+				TextColor3 = if me then WHITE else GOLD,
+				TextXAlignment = Enum.TextXAlignment.Right,
+				Thickness = 2,
+			}),
 		})
 	end
 
@@ -529,68 +633,110 @@ function NightScreens.start()
 				child:Destroy()
 			end
 		end
+		Ui.shout({
+			LayoutOrder = 0,
+			Size = UDim2.new(1, 0, 0, 30),
+			Text = "WHO LASTED LONGEST",
+			Thickness = 3,
+			Parent = line(0, 30),
+		})
 		local mine = nil
 		for i, result in results do
 			if result.userId == player.UserId then
 				mine = result
 			end
 			if i <= 5 then
-				local name = if result.userId == player.UserId then "You" else result.name
-				row(
-					i,
-					`{i}. {name}`,
-					result.lasted or "Locked in all night",
-					result.userId == player.UserId
-				)
+				row(i, result)
 			end
-		end
-		if mine and mine.earned then
-			local levelText = if (mine.levelAfter or 1) > (mine.levelBefore or 1)
-				then `LEVEL UP! {mine.station} Lv {mine.levelAfter}`
-				else `{mine.station} Lv {mine.levelAfter or 1}`
-			local reward = make("Frame", {
-				BackgroundTransparency = 1,
-				LayoutOrder = 52,
-				Size = UDim2.new(1, 0, 0, 30),
-				Parent = card,
-			})
-			label({
-				Size = UDim2.fromScale(1, 1),
-				Text = `+{mine.earned} Huss{if mine.boosted then " (x2 Boost)" else ""} · {levelText}`,
-				TextColor3 = C.orange,
-				Parent = reward,
-			})
 		end
 		if mine then
 			make("Frame", {
-				BackgroundColor3 = C.rule,
+				BackgroundColor3 = Color3.fromHex("5A4B96"),
 				BorderSizePixel = 0,
 				LayoutOrder = 50,
-				Size = UDim2.new(1, 0, 0, 2),
+				Size = UDim2.new(1, 0, 0, 3),
 				Parent = card,
 			})
-			local line = make("Frame", {
-				BackgroundTransparency = 1,
-				LayoutOrder = 51,
-				Size = UDim2.new(1, 0, 0, 30),
-				Parent = card,
+			local reward = line(51, 56)
+			make("Frame", { -- coin
+				AnchorPoint = Vector2.new(0, 0.5),
+				BackgroundColor3 = Color3.fromHex("FFF096"),
+				Position = UDim2.new(0, 4, 0.5, 0),
+				Size = UDim2.fromOffset(46, 46),
+				Parent = reward,
+			}, {
+				corner(),
+				outline(3),
+				label({
+					FontFace = Ui.display,
+					Size = UDim2.fromScale(1, 1),
+					Text = "H",
+					TextColor3 = Color3.fromHex("B4640A"),
+				}, { make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }) }),
 			})
+			local earned = Ui.shout({
+				Position = UDim2.new(0, 60, 0, 2),
+				Size = UDim2.new(0.6, -60, 1, -4),
+				Text = `+{mine.earned or 0} HUSS`,
+				TextColor3 = GOLD,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				Thickness = 4,
+				Parent = reward,
+			})
+			if mine.boosted then
+				local chip = Ui.shout({
+					AnchorPoint = Vector2.new(1, 0.5),
+					BackgroundColor3 = Color3.fromHex("5CC8C8"),
+					BackgroundTransparency = 0,
+					Position = UDim2.new(1, -4, 0.5, 0),
+					Size = UDim2.fromOffset(110, 30),
+					Text = "x2 BOOST",
+					Thickness = 2,
+					Parent = reward,
+				})
+				corner().Parent = chip
+				outline(3).Parent = chip
+				make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0), Parent = chip })
+			end
+			local pop = make("UIScale", { Scale = 1.5, Parent = earned })
+			TweenService:Create(pop, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+
+			local detail = line(52, 32)
 			label({
-				Size = UDim2.fromScale(1, 1),
-				Text = `While they partied, you hit {mine.perfects} Perfects · {mine.points} Huss`
+				Size = UDim2.new(0.55, 0, 1, 0),
+				Text = `While they partied, you hit {mine.perfects} Perfects`
 					.. if (mine.party or 0) > 0 then ` · {mine.party} party pts` else "",
-				TextColor3 = C.navy,
-				Parent = line,
+				TextColor3 = Color3.fromHex("DCD2F5"),
+				TextXAlignment = Enum.TextXAlignment.Left,
+				Parent = detail,
 			})
+			local up = (mine.levelAfter or 1) > (mine.levelBefore or 1)
+			local level = Ui.shout({
+				AnchorPoint = Vector2.new(1, 0.5),
+				BackgroundColor3 = if up then Color3.fromHex("5AD278") else Color3.fromHex("3C2D6E"),
+				BackgroundTransparency = 0,
+				Position = UDim2.new(1, 0, 0.5, 0),
+				Size = UDim2.new(0.43, 0, 1, 0),
+				Text = string.upper(
+					if up
+						then `LEVEL UP! {mine.station} LV {mine.levelAfter}`
+						else `{mine.station} LV {mine.levelAfter or 1}`
+				),
+				Thickness = 2,
+				Parent = detail,
+			})
+			corner().Parent = level
+			outline(3).Parent = level
+			make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = level })
 		end
-		-- Size the card to its rows (list padding 6, card padding 14 top and bottom).
-		local height = 28
+		-- Size the card to its rows (padding 12 + 14, 6 between rows).
+		local height = 26
 		for _, child in card:GetChildren() do
 			if child:IsA("Frame") then
 				height += child.Size.Y.Offset + 6
 			end
 		end
-		card.Size = UDim2.new(0.5, 0, 0, height)
+		card.Size = UDim2.new(0.4, 0, 0, height)
 	end)
 
 	-- Phase changes: show the right screen, move the sky between night and dawn -----------------
@@ -612,8 +758,8 @@ function NightScreens.start()
 		while true do
 			local endsAt = ReplicatedStorage:GetAttribute("PhaseEnds")
 			if typeof(endsAt) == "number" then
-				duskTitle.Text = `Dusk · pick your practice · {Ui.countdown(endsAt)}`
-				nextNight.Text = `Next night in {Ui.countdown(endsAt)}`
+				duskTitle.Text = `DUSK · PICK YOUR PRACTICE · {Ui.countdown(endsAt)}`
+				nextNight.Text = `NEXT NIGHT IN {Ui.countdown(endsAt)}`
 			end
 			task.wait(0.5)
 		end
