@@ -62,6 +62,28 @@ function Ui.label(props: { [string]: any }, children: { Instance }?): TextLabel
 	return Ui.make("TextLabel", props, children)
 end
 
+-- A gradient pill (black outline) with a shout label inside. The gradient sits on the frame,
+-- not the label, so it never tints the text. Returns the frame and the label.
+function Ui.pill(props: { [string]: any }, top: string, bottom: string): (Frame, TextLabel)
+	props.BackgroundColor3 = Color3.new(1, 1, 1)
+	local text = Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "", Thickness = 3 })
+	local frame = Ui.make("Frame", props, {
+		Ui.corner(),
+		Ui.make("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			Color = Color3.new(0, 0, 0),
+			Thickness = 4,
+		}),
+		Ui.make("UIGradient", {
+			Color = ColorSequence.new(Color3.fromHex(top), Color3.fromHex(bottom)),
+			Rotation = 90,
+		}),
+		Ui.make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0) }),
+		text,
+	})
+	return frame, text
+end
+
 -- "m:ss" until a server-clock time.
 function Ui.countdown(endsAt: number): string
 	local left = math.max(0, math.ceil(endsAt - workspace:GetServerTimeNow()))

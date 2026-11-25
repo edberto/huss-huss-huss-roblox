@@ -58,27 +58,12 @@ function NightScreens.start()
 		"Frame",
 		{ BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, Parent = gui }
 	)
-	local duskTitle = Ui.shout({
+	local _, duskTitle = Ui.pill({
 		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundColor3 = WHITE,
-		BackgroundTransparency = 0,
 		Position = UDim2.fromScale(0.5, 0.04),
 		Size = UDim2.fromScale(0.5, 0.08),
-		Text = "",
-		Thickness = 3,
 		Parent = dusk,
-	})
-	corner().Parent = duskTitle
-	outline(4).Parent = duskTitle
-	make("UIGradient", {
-		Color = ColorSequence.new(Color3.fromHex("3C2878"), Color3.fromHex("1E1446")),
-		Rotation = 90,
-		Parent = duskTitle,
-	})
-	make(
-		"UIPadding",
-		{ PaddingTop = UDim.new(0.17, 0), PaddingBottom = UDim.new(0.13, 0), Parent = duskTitle }
-	)
+	}, "3C2878", "1E1446")
 	-- Station cards: art, difficulty colour (green / blue / red), bonus chip and a 3-pip meter.
 	local STYLE = {
 		Basketball = { art = "131564544711416", top = "5AD278", bottom = "1E8C50", pips = 1 },
@@ -343,33 +328,19 @@ function NightScreens.start()
 	)
 	local promptButton = make("TextButton", {
 		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundColor3 = WHITE,
-		FontFace = Ui.display,
+		BackgroundTransparency = 1,
 		Position = UDim2.fromScale(0.5, 0.6),
 		Size = UDim2.fromScale(0.56, 0.3),
-		TextColor3 = WHITE,
-		TextScaled = true,
+		Text = "",
 		Parent = prompt,
-	}, {
-		corner(14),
-		outline(4),
-		make("UIGradient", {
-			Color = ColorSequence.new(Color3.fromHex("5AD278"), Color3.fromHex("1E8C50")),
-			Rotation = 90,
-		}),
-		make("UIStroke", {
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
-			Color = BLACK,
-			Thickness = 2.5,
-		}),
-		make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0) }),
 	})
+	local _, promptButtonText = Ui.pill({ Size = UDim2.fromScale(1, 1), Parent = promptButton }, "5AD278", "1E8C50")
 
 	local activeId = 0
 	local tapsLeft = 0
 	local buttonText = ""
 	local function refreshButton()
-		promptButton.Text = if tapsLeft > 1 then `{buttonText} ({tapsLeft})` else buttonText
+		promptButtonText.Text = string.upper(if tapsLeft > 1 then `{buttonText} ({tapsLeft})` else buttonText)
 	end
 	promptButton.Activated:Connect(function()
 		if tapsLeft <= 0 then
@@ -439,27 +410,13 @@ function NightScreens.start()
 		Thickness = 3,
 		Parent = gaveIn,
 	})
-	local tempt = Ui.shout({
+	local _, tempt = Ui.pill({
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = WHITE,
-		BackgroundTransparency = 0,
 		Position = UDim2.fromScale(0.5, 0.8),
 		Size = UDim2.fromScale(0.44, 0.075),
-		Text = "NOW DRAG THE OTHERS IN UNTIL DAWN",
-		Thickness = 3,
 		Parent = gaveIn,
-	})
-	corner().Parent = tempt
-	outline(4).Parent = tempt
-	make("UIGradient", {
-		Color = ColorSequence.new(Color3.fromHex("FF64D2"), Color3.fromHex("B42896")),
-		Rotation = 90,
-		Parent = tempt,
-	})
-	make(
-		"UIPadding",
-		{ PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = tempt }
-	)
+	}, "FF64D2", "B42896")
+	tempt.Text = "NOW DRAG THE OTHERS IN UNTIL DAWN"
 	player:GetAttributeChangedSignal("Team"):Connect(function()
 		if player:GetAttribute("Team") ~= "Partier" then
 			return
