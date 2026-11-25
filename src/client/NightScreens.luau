@@ -591,6 +591,10 @@ function NightScreens.start()
 	Ui.bind(closeResults, { Enum.KeyCode.Return }, { Enum.KeyCode.ButtonB }, function()
 		setResultsOpen(false)
 	end)
+	-- The key badge goes under the small X instead of over it.
+	local closeBadge = closeResults:FindFirstChild("KeyBadge") :: Frame
+	closeBadge.AnchorPoint = Vector2.new(0.5, 0)
+	closeBadge.Position = UDim2.new(0.5, 0, 1, 4)
 	make("UIPadding", {
 		PaddingTop = UDim.new(0, 12),
 		PaddingBottom = UDim.new(0, 14),
