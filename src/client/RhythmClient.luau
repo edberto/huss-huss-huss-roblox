@@ -51,10 +51,10 @@ function RhythmClient.start()
 		})
 	end
 	local function gradient(top: string, bottom: string): UIGradient
-		return make(
-			"UIGradient",
-			{ Color = ColorSequence.new(Color3.fromHex(top), Color3.fromHex(bottom)), Rotation = 90 }
-		)
+		return make("UIGradient", {
+			Color = ColorSequence.new(Color3.fromHex(top), Color3.fromHex(bottom)),
+			Rotation = 90,
+		})
 	end
 
 	-- Top bar: moon + night clock, and the focus meter while practising. The top-left corner
@@ -65,15 +65,19 @@ function RhythmClient.start()
 		Text = "",
 		Thickness = 2.5,
 	})
-	local focusFill = make("Frame", { BackgroundColor3 = Color3.fromHex("46EBA0"), Size = UDim2.fromScale(1, 1) }, {
-		corner(),
-		make("Frame", { -- gloss
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 0.45,
-			Position = UDim2.fromScale(0.03, 0.12),
-			Size = UDim2.fromScale(0.94, 0.28),
-		}, { corner() }),
-	})
+	local focusFill = make(
+		"Frame",
+		{ BackgroundColor3 = Color3.fromHex("46EBA0"), Size = UDim2.fromScale(1, 1) },
+		{
+			corner(),
+			make("Frame", { -- gloss
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 0.45,
+				Position = UDim2.fromScale(0.03, 0.12),
+				Size = UDim2.fromScale(0.94, 0.28),
+			}, { corner() }),
+		}
+	)
 	local focusText = Ui.label({
 		Size = UDim2.fromScale(1, 1),
 		Text = "FOCUS 100",
@@ -117,7 +121,9 @@ function RhythmClient.start()
 	local function refreshFocus()
 		local focus = math.clamp(tonumber(player:GetAttribute("Focus")) or 100, 0, 100)
 		focusFill.Size = UDim2.fromScale(focus / 100, 1)
-		focusFill.BackgroundColor3 = if focus > 35 then Color3.fromHex("46EBA0") else Color3.fromHex("FF5064")
+		focusFill.BackgroundColor3 = if focus > 35
+			then Color3.fromHex("46EBA0")
+			else Color3.fromHex("FF5064")
 		focusText.Text = `FOCUS {math.round(focus)}`
 	end
 	player:GetAttributeChangedSignal("Focus"):Connect(refreshFocus)
@@ -164,7 +170,12 @@ function RhythmClient.start()
 				FontFace = Ui.display,
 				Text = "H",
 				TextColor3 = Color3.fromHex("B4640A"),
-			}, { make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }) }),
+			}, {
+				make(
+					"UIPadding",
+					{ PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }
+				),
+			}),
 		}),
 		points,
 	})
@@ -219,7 +230,8 @@ function RhythmClient.start()
 		TweenService:Create(tapScale, TweenInfo.new(0.06), { Scale = 0.92 }):Play()
 	end)
 	tapButton.MouseButton1Up:Connect(function()
-		TweenService:Create(tapScale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		TweenService:Create(tapScale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = 1 })
+			:Play()
 	end)
 	tapButton.MouseLeave:Connect(function()
 		tapScale.Scale = 1
@@ -234,7 +246,8 @@ function RhythmClient.start()
 		Parent = gui,
 	}, { corner(), stroke(3), gradient("2D1E5A", "190F37") })
 	local RING_X = 36
-	local ringGlow = make("UIStroke", { Color = Color3.fromHex("50DCFF"), Thickness = 8, Transparency = 0.5 })
+	local ringGlow =
+		make("UIStroke", { Color = Color3.fromHex("50DCFF"), Thickness = 8, Transparency = 0.5 })
 	make("Frame", { -- hit ring: white with a cyan glow that flares on every beat
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
@@ -312,7 +325,9 @@ function RhythmClient.start()
 		local text = tostring(saved + sessionPoints)
 		if text ~= points.Text and points.Text ~= "" then
 			pointsScale.Scale = 1.12
-			TweenService:Create(pointsScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+			TweenService
+				:Create(pointsScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 })
+				:Play()
 		end
 		points.Text = text
 	end
