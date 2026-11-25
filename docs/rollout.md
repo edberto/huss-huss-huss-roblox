@@ -22,7 +22,8 @@ Manual place changes that a code publish doesn't carry. Newest first.
 - [ ] Production place: run `scripts/build_scene.luau`, set max players, then publish from Rojo
       with `default.project.json`.
 - [ ] Phone test with real players (touch layout was checked by maths only).
-- [ ] Replace the placeholder sounds with our own recordings (huss, "almost almost").
+- [x] Own "huss" recordings (6 takes, assets/audio, IDs in StationFx).
+- [ ] Record "ahh almost almost" (no sound yet, bubble only).
 - [ ] Upload `assets/thumbnail.png` as the experience thumbnail (Creator Hub > Places > Thumbnails).
 - [ ] Tag the published version (`v0.1.0`).
 
