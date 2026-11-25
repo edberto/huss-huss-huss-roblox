@@ -512,7 +512,7 @@ function NightScreens.start()
 	local card = purplePanel({
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.fromScale(0.5, 0.14),
-		Size = UDim2.new(0.4, 0, 0, 0),
+		Size = UDim2.fromScale(0.4, 0),
 		Parent = dawn,
 	})
 	make("UISizeConstraint", { MinSize = Vector2.new(420, 0), Parent = card })
@@ -703,7 +703,7 @@ function NightScreens.start()
 
 			local detail = line(52, 32)
 			label({
-				Size = UDim2.new(0.55, 0, 1, 0),
+				Size = UDim2.fromScale(0.55, 1),
 				Text = `While they partied, you hit {mine.perfects} Perfects`
 					.. if (mine.party or 0) > 0 then ` · {mine.party} party pts` else "",
 				TextColor3 = Color3.fromHex("DCD2F5"),
@@ -715,8 +715,8 @@ function NightScreens.start()
 				AnchorPoint = Vector2.new(1, 0.5),
 				BackgroundColor3 = if up then Color3.fromHex("5AD278") else Color3.fromHex("3C2D6E"),
 				BackgroundTransparency = 0,
-				Position = UDim2.new(1, 0, 0.5, 0),
-				Size = UDim2.new(0.43, 0, 1, 0),
+				Position = UDim2.fromScale(1, 0.5),
+				Size = UDim2.fromScale(0.43, 1),
 				Text = string.upper(
 					if up
 						then `LEVEL UP! {mine.station} LV {mine.levelAfter}`
