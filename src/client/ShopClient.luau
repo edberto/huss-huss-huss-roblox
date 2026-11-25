@@ -200,6 +200,25 @@ local function button(
 	})
 end
 
+-- Store icons for the Robux cards, from the pass/product itself (cached; empty if it fails,
+-- e.g. in the PLAYTEST place where the products don't exist).
+local icons: { [string]: string } = {}
+local function iconFor(key: string): string
+	if icons[key] == nil then
+		icons[key] = ""
+		local ok, info = pcall(function()
+			if key == "vip" then
+				return MarketplaceService:GetProductInfo(Products.vipPassId, Enum.InfoType.GamePass)
+			end
+			return MarketplaceService:GetProductInfo(Products.items[key].id, Enum.InfoType.Product)
+		end)
+		if ok and info and info.IconImageAssetId and info.IconImageAssetId > 0 then
+			icons[key] = `rbxassetid://{info.IconImageAssetId}`
+		end
+	end
+	return icons[key]
+end
+
 function ShopClient.start()
 	local gui = make("ScreenGui", {
 		Name = "ShopScreens",
@@ -238,6 +257,11 @@ function ShopClient.start()
 			CellPadding = UDim2.fromScale(0.02, 0.04),
 			CellSize = UDim2.fromScale(0.235, 0.44),
 			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
+		make("UIPadding", { -- room for the cards' outlines
+			PaddingTop = UDim.new(0, 4),
+			PaddingLeft = UDim.new(0, 4),
+			PaddingRight = UDim.new(0, 8),
 		}),
 	})
 	local tabButtons: { [string]: TextButton } = {}
@@ -280,13 +304,25 @@ function ShopClient.start()
 					ZIndex = 22,
 					Parent = grid,
 				}, { corner(14), outline(3) })
-				make("Frame", {
+				local swatch = make("Frame", {
 					BackgroundColor3 = Color3.fromHex(card.color),
 					Position = UDim2.fromScale(0.08, 0.08),
 					Size = UDim2.fromScale(0.84, 0.3),
 					ZIndex = 23,
 					Parent = frame,
 				}, { corner(10), outline(2.5) })
+				local icon = make("ImageLabel", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundTransparency = 1,
+					Position = UDim2.fromScale(0.5, 0.5),
+					Size = UDim2.fromScale(1.5, 1.5),
+					SizeConstraint = Enum.SizeConstraint.RelativeYY,
+					ZIndex = 24,
+					Parent = swatch,
+				})
+				task.spawn(function()
+					icon.Image = iconFor(card.key)
+				end)
 				label({
 					Position = UDim2.fromScale(0.05, 0.42),
 					Size = UDim2.fromScale(0.9, 0.22),
