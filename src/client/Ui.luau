@@ -18,6 +18,22 @@ Ui.colors = table.freeze({
 	gold = Color3.fromHex("FAC775"),
 })
 Ui.font = Font.fromEnum(Enum.Font.FredokaOne)
+Ui.display = Font.fromEnum(Enum.Font.LuckiestGuy) -- chunky headline font for button labels
+
+-- Big white button label with a thick black outline, allowed to spill past its button.
+function Ui.shout(props: { [string]: any }): TextLabel
+	local thickness = props.Thickness or 3.5
+	props.Thickness = nil
+	props.FontFace = Ui.display
+	props.TextColor3 = props.TextColor3 or Color3.new(1, 1, 1)
+	return Ui.label(props, {
+		Ui.make("UIStroke", {
+			Color = Color3.new(0, 0, 0),
+			LineJoinMode = Enum.LineJoinMode.Round,
+			Thickness = thickness,
+		}),
+	})
+end
 
 function Ui.make(className: string, props: { [string]: any }, children: { Instance }?): any
 	local inst = Instance.new(className)

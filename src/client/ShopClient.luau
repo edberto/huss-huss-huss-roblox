@@ -601,7 +601,7 @@ function ShopClient.start()
 		Size = UDim2.fromScale(0.1, 0.62),
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Parent = gui,
-	}, { make("UIListLayout", { Padding = UDim.new(0.035, 0) }) })
+	}, { make("UIListLayout", { Padding = UDim.new(0.07, 0) }) })
 	local dots: { [string]: Frame } = {}
 	local SIDE = {
 		{ "Shop", "74703712629649", "FF9628", "EB5A14" },
@@ -614,7 +614,7 @@ function ShopClient.start()
 			AutoButtonColor = true,
 			BackgroundColor3 = Color3.new(1, 1, 1),
 			LayoutOrder = i,
-			Size = UDim2.fromScale(1, 0.22),
+			Size = UDim2.fromScale(1, 0.2),
 			Text = "",
 			ZIndex = 5,
 			Parent = side,
@@ -626,25 +626,26 @@ function ShopClient.start()
 			}),
 			make("UIStroke", {
 				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Color = C.navy,
-				Thickness = 3,
+				Color = Color3.new(0, 0, 0),
+				Thickness = 4,
 			}),
 			make("ImageLabel", {
-				AnchorPoint = Vector2.new(0.5, 0),
+				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundTransparency = 1,
 				Image = "rbxassetid://" .. spec[2],
-				Position = UDim2.fromScale(0.5, 0.06),
-				Size = UDim2.fromScale(0.62, 0.62),
+				Position = UDim2.fromScale(0.5, 0.42),
+				Size = UDim2.fromScale(0.74, 0.74),
 				ZIndex = 6,
 			}),
-			Ui.label({
-				AnchorPoint = Vector2.new(0.5, 1),
-				Position = UDim2.fromScale(0.5, 0.95),
-				Size = UDim2.fromScale(0.9, 0.26),
+			-- The label spills over the bottom edge, Roblox-style.
+			Ui.shout({
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(0.5, 0.94),
+				Rotation = -4,
+				Size = UDim2.fromScale(1.35, 0.4),
 				Text = string.upper(spec[1]),
-				TextColor3 = Color3.new(1, 1, 1),
-				ZIndex = 6,
-			}, { make("UIStroke", { Color = C.navy, Thickness = 2 }) }),
+				ZIndex = 7,
+			}),
 		})
 		dots[spec[1]] = make("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),

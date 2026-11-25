@@ -132,13 +132,14 @@ function NightScreens.start()
 				Size = UDim2.fromScale(0.68, 0.68),
 				SizeConstraint = Enum.SizeConstraint.RelativeXX,
 			}),
-			label({
-				AnchorPoint = Vector2.new(0.5, 0),
-				Position = UDim2.fromScale(0.5, 0.64),
-				Size = UDim2.fromScale(0.9, 0.13),
+			Ui.shout({
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(0.5, 0.71),
+				Size = UDim2.fromScale(1.05, 0.17),
 				Text = string.upper(name),
-				TextColor3 = Color3.new(1, 1, 1),
-			}, { make("UIStroke", { Color = C.navy, Thickness = 3 }) }),
+				Thickness = 4,
+				ZIndex = 3,
+			}),
 			make("Frame", { -- difficulty pill (+ bonus chip)
 				AnchorPoint = Vector2.new(0.5, 0),
 				BackgroundTransparency = 1,
