@@ -2,6 +2,15 @@
 
 Manual place changes that a code publish doesn't carry. Newest first.
 
+## 2026-11-25: Production experience created
+- Studio File > New, ran scripts/build_scene.luau, synced default.project.json with Rojo (port 34875).
+- Published as a new experience owned by Flamingo Skies Pier (group 962391373):
+  universe 10778958069, place 71858386860011. Private (only collaborators). Team Create on.
+- Experience Settings > Security: Enable Studio Access to API Services on.
+- Creator Hub: VIP pass 2100887538 (199, on sale); developer products 500 Huss 3736028510 (25),
+  1,750 Huss 3736028729 (75), 5,000 Huss 3736028812 (199), Second Wind 3736028871 (15),
+  Throw a Party 3736028927 (99). Managed pricing off on all (in-game prices are fixed).
+
 ## Before the first Production publish (checklist)
 
 - [ ] Game Settings: max players 12 (both places).
