@@ -400,7 +400,7 @@ function NightScreens.start()
 			})
 			label({
 				Size = UDim2.fromScale(1, 1),
-				Text = `+{mine.earned} Huss · {levelText}`,
+				Text = `+{mine.earned} Huss{if mine.boosted then " (x2 Boost)" else ""} · {levelText}`,
 				TextColor3 = C.orange,
 				Parent = reward,
 			})

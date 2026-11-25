@@ -37,6 +37,7 @@ local ROBUX_CARDS = {
 	{ key = "hp_small", name = "500 Huss", robux = 25, color = "FFB547" },
 	{ key = "hp_medium", name = "1,750 Huss", robux = 75, color = "FFB547" },
 	{ key = "hp_large", name = "5,000 Huss", robux = 199, color = "FFB547" },
+	{ key = "huss_boost", name = "x2 Boost: 3 nights", robux = 29, color = "5CC8C8" },
 	{ key = "throw_party", name = "Throw a Party", robux = 99, color = "FF2E93" },
 }
 local REASONS = {

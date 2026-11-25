@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local JestGlobals = require(ReplicatedStorage.DevPackages.JestGlobals)
 local Cosmetics = require(ReplicatedStorage.Shared.Cosmetics)
 local Rewards = require(ReplicatedStorage.Shared.Rewards)
+local Products = require(ReplicatedStorage.Shared.Products)
 
 local describe, expect, it = JestGlobals.describe, JestGlobals.expect, JestGlobals.it
 
@@ -54,5 +55,35 @@ describe("Rewards", function()
 		expect(select(2, Rewards.redeem(codes, used, "NOPE", 500))).toBe("Invalid")
 		expect(Rewards.redeem(codes, used, "old", 999)).toBe(50)
 		expect(select(2, Rewards.redeem(codes, used, "old", 1001))).toBe("Invalid")
+	end)
+
+	it("stacks group, VIP and boost multipliers and counts boost nights down", function()
+		local m, left = Products.nightMultiplier(false, 0.1, false, 0)
+		expect(m).toBe(1)
+		expect(left).toBe(0)
+		m, left = Products.nightMultiplier(true, 0.1, true, 3)
+		expect(m).toBeCloseTo(1.1 * 2 * 2)
+		expect(left).toBe(2)
+		m, left = Products.nightMultiplier(false, 0.1, false, 1)
+		expect(m).toBe(2)
+		expect(left).toBe(0)
+	end)
+
+	it("repeat boost purchases add nights; the multiplier stays x2", function()
+		local left = 0
+		left += Products.boostNights -- bought once
+		local _m1
+		_m1, left = Products.nightMultiplier(false, 0, false, left) -- night 1 used
+		left += Products.boostNights -- bought again with 2 nights left
+		expect(left).toBe(5)
+		local nights = 0
+		while left > 0 do
+			local m
+			m, left = Products.nightMultiplier(false, 0, false, left)
+			expect(m).toBe(2) -- never x4
+			nights += 1
+		end
+		expect(nights).toBe(5)
+		expect(Products.nightMultiplier(false, 0, false, left)).toBe(1) -- then back to normal
 	end)
 end)

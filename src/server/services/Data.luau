@@ -26,6 +26,7 @@ export type Data = {
 	tutorialDone: boolean,
 	codes: { [string]: boolean }, -- redeem codes already used
 	tapOffset: number, -- timing calibration in seconds (positive = audio heard late)
+	boostNights: number, -- nights of x2 Huss left from Huss Boost purchases
 }
 
 local TEMPLATE: Data = {
@@ -41,6 +42,7 @@ local TEMPLATE: Data = {
 	tutorialDone = false,
 	codes = {},
 	tapOffset = 0,
+	boostNights = 0,
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -79,6 +81,7 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("SecondWinds", data.secondWinds)
 	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("TapOffset", data.tapOffset)
+	player:SetAttribute("BoostNights", data.boostNights)
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then
 		(stats:FindFirstChild("Huss") :: IntValue).Value = data.hp;
@@ -115,24 +118,33 @@ end
 
 -- Credit one night: Huss Points plus XP for the station the player practised.
 -- Returns the station level before and after, for the Dawn card.
-function Data.creditNight(player: Player, hp: number, station: string, xp: number): (number, number)
+-- Credits a night's Huss and practice XP. Returns the level before and after, the Huss actually
+-- credited (after group, VIP and boost) and whether a boost night was used.
+function Data.creditNight(
+	player: Player,
+	hp: number,
+	station: string,
+	xp: number
+): (number, number, number, boolean)
 	local data = Data.get(player)
 	if not data then
-		return 1, 1
+		return 1, 1, 0, false
 	end
 	local before = Progress.level(data.stationXp[station] or 0)
-	-- Group members earn a bonus on every night (design doc: rewards).
-	if player:GetAttribute("InGroup") == true then
-		hp *= 1 + Rewards.groupBonus
-	end
-	if player:GetAttribute("VIP") == true then
-		hp *= Products.vipMultiplier
-	end
-	data.hp += math.max(0, math.floor(hp))
+	local boosted = data.boostNights > 0
+	local multiplier, boostLeft = Products.nightMultiplier(
+		player:GetAttribute("InGroup") == true,
+		Rewards.groupBonus,
+		player:GetAttribute("VIP") == true,
+		data.boostNights
+	)
+	data.boostNights = boostLeft
+	local credited = math.max(0, math.floor(hp * multiplier))
+	data.hp += credited
 	data.stationXp[station] = (data.stationXp[station] or 0) + math.max(0, math.floor(xp))
 	data.nights += 1
 	publish(player, data)
-	return before, Progress.level(data.stationXp[station])
+	return before, Progress.level(data.stationXp[station]), credited, boosted
 end
 
 local function onPlayerAdded(player: Player)

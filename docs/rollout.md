@@ -10,6 +10,7 @@ Manual place changes that a code publish doesn't carry. Newest first.
 - Creator Hub: VIP pass 2100887538 (199, on sale); developer products 500 Huss 3736028510 (25),
   1,750 Huss 3736028729 (75), 5,000 Huss 3736028812 (199), Second Wind 3736028871 (15),
   Throw a Party 3736028927 (99). Managed pricing off on all (in-game prices are fixed).
+- Creator Hub: developer product Huss Boost 3736030396 (29, managed pricing off).
 
 ## Before the first Production publish (checklist)
 

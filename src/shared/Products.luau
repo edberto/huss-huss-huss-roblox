@@ -13,7 +13,29 @@ Products.items = table.freeze({
 	hp_large = { id = 3736028812, name = "5,000 Huss", robux = 199, hp = 5000 },
 	second_wind = { id = 3736028871, name = "Second Wind", robux = 15 },
 	throw_party = { id = 3736028927, name = "Throw a Party", robux = 99 },
+	huss_boost = { id = 3736030396, name = "x2 Boost: 3 nights", robux = 29 },
 } :: { [string]: Product })
+
+Products.boostNights = 3 -- nights of x2 Huss per Huss Boost purchase (they stack)
+Products.boostMultiplier = 2
+
+-- The night's Huss multiplier and the boost nights left after this night. Group members get a
+-- small bonus, VIP doubles, and a Huss Boost doubles again while it lasts.
+function Products.nightMultiplier(
+	inGroup: boolean,
+	groupBonus: number,
+	vip: boolean,
+	boostNightsLeft: number
+): (number, number)
+	local multiplier = if inGroup then 1 + groupBonus else 1
+	if vip then
+		multiplier *= Products.vipMultiplier
+	end
+	if boostNightsLeft > 0 then
+		return multiplier * Products.boostMultiplier, boostNightsLeft - 1
+	end
+	return multiplier, 0
+end
 
 Products.secondWindFocus = 50 -- focus restored, once per night
 Products.secondWindShowBelow = 30 -- the button appears when focus drops below this

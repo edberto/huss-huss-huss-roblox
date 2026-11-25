@@ -71,6 +71,8 @@ MarketplaceService.ProcessReceipt = function(receipt)
 			data.hp += product.hp
 		elseif key == "second_wind" then
 			data.secondWinds += 1
+		elseif key == "huss_boost" then
+			data.boostNights += Products.boostNights
 		end
 		table.insert(data.receipts, receipt.PurchaseId)
 		while #data.receipts > RECEIPTS_KEPT do

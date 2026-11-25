@@ -250,7 +250,7 @@ function Round.run()
 				Analytics.step(player, "NightOver") -- no-op if they already gave in
 				Analytics.step(player, "Dawn")
 				Analytics.event(player, "DawnPlace", place)
-				result.levelBefore, result.levelAfter =
+				result.levelBefore, result.levelAfter, result.earned, result.boosted =
 					Data.creditNight(player, hp, result.station, result.points)
 			end
 		end
