@@ -9,9 +9,15 @@ local Ui = require(script.Parent.Ui)
 
 local player = Players.LocalPlayer
 
--- Creator Store sound effects (free to use in experiences). Swap for our own recordings later.
+-- huss1-6: our own recordings (assets/audio). 1-3 and 4-6 are each one "huss huss huss" phrase.
+-- The rest are Creator Store sound effects (free to use in experiences).
 local SOUND_IDS = {
-	huss = "rbxassetid://9113702955", -- Pro Sound Effects: airy breath exhale
+	huss1 = "rbxassetid://90960262508418",
+	huss2 = "rbxassetid://71869590388356",
+	huss3 = "rbxassetid://116677625462859",
+	huss4 = "rbxassetid://96533280196463",
+	huss5 = "rbxassetid://71587162942892",
+	huss6 = "rbxassetid://97272623021431",
 	bounce = "rbxassetid://377958030", -- basketball bounce
 	rim = "rbxassetid://81912260477958", -- brick rim hit
 	clank = "rbxassetid://9116717775", -- Pro Sound Effects: metal knock
@@ -35,7 +41,7 @@ for name, id in SOUND_IDS do
 	local sound = Instance.new("Sound")
 	sound.Name = name
 	sound.SoundId = id
-	sound.Volume = if name == "huss" then 0.5 else 0.7
+	sound.Volume = if string.find(name, "^huss") then 0.6 else 0.7
 	sound.Parent = SoundService
 	sounds[name] = sound
 end
@@ -78,9 +84,16 @@ function StationFx.say(text: string, big: boolean)
 		:Play()
 end
 
--- Every hit: breath sound with a little pitch variety and the "huss" bubble.
+-- Every hit: the next take in order, so steady hits say "huss huss huss" (1-3), then again (4-6).
+-- After a pause, start a fresh phrase rather than finishing the old one.
+local hussIndex, lastHuss = 0, -math.huge
 function StationFx.huss()
-	StationFx.play("huss", 0.9 + math.random() * 0.25)
+	if os.clock() - lastHuss > 1.5 and hussIndex % 3 ~= 0 then
+		hussIndex += 3 - hussIndex % 3
+	end
+	lastHuss = os.clock()
+	hussIndex = hussIndex % 6 + 1
+	StationFx.play("huss" .. hussIndex)
 	StationFx.say("huss", false)
 end
 
