@@ -191,9 +191,11 @@ local function step(dt: number)
 	local deck = decks[live]
 	local sound = deck.sound
 	local age = os.clock() - deck.startedAt
-	if not sound.IsLoaded and age > LOAD_TIMEOUT then
-		crossfade()
-	elseif sound.IsLoaded and sound.TimeLength > FADE * 2 and sound.TimePosition >= sound.TimeLength - FADE then
+	local stuck = not sound.IsLoaded and age > LOAD_TIMEOUT
+	local ending = sound.IsLoaded
+		and sound.TimeLength > FADE * 2
+		and sound.TimePosition >= sound.TimeLength - FADE
+	if stuck or ending then
 		crossfade()
 	end
 
