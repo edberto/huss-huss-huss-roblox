@@ -675,7 +675,7 @@ function NightScreens.start()
 				}, { make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }) }),
 			})
 			local earned = Ui.shout({
-				Position = UDim2.new(0, 60, 0, 2),
+				Position = UDim2.fromOffset(60, 2),
 				Size = UDim2.new(0.6, -60, 1, -4),
 				Text = `+{mine.earned or 0} HUSS`,
 				TextColor3 = GOLD,
