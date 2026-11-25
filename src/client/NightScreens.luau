@@ -456,7 +456,10 @@ function NightScreens.start()
 		Rotation = 90,
 		Parent = tempt,
 	})
-	make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = tempt })
+	make(
+		"UIPadding",
+		{ PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = tempt }
+	)
 	player:GetAttributeChangedSignal("Team"):Connect(function()
 		if player:GetAttribute("Team") ~= "Partier" then
 			return
@@ -469,7 +472,8 @@ function NightScreens.start()
 			) or 0} HUSS`
 		gaveIn.Visible = true
 		gaveInScale.Scale = 1.4
-		TweenService:Create(gaveInScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		TweenService:Create(gaveInScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 })
+			:Play()
 		task.delay(4, function()
 			gaveIn.Visible = false
 		end)
@@ -523,7 +527,10 @@ function NightScreens.start()
 		PaddingRight = UDim.new(0, 16),
 		Parent = card,
 	})
-	make("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = card })
+	make(
+		"UIListLayout",
+		{ Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = card }
+	)
 	local nextNight = Ui.shout({
 		AnchorPoint = Vector2.new(0.5, 1),
 		BackgroundColor3 = Color3.fromHex("3C2878"),
@@ -536,7 +543,10 @@ function NightScreens.start()
 	})
 	corner().Parent = nextNight
 	outline(4).Parent = nextNight
-	make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = nextNight })
+	make(
+		"UIPadding",
+		{ PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = nextNight }
+	)
 
 	local function line(order: number, height: number): Frame
 		return make("Frame", {
@@ -565,9 +575,15 @@ function NightScreens.start()
 			}, {
 				corner(),
 				make("UIStroke", { Color = BLACK, Thickness = 2 }),
-				label({ Size = UDim2.fromScale(1, 1), Text = tostring(place), TextColor3 = BLACK }, {
-					make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.2, 0) }),
-				}),
+				label(
+					{ Size = UDim2.fromScale(1, 1), Text = tostring(place), TextColor3 = BLACK },
+					{
+						make(
+							"UIPadding",
+							{ PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.2, 0) }
+						),
+					}
+				),
 			}),
 			make("ImageLabel", {
 				AnchorPoint = Vector2.new(0, 0.5),
@@ -672,7 +688,12 @@ function NightScreens.start()
 					Size = UDim2.fromScale(1, 1),
 					Text = "H",
 					TextColor3 = Color3.fromHex("B4640A"),
-				}, { make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }) }),
+				}, {
+					make(
+						"UIPadding",
+						{ PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }
+					),
+				}),
 			})
 			local earned = Ui.shout({
 				Position = UDim2.fromOffset(60, 2),
@@ -696,10 +717,15 @@ function NightScreens.start()
 				})
 				corner().Parent = chip
 				outline(3).Parent = chip
-				make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0), Parent = chip })
+				make("UIPadding", {
+					PaddingTop = UDim.new(0.18, 0),
+					PaddingBottom = UDim.new(0.12, 0),
+					Parent = chip,
+				})
 			end
 			local pop = make("UIScale", { Scale = 1.5, Parent = earned })
-			TweenService:Create(pop, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+			TweenService:Create(pop, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Scale = 1 })
+				:Play()
 
 			local detail = line(52, 32)
 			label({
@@ -713,7 +739,9 @@ function NightScreens.start()
 			local up = (mine.levelAfter or 1) > (mine.levelBefore or 1)
 			local level = Ui.shout({
 				AnchorPoint = Vector2.new(1, 0.5),
-				BackgroundColor3 = if up then Color3.fromHex("5AD278") else Color3.fromHex("3C2D6E"),
+				BackgroundColor3 = if up
+					then Color3.fromHex("5AD278")
+					else Color3.fromHex("3C2D6E"),
 				BackgroundTransparency = 0,
 				Position = UDim2.fromScale(1, 0.5),
 				Size = UDim2.fromScale(0.43, 1),
@@ -727,7 +755,10 @@ function NightScreens.start()
 			})
 			corner().Parent = level
 			outline(3).Parent = level
-			make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = level })
+			make(
+				"UIPadding",
+				{ PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.14, 0), Parent = level }
+			)
 		end
 		-- Size the card to its rows (padding 12 + 14, 6 between rows).
 		local height = 26
