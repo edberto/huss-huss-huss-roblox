@@ -76,13 +76,13 @@ local function burst(at: Vector3, color: Color3)
 		sparks.Enabled = false
 		sparks.LightEmission = 1
 		sparks.Lifetime = NumberRange.new(1, 1.6)
-		sparks.Size = NumberSequence.new(0.9, 0)
-		sparks.Speed = NumberRange.new(28, 40)
+		sparks.Size = NumberSequence.new(2.6, 0)
+		sparks.Speed = NumberRange.new(32, 48)
 		sparks.SpreadAngle = Vector2.new(180, 180)
 		sparks.Texture = "rbxasset://textures/particles/sparkles_main.dds"
 		sparks.Transparency = NumberSequence.new(0, 1)
 		sparks.Parent = anchor
-		sparks:Emit(140)
+		sparks:Emit(180)
 		local light = Instance.new("PointLight")
 		light.Brightness = 4
 		light.Color = color
