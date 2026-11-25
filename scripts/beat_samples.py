@@ -51,3 +51,16 @@ for f in (261.63, 311.13, 392.0):
 stab = lowpass(stab, 0.25) * np.minimum(1, tt * 300) * np.exp(-tt * 9)
 save('beat_stab', stab)
 print('ok')
+
+# Firework: a low boom, then a shower of crackles, 1.6 s.
+tt = t(1.6)
+boom = np.sin(2 * np.pi * np.cumsum(40 + 90 * np.exp(-tt * 18)) / SR) * np.exp(-tt * 6)
+noise = rng.uniform(-1, 1, tt.size)
+body = lowpass(noise, 0.15) * np.exp(-tt * 9) * 0.8
+crackle = np.zeros_like(tt)
+for _ in range(70):
+    start = int(SR * rng.uniform(0.25, 1.3))
+    n = int(SR * 0.012)
+    crackle[start:start + n] += rng.uniform(-1, 1, n) * np.exp(-np.arange(n) / (n / 4)) * rng.uniform(0.3, 1)
+save('firework', boom + body + crackle * np.exp(-(tt - 0.25).clip(0) * 2.5) * 0.7)
+print('firework ok')

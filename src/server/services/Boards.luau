@@ -125,7 +125,7 @@ local function build(name: string, cframe: CFrame, size: Vector2, categories): B
 		local face = make("ImageLabel", {
 			AnchorPoint = Vector2.new(0, 0.5),
 			BackgroundColor3 = Color3.fromHex("C8AA8C"),
-			Position = UDim2.new(0.1, 0, 0.5, 0),
+			Position = UDim2.fromScale(0.1, 0.5),
 			Size = UDim2.fromScale(0.86, 0.86),
 			SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		}, { corner(), make("UIStroke", { Color = BLACK, Thickness = 4 }) })
