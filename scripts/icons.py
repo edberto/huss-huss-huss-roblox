@@ -159,7 +159,105 @@ def huss_boost():
     save(img, 'huss_boost')
 
 
+def game_icon():
+    """Experience icon: sigma-faced trainer, unbothered while a partier blasts a horn in his ear. 512x512 square."""
+    import random
+    random.seed(7)
+    B = 2 * S  # draw at 2x, downscale for smooth edges
+    BLK, TAN, TAN_D = (0, 0, 0), (255, 204, 110), (150, 95, 55)
+    # radial party glow behind the trainer
+    img = Image.new('RGB', (B, B))
+    px = img.load()
+    for y in range(0, B, 2):
+        for x in range(0, B, 2):
+            t = min(1, math.hypot(x - 420, y - 640) / 780) ** 0.9
+            c = tuple(int(a * (1 - t) + b * t) for a, b in zip((255, 90, 200), (50, 15, 110)))
+            px[x, y] = px[x + 1, y] = px[x, y + 1] = px[x + 1, y + 1] = c
+    img = img.convert('RGBA')
+    fx = Image.new('RGBA', (B, B), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(fx)
+    for ang, col in [(-50, (0, 220, 255)), (-22, (255, 60, 220)), (10, (255, 230, 40)), (38, (0, 220, 255)), (62, (255, 60, 220))]:
+        r = math.radians(ang)
+        ox, oy, n = 420, 1150, 30
+        tx, ty = ox + math.sin(r) * 1400, oy - math.cos(r) * 1400
+        nx, ny = math.cos(r) * n, math.sin(r) * n
+        fd.polygon([(ox - nx, oy - ny), (ox + nx, oy + ny), (tx + nx * 3, ty + ny * 3), (tx - nx * 3, ty - ny * 3)], fill=col + (95,))
+    img.alpha_composite(fx.filter(ImageFilter.GaussianBlur(6)))
+    sp = Image.new('RGBA', (B, B), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(sp)
+    for k in range(40):
+        a = k * math.tau / 40 + random.uniform(-0.04, 0.04)
+        w = random.uniform(0.012, 0.03)
+        cx, cy = 330, 640
+        sd.polygon([(cx + math.cos(a) * 330, cy + math.sin(a) * 330), (cx + math.cos(a - w) * 1500, cy + math.sin(a - w) * 1500),
+                    (cx + math.cos(a + w) * 1500, cy + math.sin(a + w) * 1500)], fill=(255, 255, 255, 120))
+    img.alpha_composite(sp)
+    d = ImageDraw.Draw(img)
+    for cx, cy in [(60, 470), (130, 330), (980, 250), (900, 120), (70, 720), (990, 980), (640, 300), (30, 150)]:
+        col = random.choice([(0, 220, 255), (255, 230, 40), (120, 255, 140), (255, 255, 255)])
+        sz, a = random.randint(18, 30), random.uniform(0, math.pi)
+        pts = [(cx + sz * math.cos(a + k * math.pi / 2), cy + sz * math.sin(a + k * math.pi / 2)) for k in range(4)]
+        d.polygon(pts, fill=col, outline=BLK, width=4)
+
+    # partier (behind): bigger, tongue-out grin, jaunty hat, glow stick with halo
+    halo = Image.new('RGBA', (B, B), (0, 0, 0, 0))
+    ImageDraw.Draw(halo).line([(975, 560), (1000, 250)], fill=(60, 255, 120, 200), width=70)
+    img.alpha_composite(halo.filter(ImageFilter.GaussianBlur(18)))
+    d = ImageDraw.Draw(img)
+    d.line([(975, 560), (1000, 250)], fill=BLK, width=46)
+    d.line([(975, 560), (1000, 250)], fill=(60, 255, 120), width=28)
+    d.rounded_rectangle([690, 400, 990, 700], 44, fill=TAN_D, outline=BLK, width=14)
+    d.polygon([(720, 420), (760, 210), (900, 395)], fill=PINK, outline=BLK, width=12)
+    d.ellipse([735, 185, 785, 235], fill=(255, 230, 40), outline=BLK, width=8)
+    d.rounded_rectangle([720, 480, 830, 545], 20, fill=BLK)
+    d.rounded_rectangle([850, 480, 960, 545], 20, fill=BLK)
+    d.line([(735, 495), (770, 495)], fill=(120, 120, 160), width=8)
+    d.chord([740, 580, 950, 680], 0, 180, fill=(255, 255, 255), outline=BLK, width=12)
+
+
+    # trainer head on its own layer, tilted, bleeding off the bottom
+    H = 760
+    head = Image.new('RGBA', (H + 200, H + 200), (0, 0, 0, 0))
+    hd = ImageDraw.Draw(head)
+    o = 100
+    hd.rounded_rectangle([o, o, o + H, o + H], 110, fill=TAN, outline=BLK, width=18)
+    hd.rectangle([o + 9, o + 90, o + H - 9, o + 200], fill=(230, 40, 60))
+    hd.line([(o + 9, o + 90), (o + H - 9, o + 90)], fill=BLK, width=12)
+    hd.line([(o + 9, o + 200), (o + H - 9, o + 200)], fill=BLK, width=12)
+    hd.polygon([(o + H - 20, o + 120), (o + H + 90, o + 60), (o + H + 70, o + 170)], fill=(230, 40, 60), outline=BLK, width=10)
+    # sigma face: one brow raised, heavy-lidded side-eye toward the partier, one-sided smirk, jawline
+    hd.polygon([(o + 80, o + 330), (o + 330, o + 300), (o + 335, o + 345), (o + 85, o + 375)], fill=BLK)
+    hd.polygon([(o + 430, o + 300), (o + 560, o + 215), (o + 690, o + 265), (o + 680, o + 305), (o + 560, o + 260), (o + 450, o + 345)], fill=BLK)
+    for ex0, top in ((o + 95, o + 400), (o + 445, o + 380)):
+        hd.chord([ex0, top - 60, ex0 + 230, top + 120], 0, 180, fill=(255, 255, 255), outline=BLK, width=14)
+        hd.line([(ex0 + 5, top + 30), (ex0 + 225, top + 30)], fill=BLK, width=18)
+        hd.ellipse([ex0 + 150, top + 35, ex0 + 210, top + 95], fill=BLK)
+        hd.ellipse([ex0 + 162, top + 45, ex0 + 180, top + 63], fill=(255, 255, 255))
+    hd.line([(o + 250, o + 650), (o + 470, o + 640), (o + 560, o + 590)], fill=BLK, width=20, joint='curve')
+    hd.arc([o + 520, o + 560, o + 600, o + 640], 250, 20, fill=BLK, width=12)
+    head = head.rotate(-3, resample=Image.BICUBIC, expand=True)
+    head = head.resize((int(head.width * 0.74), int(head.height * 0.74)), Image.LANCZOS)
+    img.alpha_composite(head, (-20, 290))
+    d = ImageDraw.Draw(img)
+
+    # partier's party horn blasting in his ear (he doesn't flinch)
+    horn = [(830, 640), (615, 690), (650, 815)]
+    d.polygon(horn, fill=(255, 230, 40))
+    d.line([(735, 668), (755, 735)], fill=PINK, width=18)
+    d.line([(680, 680), (705, 770)], fill=(0, 220, 255), width=18)
+    d.polygon(horn, outline=BLK, width=12)
+
+    # HUSS!: yellow, black outline, pink drop shadow, tilted
+    t = Image.new('RGBA', (B, 360), (0, 0, 0, 0))
+    td = ImageDraw.Draw(t)
+    f = ImageFont.truetype(FONT, 280)
+    td.text((B / 2 - 60 + 16, 185 + 16), 'HUSS!', font=f, fill=(255, 60, 170), anchor='mm', stroke_width=26, stroke_fill=(255, 60, 170))
+    td.text((B / 2 - 60, 185), 'HUSS!', font=f, fill=(255, 230, 40), anchor='mm', stroke_width=26, stroke_fill=BLK)
+    img.alpha_composite(t.rotate(7, resample=Image.BICUBIC), (0, 0))
+    img.resize((S, S), Image.LANCZOS).convert('RGB').save('assets/icon.png')
+
 vip()
+game_icon()
 huss_boost()
 huss_pack('huss_500', '500', [1, 2])
 huss_pack('huss_1750', '1,750', [2, 3, 2])
