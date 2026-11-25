@@ -1,6 +1,7 @@
 --!strict
 -- The give-in cutscene (~3 s, tap to skip): the camera whips from the station to the party
--- house as the music swells, "YOU GAVE IN" slams in under confetti, then normal partier play.
+-- house as the music swells and confetti falls over the "You gave in" card (NightScreens),
+-- then normal partier play.
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -42,34 +43,16 @@ function GiveIn.play(done: () -> ())
 		DisplayOrder = 20,
 		Parent = player:WaitForChild("PlayerGui"),
 	})
-	local title = Ui.label({
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.42),
-		Rotation = -6,
-		Size = UDim2.fromScale(0.9, 0.2),
-		Text = "YOU GAVE IN",
-		TextColor3 = Ui.colors.amber,
-		TextTransparency = 1,
+	Ui.label({
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.fromScale(0.5, 0.97),
+		Size = UDim2.fromScale(0.3, 0.035),
+		Text = "Tap to skip",
+		TextTransparency = 0.3,
 		Parent = gui,
-	}, { Ui.make("UIStroke", { Color = Ui.colors.navy, Thickness = 5 }) })
-	local sub = Ui.label({
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.56),
-		Size = UDim2.fromScale(0.6, 0.07),
-		Text = "Now drag the others in. Tap to skip",
-		TextTransparency = 1,
-		Parent = gui,
-	}, { Ui.make("UIStroke", { Color = Ui.colors.navy, Thickness = 3 }) })
+	})
 
-	task.delay(0.7, function()
-		title.Size = UDim2.fromScale(1.6, 0.36)
-		TweenService
-			:Create(title, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-				Size = UDim2.fromScale(0.9, 0.2),
-				TextTransparency = 0,
-			})
-			:Play()
-		TweenService:Create(sub, TweenInfo.new(0.4), { TextTransparency = 0 }):Play()
+	task.delay(0.5, function()
 		for _ = 1, 40 do
 			local bit = Ui.make("Frame", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
