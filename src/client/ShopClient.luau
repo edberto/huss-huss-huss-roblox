@@ -686,7 +686,9 @@ function ShopClient.start()
 		local ms = math.round(offset * 1000)
 		offsetText.Text = if ms == 0
 			then "0 MS · NO ADJUSTMENT"
-			else `{if ms > 0 then "+" else ""}{ms} MS · SOUND {if ms > 0 then "LATE" else "EARLY"}`
+			else `{if ms > 0 then "+" else ""}{ms} MS · SOUND {if ms > 0
+				then "LATE"
+				else "EARLY"}`
 	end
 	minus.Activated:Connect(function()
 		setOffset(offset - STEP)
