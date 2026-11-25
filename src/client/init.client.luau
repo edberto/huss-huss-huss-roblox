@@ -1,12 +1,15 @@
 -- Client entry: practice screen, fixed practice camera, basketball station.
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Basketball = require(script.Basketball)
 local Burger = require(script.Burger)
+local GiveIn = require(script.GiveIn)
 local Gym = require(script.Gym)
 local NightScreens = require(script.NightScreens)
 local PartyClient = require(script.PartyClient)
+local PartyMusic = require(script.PartyMusic)
 local RhythmClient = require(script.RhythmClient)
 local ShopClient = require(script.ShopClient)
 local Tutorial = require(script.Tutorial)
@@ -35,20 +38,18 @@ end
 player.CharacterAdded:Connect(function()
 	task.defer(updateCamera)
 end)
-player:GetAttributeChangedSignal("Team"):Connect(updateCamera)
+-- Giving in mid-night plays the cutscene first; any other team change just swaps the camera.
+local team = player:GetAttribute("Team")
+player:GetAttributeChangedSignal("Team"):Connect(function()
+	local was = team
+	team = player:GetAttribute("Team")
+	if was == "Trainer" and team == "Partier" and ReplicatedStorage:GetAttribute("Phase") == "Night" then
+		GiveIn.play(updateCamera)
+	else
+		updateCamera()
+	end
+end)
 updateCamera()
-
--- The party next door never stops: music from the lawn, loud up close, faint down the street.
--- APM library track via the Creator Store (licensed for experiences).
-local music = Instance.new("Sound")
-music.SoundId = "rbxassetid://1840650601" -- APM: Style Revolution
-music.Looped = true
-music.Volume = 0.45
-music.RollOffMode = Enum.RollOffMode.InverseTapered
-music.RollOffMinDistance = 25
-music.RollOffMaxDistance = 260
-music.Parent = workspace:WaitForChild("Town"):WaitForChild("PartyHouse"):WaitForChild("Lawn")
-music:Play()
 
 -- Party beams sweep the sky (built by the server's Decor; animated here so it's smooth and free).
 local CollectionService = game:GetService("CollectionService")
@@ -89,6 +90,7 @@ end
 RhythmClient.start()
 NightScreens.start()
 PartyClient.start()
+PartyMusic.start()
 ShopClient.start()
 task.spawn(Tutorial.start)
 ShopClient.applyBallSkin(home:WaitForChild("Ball") :: BasePart)

@@ -593,32 +593,73 @@ function ShopClient.start()
 	end)
 
 	-- Side buttons -----------------------------------------------------------------------------
+	-- Side buttons: chunky colour tiles with an icon and label (assets/ui, scripts/ui_icons.py).
 	local side = make("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
 		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 12, 0.42, 0),
-		Size = UDim2.fromScale(0.07, 0.5),
+		Position = UDim2.new(0, 12, 0.45, 0),
+		Size = UDim2.fromScale(0.1, 0.62),
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Parent = gui,
-	}, { make("UIListLayout", { Padding = UDim.new(0.04, 0) }) })
+	}, { make("UIListLayout", { Padding = UDim.new(0.035, 0) }) })
 	local dots: { [string]: Frame } = {}
-	for i, spec in
-		{ { "Shop", C.orange }, { "Daily", C.cream }, { "Gifts", C.cream }, { "Timing", C.cream } }
-	do
-		local side_button = button(side, spec[1], spec[2], C.navy)
-		side_button.LayoutOrder = i
-		side_button.Size = UDim2.fromScale(1, 0.225)
-		side_button.ZIndex = 5
+	local SIDE = {
+		{ "Shop", "74703712629649", "FF9628", "EB5A14" },
+		{ "Daily", "85898827711145", "5AD278", "28A05A" },
+		{ "Gifts", "77368354228555", "BE6EFF", "8246DC" },
+		{ "Timing", "126839820801921", "46C8FF", "1E8CDC" },
+	}
+	for i, spec in SIDE do
+		local side_button = make("TextButton", {
+			AutoButtonColor = true,
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			LayoutOrder = i,
+			Size = UDim2.fromScale(1, 0.22),
+			Text = "",
+			ZIndex = 5,
+			Parent = side,
+		}, {
+			corner(14),
+			make("UIGradient", {
+				Color = ColorSequence.new(Color3.fromHex(spec[3]), Color3.fromHex(spec[4])),
+				Rotation = 90,
+			}),
+			make("UIStroke", {
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				Color = C.navy,
+				Thickness = 3,
+			}),
+			make("ImageLabel", {
+				AnchorPoint = Vector2.new(0.5, 0),
+				BackgroundTransparency = 1,
+				Image = "rbxassetid://" .. spec[2],
+				Position = UDim2.fromScale(0.5, 0.06),
+				Size = UDim2.fromScale(0.62, 0.62),
+				ZIndex = 6,
+			}),
+			Ui.label({
+				AnchorPoint = Vector2.new(0.5, 1),
+				Position = UDim2.fromScale(0.5, 0.95),
+				Size = UDim2.fromScale(0.9, 0.26),
+				Text = string.upper(spec[1]),
+				TextColor3 = Color3.new(1, 1, 1),
+				ZIndex = 6,
+			}, { make("UIStroke", { Color = C.navy, Thickness = 2 }) }),
+		})
 		dots[spec[1]] = make("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromHex("E24B4A"),
-			Position = UDim2.fromScale(0.95, 0.05),
-			Size = UDim2.fromScale(0.28, 0.28),
+			BackgroundColor3 = Color3.fromHex("FF3250"),
+			Position = UDim2.fromScale(0.92, 0.08),
+			Size = UDim2.fromScale(0.32, 0.32),
 			SizeConstraint = Enum.SizeConstraint.RelativeXX,
 			Visible = false,
-			ZIndex = 6,
+			ZIndex = 7,
 			Parent = side_button,
-		}, { corner() })
+		}, {
+			corner(),
+			make("UIStroke", { Color = C.navy, Thickness = 2 }),
+			Ui.label({ Size = UDim2.fromScale(1, 1), Text = "!", TextColor3 = Color3.new(1, 1, 1), ZIndex = 8 }),
+		})
 		side_button.Activated:Connect(function()
 			if spec[1] == "Timing" then
 				shop.Visible, rewards.Visible = false, false

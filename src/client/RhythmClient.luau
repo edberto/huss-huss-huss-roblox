@@ -54,8 +54,9 @@ function RhythmClient.start()
 		Size = UDim2.new(1, 0, 0, 16),
 		TextXAlignment = Enum.TextXAlignment.Left,
 	})
-	-- Under the clock: the top-left corner belongs to Roblox's menu buttons.
-	make("Frame", {
+	-- Under the clock: the top-left corner belongs to Roblox's menu buttons. Only while
+	-- practising, so it never sits behind the Dusk title.
+	local focusBar = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0.5, 0, 0, 46),
@@ -304,6 +305,7 @@ function RhythmClient.start()
 		end
 		-- Track and button only while practising (not at Dusk, Dawn or as a partier).
 		track.Visible = current ~= nil
+		focusBar.Visible = current ~= nil
 		tapButton.Visible = current ~= nil
 		if not current then
 			return
