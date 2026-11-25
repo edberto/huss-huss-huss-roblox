@@ -2,6 +2,7 @@
 -- First-night tutorial (design doc): a new player's first night shows short hints at the moment
 -- each thing first matters. Reaching Dawn completes it (+100 HP, saved).
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Ui = require(script.Parent.Ui)
@@ -37,23 +38,43 @@ function Tutorial.start()
 		DisplayOrder = 6,
 		Parent = player:WaitForChild("PlayerGui"),
 	})
+	-- Hint card: bottom middle, above the beat track and the Dusk tagline, clear of the side
+	-- buttons, the HUSS button and the temptation prompt up top. Pops in when it changes.
+	local cardScale = Ui.make("UIScale", {})
 	local card = Ui.label({
-		AnchorPoint = Vector2.new(0, 1),
+		AnchorPoint = Vector2.new(0.5, 1),
 		BackgroundColor3 = Ui.colors.cream,
 		BackgroundTransparency = 0,
-		Position = UDim2.new(0, 16, 1, -90),
-		Size = UDim2.fromScale(0.46, 0.11),
+		Position = UDim2.fromScale(0.5, 0.83),
+		Size = UDim2.fromScale(0.42, 0.075),
 		TextColor3 = Ui.colors.navy,
 		TextWrapped = true,
 		Visible = false,
 		Parent = gui,
 	}, {
-		Ui.corner(12),
+		Ui.corner(14),
+		cardScale,
+		Ui.make("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			Color = Color3.new(0, 0, 0),
+			Thickness = 3,
+		}),
 		Ui.make("UIPadding", {
-			PaddingTop = UDim.new(0.12, 0),
-			PaddingBottom = UDim.new(0.12, 0),
-			PaddingLeft = UDim.new(0.04, 0),
+			PaddingTop = UDim.new(0.16, 0),
+			PaddingBottom = UDim.new(0.16, 0),
+			PaddingLeft = UDim.new(0.1, 0),
 			PaddingRight = UDim.new(0.04, 0),
+		}),
+		Ui.make("Frame", { -- the "i" badge
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromHex("50DCFF"),
+			Position = UDim2.new(0, -18, 0.5, 0),
+			Size = UDim2.fromScale(1.15, 1.15),
+			SizeConstraint = Enum.SizeConstraint.RelativeYY,
+		}, {
+			Ui.corner(),
+			Ui.make("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2.5 }),
+			Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "i", Thickness = 2 }),
 		}),
 	})
 
@@ -71,6 +92,8 @@ function Tutorial.start()
 		local mine = token
 		card.Text = HINTS[key]
 		card.Visible = true
+		cardScale.Scale = 0.8
+		TweenService:Create(cardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 		task.delay(seconds, function()
 			if token == mine then
 				card.Visible = false
