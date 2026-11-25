@@ -204,17 +204,19 @@ local function roomCamera(
 	name: string,
 	lot: CFrame,
 	spot: CFrame,
-	cameraLocal: Vector3
+	cameraLocal: Vector3,
+	turn: number, -- how far the view turns toward the party
+	down: number
 )
 	local cameraPos = (lot * CFrame.new(cameraLocal)).Position
 	local out = lot:VectorToWorldSpace(Vector3.new(0, 0, -1))
 	local toParty = ((PARTY_CENTER - spot.Position) * Vector3.new(1, 0, 1)).Unit
-	local look = (out + toParty * 0.6).Unit
+	local look = (out + toParty * turn).Unit
 	part(
 		home,
 		name,
 		Vector3.new(1, 1, 1),
-		CFrame.lookAt(cameraPos, cameraPos + look - Vector3.new(0, 0.05, 0)),
+		CFrame.lookAt(cameraPos, cameraPos + look - Vector3.new(0, down, 0)),
 		C.cream,
 		{
 			Transparency = 1,
@@ -279,11 +281,10 @@ local function rooms(home: Model, lot: CFrame, index: number)
 		"Mirror",
 		Vector3.new(0.2, 5, 9),
 		at(lot, -0.45, 4.2, 31.5),
-		Color3.fromHex("C8E6FF"),
+		Color3.fromHex("4E6A86"),
 		{
 			Material = Enum.Material.Glass,
-			Reflectance = 0.35,
-			Transparency = 0.1,
+			Reflectance = 0.5,
 		}
 	)
 	part(home, "Bench", Vector3.new(2, 1.4, 4.5), at(lot, -10.5, 1.1, 36.5), C.orange)
@@ -319,10 +320,10 @@ local function rooms(home: Model, lot: CFrame, index: number)
 	local tile = if index % 2 == 0 then Color3.fromHex("2F6F73") else Color3.fromHex("8A3C4E")
 	part(home, "Backsplash", Vector3.new(0.2, 2.6, 8), at(lot, 0.6, 4.8, 32), tile)
 	part(home, "Cabinets", Vector3.new(1.4, 1.8, 8), at(lot, 1.2, 7.2, 32), wood)
-	part(home, "Fridge", Vector3.new(2.6, 7, 3), at(lot, 11.7, 3.9, 31.5), Color3.fromHex("E8EEF2"))
-	part(home, "FridgeHandle", Vector3.new(0.2, 2, 0.2), at(lot, 10.3, 4.6, 30.4), steel)
+	part(home, "Fridge", Vector3.new(2.6, 7, 3), at(lot, 11.7, 3.9, 36.6), Color3.fromHex("E8EEF2"))
+	part(home, "FridgeHandle", Vector3.new(0.2, 2, 0.2), at(lot, 10.3, 4.6, 35.4), steel)
 	local kitchenLamp =
-		part(home, "KitchenLamp", Vector3.new(1.4, 1.4, 1.4), at(lot, 7, 8.1, 31), C.amber, {
+		part(home, "KitchenLamp", Vector3.new(1.4, 1.4, 1.4), at(lot, 7, 8.1, 35), C.amber, {
 			Material = Enum.Material.Neon,
 			Shape = Enum.PartType.Ball,
 			CastShadow = false,
@@ -419,8 +420,8 @@ local function buildHome(index: number, lot: CFrame)
 			}
 		)
 	end
-	roomCamera(home, "PracticeCamera_Gym", lot, gymSpot, Vector3.new(-5, 5.6, 37.5))
-	roomCamera(home, "PracticeCamera_Burgers", lot, burgerSpot, Vector3.new(10, 5.8, 37.6))
+	roomCamera(home, "PracticeCamera_Gym", lot, gymSpot, Vector3.new(-5, 5.6, 37.5), 0.6, 0.05)
+	roomCamera(home, "PracticeCamera_Burgers", lot, burgerSpot, Vector3.new(8, 6.6, 37.2), 0.3, 0.2)
 	home.Parent = homes
 end
 

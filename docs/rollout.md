@@ -2,6 +2,15 @@
 
 Manual place changes that a code publish doesn't carry. Newest first.
 
+## 2026-11-25: Practice rooms (PLAYTEST)
+
+- Rebuilt workspace.Homes in PLAYTEST from `scripts/build_scene.luau` (homes section only): each
+  home now has an open garage gym and a kitchen behind a picture window, with
+  PracticeSpot_Gym / PracticeSpot_Burgers and PracticeCamera_Gym / PracticeCamera_Burgers.
+  Basketball keeps PracticeSpot / PracticeCamera on the driveway.
+- Production still has the old solid homes: run `scripts/build_scene.luau` there before the
+  next Production publish (the code falls back to the driveway if the room spots are missing).
+
 ## 2026-11-25: Production experience created
 - Studio File > New, ran scripts/build_scene.luau, synced default.project.json with Rojo (port 34875).
 - Published as a new experience owned by Flamingo Skies Pier (group 962391373):
