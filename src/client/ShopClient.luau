@@ -81,7 +81,8 @@ local function owned(): { [string]: boolean }
 end
 
 local BLACK, WHITE, GOLD = Color3.new(0, 0, 0), Color3.new(1, 1, 1), Color3.fromHex("FFD75A")
-local PURPLE, CARD, IDLE = Color3.fromHex("23164B"), Color3.fromHex("32235F"), Color3.fromHex("3C2D6E")
+local PURPLE, CARD, IDLE =
+	Color3.fromHex("23164B"), Color3.fromHex("32235F"), Color3.fromHex("3C2D6E")
 local GREEN = Color3.fromHex("5AD278")
 
 local function outline(thickness: number): UIStroke
@@ -107,7 +108,8 @@ local function panel(gui: ScreenGui, title: string): (Frame, Frame, TextLabel)
 	frame:GetPropertyChangedSignal("Visible"):Connect(function()
 		if frame.Visible then
 			scale.Scale = 0.85
-			TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+			TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 })
+				:Play()
 		end
 	end)
 	Ui.shout({
@@ -159,7 +161,12 @@ end
 
 -- A chunky button: solid colour, black outline, gloss, white outlined text. `_textColor` is
 -- kept for callers; text is always white with a black outline now.
-local function button(parent: Instance, text: string, color: Color3, _textColor: Color3?): TextButton
+local function button(
+	parent: Instance,
+	text: string,
+	color: Color3,
+	_textColor: Color3?
+): TextButton
 	return make("TextButton", {
 		AutoButtonColor = true,
 		BackgroundColor3 = color,
@@ -443,7 +450,8 @@ function ShopClient.start()
 		end)
 		giftCells[i] = cell
 	end
-	local groupButton = button(gifts, `JOIN THE GROUP · {Rewards.groupHp} HUSS`, Color3.fromHex("FF50C8"))
+	local groupButton =
+		button(gifts, `JOIN THE GROUP · {Rewards.groupHp} HUSS`, Color3.fromHex("FF50C8"))
 	groupButton.LayoutOrder = #Rewards.gifts + 1
 	groupButton.Activated:Connect(function()
 		local reason = groupRemote:InvokeServer()
@@ -514,10 +522,7 @@ function ShopClient.start()
 			cell.Text = if claimable
 				then `Day {day}\nClaim`
 				else `Day {day}\n{hp}{if day == 7 then " + trail" else ""}`
-			cell.BackgroundColor3 = if claimable
-				then C.orange
-				elseif done then GREEN
-				else IDLE
+			cell.BackgroundColor3 = if claimable then C.orange elseif done then GREEN else IDLE
 		end
 		local now = workspace:GetServerTimeNow()
 		local joined = tonumber(player:GetAttribute("JoinedAt")) or now
