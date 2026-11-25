@@ -1,7 +1,7 @@
 # Builds the 512x512 store icons in assets/icons/ (VIP pass + 5 developer products). Everything
 # stays inside the circle Roblox crops pass icons to. Run: python3 scripts/icons.py
 import glob, math, os
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageFilter
 
 S = 512
 FONT = glob.glob('/usr/share/fonts/**/Anton*.ttf', recursive=True)[0]
@@ -164,7 +164,7 @@ def game_icon():
     import random
     random.seed(7)
     B = 2 * S  # draw at 2x, downscale for smooth edges
-    BLK, TAN, TAN_D = (0, 0, 0), (255, 204, 110), (150, 95, 55)
+    BLK, TAN, TAN_D = (0, 0, 0), (255, 204, 110), (245, 200, 165)
     # radial party glow behind the trainer
     img = Image.new('RGB', (B, B))
     px = img.load()
@@ -225,16 +225,29 @@ def game_icon():
     hd.line([(o + 9, o + 90), (o + H - 9, o + 90)], fill=BLK, width=12)
     hd.line([(o + 9, o + 200), (o + H - 9, o + 200)], fill=BLK, width=12)
     hd.polygon([(o + H - 20, o + 120), (o + H + 90, o + 60), (o + H + 70, o + 170)], fill=(230, 40, 60), outline=BLK, width=10)
-    # sigma face: one brow raised, heavy-lidded side-eye toward the partier, one-sided smirk, jawline
-    hd.polygon([(o + 80, o + 330), (o + 330, o + 300), (o + 335, o + 345), (o + 85, o + 375)], fill=BLK)
-    hd.polygon([(o + 430, o + 300), (o + 560, o + 215), (o + 690, o + 265), (o + 680, o + 305), (o + 560, o + 260), (o + 450, o + 345)], fill=BLK)
-    for ex0, top in ((o + 95, o + 400), (o + 445, o + 380)):
-        hd.chord([ex0, top - 60, ex0 + 230, top + 120], 0, 180, fill=(255, 255, 255), outline=BLK, width=14)
-        hd.line([(ex0 + 5, top + 30), (ex0 + 225, top + 30)], fill=BLK, width=18)
-        hd.ellipse([ex0 + 150, top + 35, ex0 + 210, top + 95], fill=BLK)
-        hd.ellipse([ex0 + 162, top + 45, ex0 + 180, top + 63], fill=(255, 255, 255))
-    hd.line([(o + 250, o + 650), (o + 470, o + 640), (o + 560, o + 590)], fill=BLK, width=20, joint='curve')
-    hd.arc([o + 520, o + 560, o + 600, o + 640], 250, 20, fill=BLK, width=12)
+    # sigma face: low flat brows, heavy-lidded narrow eyes glancing aside, chiselled cheekbones and jaw, flat mouth
+    shadow = Image.new('RGBA', head.size, (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shadow)
+    SH = (150, 80, 30, 150)
+    sd.polygon([(o + 30, o + 520), (o + 230, o + 600), (o + 200, o + 730), (o + 60, o + 700)], fill=SH)  # cheek hollows
+    sd.polygon([(o + H - 30, o + 520), (o + H - 230, o + 600), (o + H - 200, o + 730), (o + H - 60, o + 700)], fill=SH)
+    sd.polygon([(o + 60, o + 700), (o + 250, o + 760), (o + H - 250, o + 760), (o + H - 60, o + 700),
+                (o + H - 40, o + H - 20), (o + 40, o + H - 20)], fill=SH)  # jaw shadow under a hard jawline
+    sd.polygon([(o + 380, o + 420), (o + 400, o + 600), (o + 360, o + 610)], fill=SH)  # nose side
+    clip = Image.new('L', head.size, 0)
+    ImageDraw.Draw(clip).rounded_rectangle([o + 9, o + 9, o + H - 9, o + H - 9], 100, fill=255)
+    shadow.putalpha(ImageChops.darker(shadow.getchannel('A'), clip))
+    head.alpha_composite(shadow)
+    hd = ImageDraw.Draw(head)
+    hd.line([(o + 60, o + 700), (o + 250, o + 765), (o + H - 250, o + 765), (o + H - 60, o + 700)], fill=BLK, width=12)
+    hd.line([(o + 90, o + 300), (o + 330, o + 320), (o + 345, o + 345)], fill=BLK, width=40)
+    hd.line([(o + H - 90, o + 300), (o + H - 330, o + 320), (o + H - 345, o + 345)], fill=BLK, width=40)
+    for ex0 in (o + 105, o + 425):
+        hd.chord([ex0, o + 330, ex0 + 230, o + 470], 0, 180, fill=(255, 255, 255), outline=BLK, width=12)
+        hd.line([(ex0 - 5, o + 400), (ex0 + 235, o + 395)], fill=BLK, width=22)  # heavy upper lid
+        hd.chord([ex0 + 140, o + 375, ex0 + 210, o + 445], 0, 180, fill=BLK)  # pupil glancing to his left
+    hd.line([(o + 375, o + 600), (o + 410, o + 600)], fill=BLK, width=10)  # nose base
+    hd.line([(o + 300, o + 665), (o + 470, o + 660)], fill=BLK, width=14)  # flat, unbothered mouth
     head = head.rotate(-3, resample=Image.BICUBIC, expand=True)
     head = head.resize((int(head.width * 0.74), int(head.height * 0.74)), Image.LANCZOS)
     img.alpha_composite(head, (-20, 290))
