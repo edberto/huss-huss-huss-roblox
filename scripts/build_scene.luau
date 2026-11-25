@@ -199,16 +199,29 @@ end
 -- A camera behind a practice spot inside a room, looking out of the room's opening (door or
 -- window) and turned toward the party house down the street, so the party and its floating
 -- boards stay in view.
-local function roomCamera(home: Model, name: string, lot: CFrame, spot: CFrame, cameraLocal: Vector3)
+local function roomCamera(
+	home: Model,
+	name: string,
+	lot: CFrame,
+	spot: CFrame,
+	cameraLocal: Vector3
+)
 	local cameraPos = (lot * CFrame.new(cameraLocal)).Position
 	local out = lot:VectorToWorldSpace(Vector3.new(0, 0, -1))
 	local toParty = ((PARTY_CENTER - spot.Position) * Vector3.new(1, 0, 1)).Unit
 	local look = (out + toParty * 0.6).Unit
-	part(home, name, Vector3.new(1, 1, 1), CFrame.lookAt(cameraPos, cameraPos + look - Vector3.new(0, 0.05, 0)), C.cream, {
-		Transparency = 1,
-		CanCollide = false,
-		CanQuery = false,
-	})
+	part(
+		home,
+		name,
+		Vector3.new(1, 1, 1),
+		CFrame.lookAt(cameraPos, cameraPos + look - Vector3.new(0, 0.05, 0)),
+		C.cream,
+		{
+			Transparency = 1,
+			CanCollide = false,
+			CanQuery = false,
+		}
+	)
 end
 
 -- The house as rooms: an open garage (Gym) and a kitchen behind a picture window (Burgers),
@@ -250,20 +263,41 @@ local function rooms(home: Model, lot: CFrame, index: number)
 	end
 	part(home, "RackBar", Vector3.new(0.3, 0.3, 7), at(lot, -12.3, 6.2, 31), steel)
 	for i, z in { 29, 30, 32, 33 } do
-		part(home, "Plate", Vector3.new(0.4, 2.2 - i % 2 * 0.6, 2.2 - i % 2 * 0.6), at(lot, -12.6, 1.6, z), C.navy, {
-			Shape = Enum.PartType.Cylinder,
-		})
+		part(
+			home,
+			"Plate",
+			Vector3.new(0.4, 2.2 - i % 2 * 0.6, 2.2 - i % 2 * 0.6),
+			at(lot, -12.6, 1.6, z),
+			C.navy,
+			{
+				Shape = Enum.PartType.Cylinder,
+			}
+		)
 	end
-	part(home, "Mirror", Vector3.new(0.2, 5, 9), at(lot, -0.45, 4.2, 31.5), Color3.fromHex("C8E6FF"), {
-		Material = Enum.Material.Glass,
-		Reflectance = 0.35,
-		Transparency = 0.1,
-	})
+	part(
+		home,
+		"Mirror",
+		Vector3.new(0.2, 5, 9),
+		at(lot, -0.45, 4.2, 31.5),
+		Color3.fromHex("C8E6FF"),
+		{
+			Material = Enum.Material.Glass,
+			Reflectance = 0.35,
+			Transparency = 0.1,
+		}
+	)
 	part(home, "Bench", Vector3.new(2, 1.4, 4.5), at(lot, -10.5, 1.1, 36.5), C.orange)
-	local gymLamp = part(home, "GymLamp", Vector3.new(6, 0.3, 0.8), at(lot, -7, 8.85, 32), Color3.fromHex("E6F4FF"), {
-		Material = Enum.Material.Neon,
-		CastShadow = false,
-	})
+	local gymLamp = part(
+		home,
+		"GymLamp",
+		Vector3.new(6, 0.3, 0.8),
+		at(lot, -7, 8.85, 32),
+		Color3.fromHex("E6F4FF"),
+		{
+			Material = Enum.Material.Neon,
+			CastShadow = false,
+		}
+	)
 	light(gymLamp, Color3.fromHex("E6F4FF"), 16, 1.2)
 
 	-- Kitchen: the station brings its own grill counter under the window; a stove counter on
@@ -272,19 +306,27 @@ local function rooms(home: Model, lot: CFrame, index: number)
 	part(home, "SideCounter", Vector3.new(2.4, 3, 8), at(lot, 1.7, 1.7, 32), wood)
 	part(home, "Worktop", Vector3.new(2.6, 0.3, 8.2), at(lot, 1.7, 3.35, 32), C.cream)
 	part(home, "Stove", Vector3.new(2, 0.2, 2.6), at(lot, 1.7, 3.55, 33.5), rubber)
-	part(home, "Pan", Vector3.new(0.3, 1.6, 1.6), at(lot, 1.7, 3.8, 33.5) * CFrame.Angles(0, 0, math.rad(90)), rubber, {
-		Shape = Enum.PartType.Cylinder,
-	})
+	part(
+		home,
+		"Pan",
+		Vector3.new(0.3, 1.6, 1.6),
+		at(lot, 1.7, 3.8, 33.5) * CFrame.Angles(0, 0, math.rad(90)),
+		rubber,
+		{
+			Shape = Enum.PartType.Cylinder,
+		}
+	)
 	local tile = if index % 2 == 0 then Color3.fromHex("2F6F73") else Color3.fromHex("8A3C4E")
 	part(home, "Backsplash", Vector3.new(0.2, 2.6, 8), at(lot, 0.6, 4.8, 32), tile)
 	part(home, "Cabinets", Vector3.new(1.4, 1.8, 8), at(lot, 1.2, 7.2, 32), wood)
 	part(home, "Fridge", Vector3.new(2.6, 7, 3), at(lot, 11.7, 3.9, 31.5), Color3.fromHex("E8EEF2"))
 	part(home, "FridgeHandle", Vector3.new(0.2, 2, 0.2), at(lot, 10.3, 4.6, 30.4), steel)
-	local kitchenLamp = part(home, "KitchenLamp", Vector3.new(1.4, 1.4, 1.4), at(lot, 7, 8.1, 31), C.amber, {
-		Material = Enum.Material.Neon,
-		Shape = Enum.PartType.Ball,
-		CastShadow = false,
-	})
+	local kitchenLamp =
+		part(home, "KitchenLamp", Vector3.new(1.4, 1.4, 1.4), at(lot, 7, 8.1, 31), C.amber, {
+			Material = Enum.Material.Neon,
+			Shape = Enum.PartType.Ball,
+			CastShadow = false,
+		})
 	light(kitchenLamp, C.amber, 16, 1.3)
 end
 
@@ -364,11 +406,18 @@ local function buildHome(index: number, lot: CFrame)
 	local gymSpot = at(lot, -7, 3, 31)
 	local burgerSpot = at(lot, 7, 3, 29.4)
 	for station, spotCf in { Gym = gymSpot, Burgers = burgerSpot } do
-		part(home, `PracticeSpot_{station}`, Vector3.new(4, 1, 4), CFrame.lookAt(spotCf.Position, (spotCf * CFrame.new(0, 0, -10)).Position), C.cream, {
-			Transparency = 1,
-			CanCollide = false,
-			CanQuery = false,
-		})
+		part(
+			home,
+			`PracticeSpot_{station}`,
+			Vector3.new(4, 1, 4),
+			CFrame.lookAt(spotCf.Position, (spotCf * CFrame.new(0, 0, -10)).Position),
+			C.cream,
+			{
+				Transparency = 1,
+				CanCollide = false,
+				CanQuery = false,
+			}
+		)
 	end
 	roomCamera(home, "PracticeCamera_Gym", lot, gymSpot, Vector3.new(-5, 5.6, 37.5))
 	roomCamera(home, "PracticeCamera_Burgers", lot, burgerSpot, Vector3.new(8.5, 5.8, 36.8))

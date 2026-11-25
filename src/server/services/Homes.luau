@@ -61,7 +61,9 @@ function Homes.placeOnSpot(player: Player)
 	local home = owners[player]
 	local station = player:GetAttribute("Station")
 	local spot = home
-		and (home:FindFirstChild(`PracticeSpot_{station}`) or home:FindFirstChild("PracticeSpot")) :: BasePart?
+		and (
+			home:FindFirstChild(`PracticeSpot_{station}`) or home:FindFirstChild("PracticeSpot")
+		) :: BasePart?
 	if spot and player.Character then
 		player.Character:PivotTo(spot.CFrame + Vector3.new(0, 2, 0))
 	end

@@ -27,9 +27,10 @@ local camera = workspace.CurrentCamera
 local CAMERA_TILT = 12 -- degrees
 -- Each station has its own view: the driveway, the garage gym or the kitchen.
 local function cameraPoint(): BasePart
-	return (home:FindFirstChild(`PracticeCamera_{player:GetAttribute("Station")}`) or home:WaitForChild(
-		"PracticeCamera"
-	)) :: BasePart
+	return (
+		home:FindFirstChild(`PracticeCamera_{player:GetAttribute("Station")}`)
+		or home:WaitForChild("PracticeCamera")
+	) :: BasePart
 end
 -- Trainers get the fixed practice view; partiers walk around with the normal camera.
 local function updateCamera()
