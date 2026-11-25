@@ -449,7 +449,8 @@ function RhythmClient.start()
 				local size = if skill then 36 else 24
 				dot.Size = UDim2.fromOffset(size, size)
 				dot.BackgroundColor3 = if skill then ORANGE else CREAM
-				(dot :: any).Star.Visible = skill
+				local star = dot:FindFirstChild("Star") :: TextLabel
+				star.Visible = skill
 				dot.Position = UDim2.new(0, x, 0.5, 0)
 				dot.Visible = true
 			end
