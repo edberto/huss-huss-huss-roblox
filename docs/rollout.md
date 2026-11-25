@@ -40,3 +40,5 @@ Manual place changes that a code publish doesn't carry. Newest first.
   party house next door; street, lamps, moon; night Lighting). Baseplate recoloured, grid texture
   removed, SpawnLocation moved to the practice spot and hidden.
 - Not yet in Production: run the same script there before the first Production publish.
+- 2026-11-25 Production social links: Discord https://discord.gg/rCDG7sVwAa ("Flamingo Skies Pier Discord"), Roblox Community 962391373 ("Join Flamingo Skies Pier (+10% Huss)").
+- 2026-11-25 Huss Boost icon added (assets/icons/huss_boost.png). Icons + thumbnail not uploaded yet: waiting on Studio upload-folder approval.
