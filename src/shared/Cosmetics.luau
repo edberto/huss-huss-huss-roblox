@@ -12,17 +12,17 @@ Cosmetics.items = table.freeze({
 	trail_mint = { slot = "trail", name = "Mint", price = 250, colors = { "3DFFB0", "3DFFB0" } },
 	trail_fire = { slot = "trail", name = "Fire", price = 500, colors = { "FF6B1A", "FFB547" } },
 	trail_ice = { slot = "trail", name = "Ice", price = 750, colors = { "85B7EB", "F2EEDC" } },
-	trail_party = { slot = "trail", name = "Party", price = 1000, colors = { "FF2E93", "8A3CFF" } },
-	trail_gold = { slot = "trail", name = "Gold", price = 2000, colors = { "FAC775", "FFB547" } },
+	trail_party = { slot = "trail", name = "Party", price = 2500, colors = { "FF2E93", "8A3CFF" } },
+	trail_gold = { slot = "trail", name = "Gold", price = 6000, colors = { "FAC775", "FFB547" } },
 	trail_streak = { slot = "trail", name = "7-Day Streak", colors = { "3DFFB0", "FF2E93" } },
 	title_hooper = { slot = "title", name = "Hooper", price = 300 },
 	title_gymrat = { slot = "title", name = "Gym Rat", price = 300 },
 	title_burgerboss = { slot = "title", name = "Burger Boss", price = 300 },
-	title_neverpartied = { slot = "title", name = "Never Partied", price = 1500 },
-	title_legend = { slot = "title", name = "Huss Legend", price = 3000 },
+	title_neverpartied = { slot = "title", name = "Never Partied", price = 5000 },
+	title_legend = { slot = "title", name = "Huss Legend", price = 15000 },
 	ball_glow = { slot = "ball", name = "Glow", price = 500, colors = { "FF6B1A" } },
-	ball_party = { slot = "ball", name = "Party", price = 1000, colors = { "FF2E93" } },
-	ball_gold = { slot = "ball", name = "Gold", price = 1500, colors = { "FAC775" } },
+	ball_party = { slot = "ball", name = "Party", price = 2500, colors = { "FF2E93" } },
+	ball_gold = { slot = "ball", name = "Gold", price = 5000, colors = { "FAC775" } },
 } :: { [string]: Item })
 
 Cosmetics.slots = table.freeze({ "trail", "title", "ball" } :: { Slot })
