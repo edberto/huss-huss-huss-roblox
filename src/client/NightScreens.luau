@@ -687,12 +687,13 @@ function NightScreens.start()
 				:Play()
 
 			local detail = line(52, 32)
-			label({
+			Ui.shout({
 				Size = UDim2.fromScale(0.55, 1),
-				Text = `While they partied, you hit {mine.perfects} Perfects`
-					.. if (mine.party or 0) > 0 then ` · {mine.party} party pts` else "",
+				Text = `{mine.perfects} PERFECTS`
+					.. if (mine.party or 0) > 0 then ` · {mine.party} PARTY PTS` else "",
 				TextColor3 = Color3.fromHex("DCD2F5"),
 				TextXAlignment = Enum.TextXAlignment.Left,
+				Thickness = 2,
 				Parent = detail,
 			})
 			local up = (mine.levelAfter or 1) > (mine.levelBefore or 1)
