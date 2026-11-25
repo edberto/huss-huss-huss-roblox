@@ -43,7 +43,10 @@ local function outlined(props: { [string]: any }, thickness: number): TextLabel
 	props.TextColor3 = props.TextColor3 or WHITE
 	props.FontFace = props.FontFace or DISPLAY
 	return make("TextLabel", props, {
-		make("UIStroke", { Color = BLACK, Thickness = thickness, LineJoinMode = Enum.LineJoinMode.Round }),
+		make(
+			"UIStroke",
+			{ Color = BLACK, Thickness = thickness, LineJoinMode = Enum.LineJoinMode.Round }
+		),
 	})
 end
 
@@ -53,7 +56,16 @@ type Board = {
 	index: number,
 	header: Frame,
 	title: TextLabel,
-	rows: { { frame: Frame, medal: Frame, place: TextLabel, face: ImageLabel, name: TextLabel, value: TextLabel } },
+	rows: {
+		{
+			frame: Frame,
+			medal: Frame,
+			place: TextLabel,
+			face: ImageLabel,
+			name: TextLabel,
+			value: TextLabel,
+		}
+	},
 	dots: { Frame },
 	empty: TextLabel,
 }
@@ -107,7 +119,12 @@ local function build(name: string, cframe: CFrame, size: Vector2, categories): B
 		Position = UDim2.fromScale(0.04, 0.16),
 		Size = UDim2.fromScale(0.92, 0.76),
 		Parent = root,
-	}, { make("UIListLayout", { Padding = UDim.new(0.012, 0), SortOrder = Enum.SortOrder.LayoutOrder }) })
+	}, {
+		make(
+			"UIListLayout",
+			{ Padding = UDim.new(0.012, 0), SortOrder = Enum.SortOrder.LayoutOrder }
+		),
+	})
 	for i = 1, SHOWN do
 		local place = outlined({
 			Size = UDim2.fromScale(1, 1),
@@ -149,7 +166,14 @@ local function build(name: string, cframe: CFrame, size: Vector2, categories): B
 			Size = UDim2.fromScale(1, 0.088),
 			Parent = list,
 		}, { corner(0.3), medal, face, nameLabel, value })
-		rows[i] = { frame = frame, medal = medal, place = place, face = face, name = nameLabel, value = value }
+		rows[i] = {
+			frame = frame,
+			medal = medal,
+			place = place,
+			face = face,
+			name = nameLabel,
+			value = value,
+		}
 	end
 	local empty = outlined({
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -237,9 +261,18 @@ function Boards.build()
 		table.insert(groups[category.board], category)
 	end
 	table.insert(boards, build("Center", facing, Vector2.new(22, 22), groups.Center))
-	table.insert(boards, build("Left", facing * CFrame.new(21, -2, -2), Vector2.new(17, 18), groups.Left))
-	table.insert(boards, build("Right", facing * CFrame.new(-21, -2, -2), Vector2.new(17, 18), groups.Right))
-	table.insert(boards, build("Party", facing * CFrame.new(0, 21, -4), Vector2.new(17, 18), groups.Party))
+	table.insert(
+		boards,
+		build("Left", facing * CFrame.new(21, -2, -2), Vector2.new(17, 18), groups.Left)
+	)
+	table.insert(
+		boards,
+		build("Right", facing * CFrame.new(-21, -2, -2), Vector2.new(17, 18), groups.Right)
+	)
+	table.insert(
+		boards,
+		build("Party", facing * CFrame.new(0, 21, -4), Vector2.new(17, 18), groups.Party)
+	)
 
 	for _, board in boards do
 		render(board)

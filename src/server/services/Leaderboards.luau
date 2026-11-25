@@ -107,7 +107,10 @@ local function localTop(key: string): { Entry }
 	for _, player in Players:GetPlayers() do
 		local current = valuesFor(player)
 		if current then
-			table.insert(entries, { id = player.UserId, name = player.DisplayName, value = current[key] })
+			table.insert(
+				entries,
+				{ id = player.UserId, name = player.DisplayName, value = current[key] }
+			)
 		end
 	end
 	table.sort(entries, function(a, b)

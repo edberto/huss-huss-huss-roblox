@@ -50,13 +50,49 @@ end
 -- categories that rotate on one floating board.
 Stats.categories = table.freeze({
 	{ key = "hp", title = "MOST HUSS", short = "HUSS", board = "Center", color = "FFBE28" },
-	{ key = "bestCombo", title = "LONGEST COMBO", short = "COMBO", board = "Left", color = "50DCFF" },
-	{ key = "playtime", title = "MOST PLAYTIME", short = "PLAYTIME", board = "Left", color = "50DCFF" },
-	{ key = "dawns_Basketball", title = "BASKETBALL DAWNS", short = "BASKETBALL", board = "Right", color = "5AD278" },
+	{
+		key = "bestCombo",
+		title = "LONGEST COMBO",
+		short = "COMBO",
+		board = "Left",
+		color = "50DCFF",
+	},
+	{
+		key = "playtime",
+		title = "MOST PLAYTIME",
+		short = "PLAYTIME",
+		board = "Left",
+		color = "50DCFF",
+	},
+	{
+		key = "dawns_Basketball",
+		title = "BASKETBALL DAWNS",
+		short = "BASKETBALL",
+		board = "Right",
+		color = "5AD278",
+	},
 	{ key = "dawns_Gym", title = "GYM DAWNS", short = "GYM", board = "Right", color = "50AAFF" },
-	{ key = "dawns_Burgers", title = "BURGERS DAWNS", short = "BURGERS", board = "Right", color = "FF5A5A" },
-	{ key = "draggedIn", title = "TRAINERS DRAGGED IN", short = "DRAGGED IN", board = "Party", color = "FF50C8" },
-	{ key = "partyPoints", title = "PARTY POINTS", short = "PARTY PTS", board = "Party", color = "FF50C8" },
+	{
+		key = "dawns_Burgers",
+		title = "BURGERS DAWNS",
+		short = "BURGERS",
+		board = "Right",
+		color = "FF5A5A",
+	},
+	{
+		key = "draggedIn",
+		title = "TRAINERS DRAGGED IN",
+		short = "DRAGGED IN",
+		board = "Party",
+		color = "FF50C8",
+	},
+	{
+		key = "partyPoints",
+		title = "PARTY POINTS",
+		short = "PARTY PTS",
+		board = "Party",
+		color = "FF50C8",
+	},
 })
 
 -- A category's value for a player's saved data (hp lives outside stats).

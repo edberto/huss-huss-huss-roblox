@@ -60,9 +60,13 @@ local function burst(at: Vector3, color: Color3)
 	trail.Lifetime = 0.4
 	trail.Transparency = NumberSequence.new(0, 1)
 	trail.Parent = anchor
-	local rise = TweenService:Create(anchor, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = at,
-	})
+	local rise = TweenService:Create(
+		anchor,
+		TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{
+			Position = at,
+		}
+	)
 	rise:Play()
 	rise.Completed:Connect(function()
 		local sparks = Instance.new("ParticleEmitter")
@@ -98,13 +102,15 @@ end
 
 -- A short volley over the boards; bigger at Dawn.
 function Spectacle.fireworks(count: number)
-	local center = workspace:FindFirstChild("Town") and workspace.Town:FindFirstChild("Board_Center") :: BasePart?
+	local center = workspace:FindFirstChild("Town")
+		and workspace.Town:FindFirstChild("Board_Center") :: BasePart?
 	if not center then
 		return
 	end
 	for i = 1, count do
 		task.delay((i - 1) * 0.35, function()
-			local offset = center.CFrame.RightVector * math.random(-40, 40) + Vector3.new(0, math.random(22, 40), 0)
+			local offset = center.CFrame.RightVector * math.random(-40, 40)
+				+ Vector3.new(0, math.random(22, 40), 0)
 			burst(center.Position + offset, COLORS[math.random(#COLORS)])
 		end)
 	end

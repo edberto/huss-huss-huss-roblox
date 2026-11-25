@@ -24,7 +24,10 @@ local mine: { place: TextLabel, value: TextLabel }
 local current = "hp"
 
 local function stroke(thickness: number): UIStroke
-	return make("UIStroke", { ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Color = BLACK, Thickness = thickness })
+	return make(
+		"UIStroke",
+		{ ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Color = BLACK, Thickness = thickness }
+	)
 end
 
 local function category(key: string)
@@ -40,7 +43,9 @@ local function render()
 	local info = category(current)
 	for key, tab in tabs do
 		local on = key == current
-		tab.BackgroundColor3 = if on then Color3.fromHex(category(key).color) else Color3.fromHex("3C2D6E")
+		tab.BackgroundColor3 = if on
+			then Color3.fromHex(category(key).color)
+			else Color3.fromHex("3C2D6E")
 	end
 	for _, child in list:GetChildren() do
 		if child:IsA("Frame") then
@@ -70,9 +75,15 @@ local function render()
 			}, {
 				corner(),
 				make("UIStroke", { Color = BLACK, Thickness = 2 }),
-				Ui.label({ Size = UDim2.fromScale(1, 1), Text = tostring(place), TextColor3 = BLACK }, {
-					make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.2, 0) }),
-				}),
+				Ui.label(
+					{ Size = UDim2.fromScale(1, 1), Text = tostring(place), TextColor3 = BLACK },
+					{
+						make(
+							"UIPadding",
+							{ PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.2, 0) }
+						),
+					}
+				),
 			}),
 			make("ImageLabel", {
 				AnchorPoint = Vector2.new(0, 0.5),
@@ -100,9 +111,13 @@ local function render()
 		})
 	end
 	if #entries == 0 then
-		make("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 60), Parent = list }, {
-			Ui.label({ Size = UDim2.fromScale(1, 0.6), Text = "Nobody yet. Be the first!" }),
-		})
+		make(
+			"Frame",
+			{ BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 60), Parent = list },
+			{
+				Ui.label({ Size = UDim2.fromScale(1, 0.6), Text = "Nobody yet. Be the first!" }),
+			}
+		)
 	end
 	local own = tonumber(player:GetAttribute(`Stat_{current}`)) or 0
 	mine.place.Text = if myPlace then `YOU  #{myPlace}` else "YOU  · not in top 100 yet"
@@ -143,7 +158,9 @@ function Ranks.start()
 		ScrollBarImageColor3 = Color3.fromHex("FFD23C"),
 		ScrollBarThickness = 10,
 		Size = UDim2.new(0.94, 0, 1, -212),
-	}, { make("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder }) })
+	}, {
+		make("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder }),
+	})
 	local tabRow = make("ScrollingFrame", {
 		AutomaticCanvasSize = Enum.AutomaticSize.X,
 		BackgroundTransparency = 1,
@@ -205,7 +222,11 @@ function Ranks.start()
 		Position = UDim2.new(1, -16, 0, 14),
 		Size = UDim2.fromOffset(44, 44),
 		Text = "",
-	}, { corner(), stroke(3), Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "X", Thickness = 2.5 }) })
+	}, {
+		corner(),
+		stroke(3),
+		Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "X", Thickness = 2.5 }),
+	})
 	close.Activated:Connect(function()
 		panel.Visible = false
 	end)
