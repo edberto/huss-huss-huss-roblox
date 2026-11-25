@@ -63,6 +63,9 @@ function Tutorial.start()
 		if shown[key] then
 			return
 		end
+		if player:GetAttribute("Team") == "Partier" and key ~= "done" then
+			return -- trainer hints only; partiers have their own give-in card
+		end
 		shown[key] = true
 		token += 1
 		local mine = token
@@ -90,6 +93,13 @@ function Tutorial.start()
 	end
 	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(onPhase)
 	onPhase()
+	-- Giving in clears any trainer hint so it never sits over the give-in card.
+	player:GetAttributeChangedSignal("Team"):Connect(function()
+		if player:GetAttribute("Team") == "Partier" then
+			token += 1
+			card.Visible = false
+		end
+	end)
 
 	remotes
 		:WaitForChild("Result").OnClientEvent

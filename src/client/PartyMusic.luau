@@ -1,8 +1,8 @@
 --!strict
 -- The party next door as a DJ set: a shuffled playlist from the house lawn, each song
--- crossfading into the next over its last FADE seconds. Quiet while the party warms up at
--- Dusk, full through the Night, fading out at Dawn. Partiers get it louder, plus a
--- now-playing pop-up for each new song. Licensed Creator Store tracks.
+-- crossfading into the next over its last FADE seconds. Partiers only (trainers hear their
+-- own training groove): full through the Night, fading out at Dawn, with a now-playing pop-up
+-- for each new song. Licensed Creator Store tracks.
 -- ponytail: each client shuffles on its own, so two partiers may hear different songs.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -25,8 +25,7 @@ local TRACKS = {
 type Track = typeof(TRACKS[1])
 
 local FADE = 5
-local VOLUME = 0.45
-local PARTIER_GAIN = 1.5
+local VOLUME = 0.65
 local PHASE_LEVEL = { Dusk = 0.35, Night = 1, Dawn = 0 }
 local LOAD_TIMEOUT = 10 -- a song that won't load (moderation, outage) is skipped
 
@@ -186,7 +185,7 @@ local function step(dt: number)
 	local phase = ReplicatedStorage:GetAttribute("Phase")
 	local target = PHASE_LEVEL[phase :: any] or 1
 	level += (target - level) * math.min(1, dt * 0.6) -- eases over a few seconds
-	local gain = VOLUME * level * (if isPartier() then PARTIER_GAIN else 1)
+	local gain = if isPartier() then VOLUME * level else 0
 
 	local deck = decks[live]
 	local sound = deck.sound
