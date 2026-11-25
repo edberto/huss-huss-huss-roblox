@@ -334,13 +334,15 @@ function NightScreens.start()
 		Text = "",
 		Parent = prompt,
 	})
-	local _, promptButtonText = Ui.pill({ Size = UDim2.fromScale(1, 1), Parent = promptButton }, "5AD278", "1E8C50")
+	local _, promptButtonText =
+		Ui.pill({ Size = UDim2.fromScale(1, 1), Parent = promptButton }, "5AD278", "1E8C50")
 
 	local activeId = 0
 	local tapsLeft = 0
 	local buttonText = ""
 	local function refreshButton()
-		promptButtonText.Text = string.upper(if tapsLeft > 1 then `{buttonText} ({tapsLeft})` else buttonText)
+		promptButtonText.Text =
+			string.upper(if tapsLeft > 1 then `{buttonText} ({tapsLeft})` else buttonText)
 	end
 	promptButton.Activated:Connect(function()
 		if tapsLeft <= 0 then
