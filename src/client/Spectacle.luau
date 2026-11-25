@@ -91,7 +91,7 @@ local function burst(at: Vector3, color: Color3)
 		TweenService:Create(light, TweenInfo.new(0.8), { Brightness = 0 }):Play()
 		local boom = Instance.new("Sound")
 		boom.SoundId = FIREWORK_SOUND
-		boom.Volume = 0.5
+		boom.Volume = 0.5 * (tonumber(game:GetService("Players").LocalPlayer:GetAttribute("Vol_sfx")) or 1)
 		boom.PlaybackSpeed = 0.9 + math.random() * 0.25
 		boom.Parent = SoundService
 		SoundService:PlayLocalSound(boom)

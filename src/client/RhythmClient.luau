@@ -9,6 +9,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local BeatClock = require(ReplicatedStorage.Shared.BeatClock)
 local Night = require(ReplicatedStorage.Shared.Night)
+local Progress = require(ReplicatedStorage.Shared.Progress)
 local Score = require(ReplicatedStorage.Shared.Score)
 local StationFx = require(script.Parent.StationFx)
 
@@ -503,7 +504,7 @@ function RhythmClient.start()
 			if not style then
 				return
 			end
-			sessionPoints = total
+			sessionPoints = math.floor(total * Progress.hussPerPoint) -- Huss so far, before bonuses
 			refreshPoints()
 			combo.Text = if streak > 0 then `x{Score.multiplier(streak)} · {streak}` else ""
 			flashWord(style.text, style.color, 0.5)

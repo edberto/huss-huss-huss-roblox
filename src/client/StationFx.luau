@@ -27,12 +27,15 @@ local SOUND_IDS = {
 	clank = "rbxassetid://9116717775", -- Pro Sound Effects: metal knock
 	wrap = "rbxassetid://9117410302", -- Pro Sound Effects: cellophane crunch
 	thud = "rbxassetid://9119342958", -- Pro Sound Effects: muted thud
-	kick = "rbxassetid://9119342958", -- the beat (same muted thud, its own Sound so they don't cut)
+	kick = "rbxassetid://128535338677323", -- the beat: our punchy kick, audible on phone speakers
 	clap = "rbxassetid://9114771714", -- Pro Sound Effects: hand slap claps; skill beats
 	tempo = "rbxassetid://9113551773", -- Pro Sound Effects: boom thump; "TEMPO UP!"
 }
 
-local VOLUMES = { hat = 0.3, bass = 0.55, stab = 0.35 }
+local VOLUMES = { kick = 1, hat = 0.5, bass = 0.8, stab = 0.5, clap = 0.9 }
+-- The training groove; Settings → BEAT scales these (player attribute "Vol_beat", 0-2) and
+-- SOUNDS scales the rest: the voice and effects ("Vol_sfx").
+local BEAT = { kick = true, hat = true, bass = true, stab = true, clap = true }
 
 local ALMOST_COOLDOWN = 20
 
@@ -47,10 +50,20 @@ for name, id in SOUND_IDS do
 	local sound = Instance.new("Sound")
 	sound.Name = name
 	sound.SoundId = id
-	sound.Volume = VOLUMES[name] or if string.find(name, "^huss") then 0.6 else 0.7
+	VOLUMES[name] = VOLUMES[name] or if string.find(name, "^huss") then 0.6 else 0.7
 	sound.Parent = SoundService
 	sounds[name] = sound
 end
+local function applyVolumes()
+	local beat = tonumber(player:GetAttribute("Vol_beat")) or 1
+	local sfx = tonumber(player:GetAttribute("Vol_sfx")) or 1
+	for name, sound in sounds do
+		sound.Volume = VOLUMES[name] * if BEAT[name] then beat else sfx
+	end
+end
+player:GetAttributeChangedSignal("Vol_beat"):Connect(applyVolumes)
+player:GetAttributeChangedSignal("Vol_sfx"):Connect(applyVolumes)
+applyVolumes()
 
 function StationFx.play(name: string, pitch: number?)
 	local sound = sounds[name]

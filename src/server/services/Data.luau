@@ -29,6 +29,7 @@ export type Data = {
 	tapOffset: number, -- timing calibration in seconds (positive = audio heard late)
 	boostNights: number, -- nights of x2 Huss left from Huss Boost purchases
 	stats: Stats.Stats, -- lifetime stats for the leaderboards
+	volume: { music: number, beat: number, sfx: number }, -- Settings sliders, 0-2 (1 = default)
 }
 
 local TEMPLATE: Data = {
@@ -46,6 +47,7 @@ local TEMPLATE: Data = {
 	tapOffset = 0,
 	boostNights = 0,
 	stats = Stats.new(),
+	volume = { music = 1, beat = 1, sfx = 1 },
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -85,6 +87,9 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("TutorialDone", data.tutorialDone)
 	player:SetAttribute("TapOffset", data.tapOffset)
 	player:SetAttribute("BoostNights", data.boostNights)
+	player:SetAttribute("Vol_music", data.volume.music)
+	player:SetAttribute("Vol_beat", data.volume.beat)
+	player:SetAttribute("Vol_sfx", data.volume.sfx)
 	-- Own leaderboard values, so the Ranks panel can pin the player's row.
 	for _, category in Stats.categories do
 		player:SetAttribute(`Stat_{category.key}`, Stats.value(data.hp, data.stats, category.key))

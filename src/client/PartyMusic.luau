@@ -1,8 +1,9 @@
 --!strict
 -- The party next door as a DJ set: a shuffled playlist from the house lawn, each song
--- crossfading into the next over its last FADE seconds. Partiers only (trainers hear their
--- own training groove): full through the Night, fading out at Dawn, with a now-playing pop-up
--- for each new song. Licensed Creator Store tracks.
+-- crossfading into the next over its last FADE seconds. It plays for everyone except trainers
+-- during the Night (they hear their own training groove), so it carries on through Dawn and
+-- Dusk into the next night. Outside the Night it is heard the same everywhere; at Night it
+-- comes from the lawn. Now-playing pop-up for each new song. Licensed Creator Store tracks.
 -- ponytail: each client shuffles on its own, so two partiers may hear different songs.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -26,7 +27,7 @@ type Track = typeof(TRACKS[1])
 
 local FADE = 5
 local VOLUME = 0.65
-local PHASE_LEVEL = { Dusk = 0.35, Night = 1, Dawn = 0 }
+local NEAR_NIGHT, NEAR_DAY = 25, 600 -- RollOffMinDistance: from the lawn at Night, everywhere else
 local LOAD_TIMEOUT = 10 -- a song that won't load (moderation, outage) is skipped
 
 local player = Players.LocalPlayer
@@ -34,6 +35,11 @@ local PartyMusic = {}
 
 local function isPartier(): boolean
 	return player:GetAttribute("Team") == "Partier"
+end
+
+-- Trainers don't hear the party during the Night; everyone else does.
+local function hearsParty(): boolean
+	return isPartier() or ReplicatedStorage:GetAttribute("Phase") ~= "Night"
 end
 
 -- Shuffle bag: every song once before any repeats, and never the same song twice in a row.
@@ -169,7 +175,7 @@ local function play(deck: Deck)
 	deck.startedAt = os.clock()
 	deck.fadingSince = nil
 	current = track
-	if isPartier() then
+	if hearsParty() then
 		PartyMusic.showNowPlaying(track)
 	end
 end
@@ -182,10 +188,12 @@ local function crossfade()
 end
 
 local function step(dt: number)
-	local phase = ReplicatedStorage:GetAttribute("Phase")
-	local target = PHASE_LEVEL[phase :: any] or 1
-	level += (target - level) * math.min(1, dt * 0.6) -- eases over a few seconds
-	local gain = if isPartier() then VOLUME * level else 0
+	local night = ReplicatedStorage:GetAttribute("Phase") == "Night"
+	local target = if hearsParty() then 1 else 0
+	level += (target - level) * math.min(1, dt * 0.8) -- eases over a few seconds
+	local setting = tonumber(player:GetAttribute("Vol_music")) or 1
+	local gain = VOLUME * level * setting
+	local near = if night then NEAR_NIGHT else NEAR_DAY
 
 	local deck = decks[live]
 	local sound = deck.sound
@@ -211,6 +219,7 @@ local function step(dt: number)
 			weight = 0
 		end
 		d.sound.Volume = gain * weight
+		d.sound.RollOffMinDistance += (near - d.sound.RollOffMinDistance) * math.min(1, dt * 0.5)
 	end
 end
 
@@ -222,8 +231,8 @@ function PartyMusic.start()
 			Name = "PartyDeck" .. i,
 			Volume = 0,
 			RollOffMode = Enum.RollOffMode.InverseTapered,
-			RollOffMinDistance = 25,
-			RollOffMaxDistance = 260,
+			RollOffMinDistance = NEAR_DAY,
+			RollOffMaxDistance = 1000,
 			Parent = lawn,
 		}) :: Sound
 		decks[i] = { sound = sound, track = nil, startedAt = 0, fadingSince = nil }
@@ -231,7 +240,13 @@ function PartyMusic.start()
 	play(decks[live])
 	-- Becoming a partier mid-song: show what's on.
 	player:GetAttributeChangedSignal("Team"):Connect(function()
-		if isPartier() and current then
+		if isPartier() and current and ReplicatedStorage:GetAttribute("Phase") == "Night" then -- gave in
+			PartyMusic.showNowPlaying(current)
+		end
+	end)
+	-- Dawn: trainers hear the party again, so show what's on.
+	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(function()
+		if ReplicatedStorage:GetAttribute("Phase") == "Dawn" and not isPartier() and current then
 			PartyMusic.showNowPlaying(current)
 		end
 	end)

@@ -25,6 +25,7 @@ local giftRemote = remotes:WaitForChild("ClaimGift") :: RemoteFunction
 local groupRemote = remotes:WaitForChild("ClaimGroup") :: RemoteFunction
 local codeRemote = remotes:WaitForChild("RedeemCode") :: RemoteFunction
 local offsetRemote = remotes:WaitForChild("SetTapOffset") :: RemoteFunction
+local volumeRemote = remotes:WaitForChild("SetVolume") :: RemoteFunction
 
 local C = Ui.colors
 local make, corner, label = Ui.make, Ui.corner, Ui.label
@@ -583,7 +584,189 @@ function ShopClient.start()
 	-- plays and a ring flashes. The offset (sound lateness) is what the server subtracts from taps.
 	local CAL_BEATS, CAL_BPM = 8, 100
 	local MAX_OFFSET, STEP = 0.3, 0.01
-	local timing, timingBody, timingNote = panel(gui, "Timing")
+	-- Settings: a SOUND tab (volume sliders) and a TIMING tab (calibration).
+	local timing, settingsBody, timingNote = panel(gui, "Settings")
+	local settingsTab = "sound"
+	local settingsTabRow = make("Frame", {
+		BackgroundTransparency = 1,
+		Size = UDim2.fromScale(1, 0.12),
+		ZIndex = 21,
+		Parent = settingsBody,
+	}, {
+		make(
+			"UIListLayout",
+			{ FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0.02, 0) }
+		),
+	})
+	local soundBody = make("Frame", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromScale(0, 0.16),
+		Size = UDim2.fromScale(1, 0.84),
+		ZIndex = 21,
+		Parent = settingsBody,
+	})
+	local timingBody = make("Frame", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromScale(0, 0.16),
+		Size = UDim2.fromScale(1, 0.84),
+		Visible = false,
+		ZIndex = 21,
+		Parent = settingsBody,
+	})
+
+	-- Volume rows: NAME ... 100%, then − [bar] +, then a hint. 0-200%, saved shortly after the
+	-- last change. The attribute is set locally at once so the sound follows the slider.
+	local VOLUME_ROWS = {
+		{ key = "music", name = "MUSIC", color = "FF2E93", hint = "The party next door, outside of practice" },
+		{ key = "beat", name = "BEAT", color = "3DFFB0", hint = "Your practice groove: kick, hats, bass" },
+		{ key = "sfx", name = "SOUNDS", color = "50DCFF", hint = "Your huss voice, ball, doorbell, phone" },
+	}
+	local volumeRefreshers: { () -> () } = {}
+	for i, row in VOLUME_ROWS do
+		local y = (i - 1) * 0.33
+		local attribute = `Vol_{row.key}`
+		label({
+			Position = UDim2.fromScale(0, y),
+			Size = UDim2.fromScale(0.5, 0.1),
+			Text = row.name,
+			FontFace = Ui.display,
+			TextColor3 = WHITE,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 22,
+			Parent = soundBody,
+		})
+		local percent = Ui.shout({
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.fromScale(1, y),
+			Size = UDim2.fromScale(0.3, 0.1),
+			Text = "100%",
+			TextColor3 = GOLD,
+			TextXAlignment = Enum.TextXAlignment.Right,
+			Thickness = 2.5,
+			ZIndex = 22,
+			Parent = soundBody,
+		})
+		local down = button(soundBody, "−", IDLE)
+		down.Position = UDim2.fromScale(0, y + 0.11)
+		down.Size = UDim2.fromScale(0.09, 0.11)
+		local up = button(soundBody, "+", IDLE)
+		up.Position = UDim2.fromScale(0.91, y + 0.11)
+		up.Size = UDim2.fromScale(0.09, 0.11)
+		local fill = make("Frame", {
+			BackgroundColor3 = Color3.fromHex(row.color),
+			Size = UDim2.fromScale(0.5, 1),
+			ZIndex = 23,
+		}, { corner() })
+		local bar = make("Frame", {
+			BackgroundColor3 = Color3.fromHex("140C28"),
+			Position = UDim2.fromScale(0.12, y + 0.14),
+			Size = UDim2.fromScale(0.76, 0.05),
+			ZIndex = 22,
+			Parent = soundBody,
+		}, { corner(), outline(2.5), fill })
+		local knob = make("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = GOLD,
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(2.4, 2.4),
+			SizeConstraint = Enum.SizeConstraint.RelativeYY,
+			ZIndex = 24,
+			Parent = bar,
+		}, { corner(), outline(3) })
+		label({
+			Position = UDim2.fromScale(0, y + 0.23),
+			Size = UDim2.fromScale(1, 0.07),
+			Text = row.hint,
+			TextColor3 = Color3.fromHex("C8B4E6"),
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 22,
+			Parent = soundBody,
+		})
+
+		local value = 1
+		local saveToken = 0
+		local function show()
+			fill.Size = UDim2.fromScale(value / 2, 1)
+			knob.Position = UDim2.fromScale(value / 2, 0.5)
+			percent.Text = `{math.round(value * 100)}%`
+		end
+		local function set(v: number)
+			value = math.clamp(math.round(v * 20) / 20, 0, 2) -- 5% steps
+			show()
+			player:SetAttribute(attribute, value)
+			saveToken += 1
+			local token = saveToken
+			task.delay(0.6, function()
+				if token == saveToken then
+					local reason = volumeRemote:InvokeServer(row.key, value)
+					if reason then
+						timingNote.Text = REASONS[reason] or reason
+					end
+				end
+			end)
+		end
+		table.insert(volumeRefreshers, function()
+			value = tonumber(player:GetAttribute(attribute)) or 1
+			show()
+		end)
+		-- A sample so you hear the new level: a kick for the beat, a huss for sounds.
+		local function sample()
+			if row.key == "beat" then
+				StationFx.play("kick")
+			elseif row.key == "sfx" then
+				StationFx.play("huss1")
+			end
+		end
+		down.Activated:Connect(function()
+			set(value - 0.1)
+			sample()
+		end)
+		up.Activated:Connect(function()
+			set(value + 0.1)
+			sample()
+		end)
+		local dragging = false
+		local function dragTo(x: number)
+			set(math.clamp((x - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1) * 2)
+		end
+		bar.InputBegan:Connect(function(input)
+			if
+				input.UserInputType == Enum.UserInputType.MouseButton1
+				or input.UserInputType == Enum.UserInputType.Touch
+			then
+				dragging = true
+				dragTo(input.Position.X)
+			end
+		end)
+		UserInputService.InputChanged:Connect(function(input)
+			if
+				dragging
+				and (
+					input.UserInputType == Enum.UserInputType.MouseMovement
+					or input.UserInputType == Enum.UserInputType.Touch
+				)
+			then
+				dragTo(input.Position.X)
+			end
+		end)
+		UserInputService.InputEnded:Connect(function(input)
+			if
+				dragging
+				and (
+					input.UserInputType == Enum.UserInputType.MouseButton1
+					or input.UserInputType == Enum.UserInputType.Touch
+				)
+			then
+				dragging = false
+				sample()
+			end
+		end)
+	end
+	local function refreshVolumes()
+		for _, refresh in volumeRefreshers do
+			refresh()
+		end
+	end
 	label({
 		Size = UDim2.fromScale(1, 0.11),
 		Text = "Earbuds or lag? Tap along to the beat, then slide until the beat and the flash match.",
@@ -743,7 +926,7 @@ function ShopClient.start()
 		while run == calRun and timing.Visible and not calibrating do
 			local soundAt, flashAt = beat, beat + offset
 			task.delay(math.max(0, soundAt - os.clock()), function()
-				if timing.Visible and not calibrating then
+				if run == calRun and timing.Visible and not calibrating then
 					StationFx.play("kick")
 				end
 			end)
@@ -804,6 +987,31 @@ function ShopClient.start()
 		timingNote.Text = if reason then REASONS[reason] or reason else "SAVED ✓"
 	end)
 
+	local settingsTabs: { [string]: TextButton } = {}
+	local function showSettingsTab(tab: string)
+		settingsTab = tab
+		soundBody.Visible = tab == "sound"
+		timingBody.Visible = tab == "timing"
+		for key, tabButton in settingsTabs do
+			tabButton.BackgroundColor3 = if key == tab then Color3.fromHex("FFBE28") else IDLE
+		end
+		timingNote.Text = ""
+		calRun += 1 -- stops a calibration or preview in progress
+		if tab == "timing" then
+			task.spawn(runCalibration)
+		else
+			refreshVolumes()
+		end
+	end
+	for _, tab in { { "sound", "SOUND" }, { "timing", "TIMING" } } do
+		local tabButton = button(settingsTabRow, tab[2], IDLE)
+		tabButton.Size = UDim2.fromScale(0.22, 1)
+		tabButton.Activated:Connect(function()
+			showSettingsTab(tab[1])
+		end)
+		settingsTabs[tab[1]] = tabButton
+	end
+
 	-- Side buttons -----------------------------------------------------------------------------
 	-- Side buttons: chunky colour tiles with an icon and label (assets/ui, scripts/ui_icons.py).
 	local side = make("Frame", {
@@ -819,7 +1027,7 @@ function ShopClient.start()
 		{ "Shop", "74703712629649", "FF9628", "EB5A14" },
 		{ "Daily", "85898827711145", "5AD278", "28A05A" },
 		{ "Gifts", "77368354228555", "BE6EFF", "8246DC" },
-		{ "Timing", "126839820801921", "46C8FF", "1E8CDC" },
+		{ "Settings", "111747124734544", "46C8FF", "1E8CDC" },
 		{ "Ranks", "108570200348915", "FFD23C", "E6A014" },
 	}
 	for i, spec in SIDE do
@@ -883,12 +1091,11 @@ function ShopClient.start()
 			if spec[1] == "Ranks" then
 				shop.Visible, rewards.Visible, timing.Visible = false, false, false
 				Ranks.toggle()
-			elseif spec[1] == "Timing" then
+			elseif spec[1] == "Settings" then
 				shop.Visible, rewards.Visible = false, false
 				timing.Visible = not timing.Visible
-				timingNote.Text = ""
 				if timing.Visible then
-					task.spawn(runCalibration)
+					showSettingsTab(settingsTab)
 				end
 			elseif spec[1] == "Shop" then
 				timing.Visible = false

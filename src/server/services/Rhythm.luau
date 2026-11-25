@@ -51,7 +51,20 @@ resultEvent.Parent = remotes
 local calibrate = Instance.new("RemoteFunction")
 calibrate.Name = "SetTapOffset" -- client -> server: seconds; saved, returns nil or a reason
 calibrate.Parent = remotes
+local setVolume = Instance.new("RemoteFunction")
+setVolume.Name = "SetVolume" -- client -> server: "music" | "beat" | "sfx", 0-2; saved, returns nil or a reason
+setVolume.Parent = remotes
 remotes.Parent = ReplicatedStorage
+
+setVolume.OnServerInvoke = function(player: Player, kind: unknown, value: unknown): string?
+	if (kind ~= "music" and kind ~= "beat" and kind ~= "sfx") or typeof(value) ~= "number" or value ~= value then
+		return "Invalid"
+	end
+	return Data.update(player, function(data)
+		(data.volume :: any)[kind] = math.clamp(math.round(value * 100) / 100, 0, 2)
+		return nil
+	end)
+end
 
 calibrate.OnServerInvoke = function(player: Player, offset: unknown): string?
 	if typeof(offset) ~= "number" or offset ~= offset then

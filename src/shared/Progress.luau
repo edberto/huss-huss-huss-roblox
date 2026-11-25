@@ -21,6 +21,9 @@ Progress.lastStandingBonus = 500
 Progress.topThreeBonus = 250
 Progress.finishBonus = 50
 Progress.placementMinPlayers = 3 -- placement bonuses need a real field to beat
+-- Practice points become Huss at this rate: a strong night is ~300-500 Huss, in line with the
+-- daily reward, gifts and the Robux packs. (1:1 paid ~3,000 a night and emptied the shop in four.)
+Progress.hussPerPoint = 0.1
 
 -- Total XP needed to reach `level` from level 1.
 function Progress.xpForLevel(level: number): number
@@ -59,7 +62,7 @@ function Progress.nightReward(
 	players: number,
 	finished: boolean
 ): number
-	local hp = math.floor(points) + math.floor(partyPoints)
+	local hp = math.floor(points * Progress.hussPerPoint) + math.floor(partyPoints)
 	if players >= Progress.placementMinPlayers then
 		if place == 1 then
 			hp += Progress.lastStandingBonus
