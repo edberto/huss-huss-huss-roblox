@@ -152,7 +152,7 @@ function Ui.bind(button: GuiObject, pcKeys: { Enum.KeyCode }, padKeys: { Enum.Ke
 		BackgroundColor3 = Color3.new(1, 1, 1),
 		Name = "KeyBadge",
 		Position = UDim2.fromScale(0, 0),
-		Size = UDim2.new(0, 30, 0, 26),
+		Size = UDim2.fromOffset(30, 26),
 		ZIndex = button.ZIndex + 2,
 		Parent = button,
 	}, {
@@ -174,7 +174,7 @@ function Ui.bind(button: GuiObject, pcKeys: { Enum.KeyCode }, padKeys: { Enum.Ke
 			text.TextColor3 = Color3.new(0, 0, 0)
 			badge.BackgroundColor3 = Color3.new(1, 1, 1)
 		end
-		badge.Size = UDim2.new(0, if #text.Text > 2 then 62 else 30, 0, 26)
+		badge.Size = UDim2.fromOffset(if #text.Text > 2 then 62 else 30, 26)
 	end
 	table.insert(badges, refresh)
 	refresh()
