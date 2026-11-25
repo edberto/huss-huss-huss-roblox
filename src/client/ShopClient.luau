@@ -597,7 +597,7 @@ function ShopClient.start()
 	local side = make("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
 		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 12, 0.45, 0),
+		Position = UDim2.new(0, 28, 0.45, 0), -- room for the labels spilling past the tiles
 		Size = UDim2.fromScale(0.1, 0.62),
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Parent = gui,
