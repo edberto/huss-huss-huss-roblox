@@ -32,6 +32,8 @@ local SOUND_IDS = {
 	tempo = "rbxassetid://9113551773", -- Pro Sound Effects: boom thump; "TEMPO UP!"
 }
 
+local VOLUMES = { hat = 0.3, bass = 0.55, stab = 0.35 }
+
 local ALMOST_COOLDOWN = 20
 
 local StationFx = {}
@@ -45,7 +47,7 @@ for name, id in SOUND_IDS do
 	local sound = Instance.new("Sound")
 	sound.Name = name
 	sound.SoundId = id
-	sound.Volume = if string.find(name, "^huss") then 0.6 elseif name == "hat" then 0.3 elseif name == "bass" then 0.55 elseif name == "stab" then 0.35 else 0.7
+	sound.Volume = VOLUMES[name] or if string.find(name, "^huss") then 0.6 else 0.7
 	sound.Parent = SoundService
 	sounds[name] = sound
 end
