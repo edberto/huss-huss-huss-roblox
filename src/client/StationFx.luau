@@ -9,7 +9,7 @@ local Ui = require(script.Parent.Ui)
 
 local player = Players.LocalPlayer
 
--- huss1-6: our own recordings (assets/audio). 1-3 and 4-6 are each one "huss huss huss" phrase.
+-- huss1-6 and almost: our own recordings (assets/audio). 1-3 and 4-6 are each one "huss huss huss" phrase.
 -- The rest are Creator Store sound effects (free to use in experiences).
 local SOUND_IDS = {
 	huss1 = "rbxassetid://90960262508418",
@@ -18,6 +18,7 @@ local SOUND_IDS = {
 	huss4 = "rbxassetid://96533280196463",
 	huss5 = "rbxassetid://71587162942892",
 	huss6 = "rbxassetid://97272623021431",
+	almost = "rbxassetid://71905871777804", -- our "ahh almost almost"
 	bounce = "rbxassetid://377958030", -- basketball bounce
 	rim = "rbxassetid://81912260477958", -- brick rim hit
 	clank = "rbxassetid://9116717775", -- Pro Sound Effects: metal knock
@@ -104,6 +105,7 @@ function StationFx.almost()
 		return
 	end
 	lastAlmost = os.clock()
+	StationFx.play("almost")
 	StationFx.say("ahh almost almost", true)
 	local camera = workspace.CurrentCamera
 	local punch = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, true)

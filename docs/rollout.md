@@ -23,7 +23,7 @@ Manual place changes that a code publish doesn't carry. Newest first.
       with `default.project.json`.
 - [ ] Phone test with real players (touch layout was checked by maths only).
 - [x] Own "huss" recordings (6 takes, assets/audio, IDs in StationFx).
-- [ ] Record "ahh almost almost" (no sound yet, bubble only).
+- [x] Own "ahh almost almost" recording (assets/audio, ID in StationFx).
 - [ ] Upload `assets/thumbnail.png` as the experience thumbnail (Creator Hub > Places > Thumbnails).
 - [ ] Tag the published version (`v0.1.0`).
 
