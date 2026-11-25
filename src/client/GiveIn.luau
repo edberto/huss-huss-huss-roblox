@@ -12,7 +12,8 @@ local Ui = require(script.Parent.Ui)
 local player = Players.LocalPlayer
 local GiveIn = {}
 
-local CONFETTI = { Ui.colors.pink, Ui.colors.mint, Ui.colors.amber, Ui.colors.purple, Color3.new(1, 1, 1) }
+local CONFETTI =
+	{ Ui.colors.pink, Ui.colors.mint, Ui.colors.amber, Ui.colors.purple, Color3.new(1, 1, 1) }
 
 -- Plays the cutscene, then calls done (also when skipped).
 function GiveIn.play(done: () -> ())
@@ -21,15 +22,18 @@ function GiveIn.play(done: () -> ())
 	local lawn = house:WaitForChild("Lawn") :: BasePart
 	local from = camera.CFrame
 	local target = lawn.Position + Vector3.new(0, 6, 0)
-	local shot = CFrame.lookAt(target + (from.Position - target).Unit * 28 + Vector3.new(0, 8, 0), target)
+	local shot =
+		CFrame.lookAt(target + (from.Position - target).Unit * 28 + Vector3.new(0, 8, 0), target)
 
 	StationFx.play("tempo", 0.7)
 	PartyMusic.swell()
 	camera.CameraType = Enum.CameraType.Scriptable
-	TweenService:Create(camera, TweenInfo.new(1.1, Enum.EasingStyle.Quart, Enum.EasingDirection.InOut), {
-		CFrame = shot,
-		FieldOfView = 80,
-	}):Play()
+	TweenService
+		:Create(camera, TweenInfo.new(1.1, Enum.EasingStyle.Quart, Enum.EasingDirection.InOut), {
+			CFrame = shot,
+			FieldOfView = 80,
+		})
+		:Play()
 
 	local gui = Ui.make("ScreenGui", {
 		Name = "GiveIn",
@@ -59,10 +63,12 @@ function GiveIn.play(done: () -> ())
 
 	task.delay(0.7, function()
 		title.Size = UDim2.fromScale(1.6, 0.36)
-		TweenService:Create(title, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Size = UDim2.fromScale(0.9, 0.2),
-			TextTransparency = 0,
-		}):Play()
+		TweenService
+			:Create(title, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				Size = UDim2.fromScale(0.9, 0.2),
+				TextTransparency = 0,
+			})
+			:Play()
 		TweenService:Create(sub, TweenInfo.new(0.4), { TextTransparency = 0 }):Play()
 		for _ = 1, 40 do
 			local bit = Ui.make("Frame", {
@@ -74,10 +80,17 @@ function GiveIn.play(done: () -> ())
 				Size = UDim2.fromOffset(math.random(8, 14), math.random(14, 22)),
 				Parent = gui,
 			})
-			TweenService:Create(bit, TweenInfo.new(1.6 + math.random(), Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-				Position = UDim2.fromScale(bit.Position.X.Scale + (math.random() - 0.5) * 0.3, 1.1),
-				Rotation = bit.Rotation + math.random(-360, 360),
-			}):Play()
+			TweenService:Create(
+				bit,
+				TweenInfo.new(1.6 + math.random(), Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+				{
+					Position = UDim2.fromScale(
+						bit.Position.X.Scale + (math.random() - 0.5) * 0.3,
+						1.1
+					),
+					Rotation = bit.Rotation + math.random(-360, 360),
+				}
+			):Play()
 		end
 	end)
 

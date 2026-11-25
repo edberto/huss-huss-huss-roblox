@@ -658,7 +658,12 @@ function ShopClient.start()
 		}, {
 			corner(),
 			make("UIStroke", { Color = C.navy, Thickness = 2 }),
-			Ui.label({ Size = UDim2.fromScale(1, 1), Text = "!", TextColor3 = Color3.new(1, 1, 1), ZIndex = 8 }),
+			Ui.label({
+				Size = UDim2.fromScale(1, 1),
+				Text = "!",
+				TextColor3 = Color3.new(1, 1, 1),
+				ZIndex = 8,
+			}),
 		})
 		side_button.Activated:Connect(function()
 			if spec[1] == "Timing" then

@@ -43,7 +43,11 @@ local team = player:GetAttribute("Team")
 player:GetAttributeChangedSignal("Team"):Connect(function()
 	local was = team
 	team = player:GetAttribute("Team")
-	if was == "Trainer" and team == "Partier" and ReplicatedStorage:GetAttribute("Phase") == "Night" then
+	if
+		was == "Trainer"
+		and team == "Partier"
+		and ReplicatedStorage:GetAttribute("Phase") == "Night"
+	then
 		GiveIn.play(updateCamera)
 	else
 		updateCamera()
