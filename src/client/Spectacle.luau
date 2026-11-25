@@ -109,8 +109,9 @@ function Spectacle.fireworks(count: number)
 	end
 	for i = 1, count do
 		task.delay((i - 1) * 0.35, function()
-			local offset = center.CFrame.RightVector * math.random(-40, 40)
-				+ Vector3.new(0, math.random(22, 40), 0)
+			local offset = center.CFrame.RightVector * math.random(-55, 55)
+				- center.CFrame.LookVector * math.random(12, 30) -- behind the boards
+				+ Vector3.new(0, math.random(2, 12), 0)
 			burst(center.Position + offset, COLORS[math.random(#COLORS)])
 		end)
 	end
