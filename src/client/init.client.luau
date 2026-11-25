@@ -25,7 +25,12 @@ local home = workspace:WaitForChild("Homes"):WaitForChild(player:GetAttribute("H
 -- Fixed view of the player's driveway with the party house behind them (design doc: camera).
 local camera = workspace.CurrentCamera
 local CAMERA_TILT = 12 -- degrees
-local cameraPoint = home:WaitForChild("PracticeCamera") :: BasePart
+-- Each station has its own view: the driveway, the garage gym or the kitchen.
+local function cameraPoint(): BasePart
+	return (home:FindFirstChild(`PracticeCamera_{player:GetAttribute("Station")}`) or home:WaitForChild(
+		"PracticeCamera"
+	)) :: BasePart
+end
 -- Trainers get the fixed practice view; partiers walk around with the normal camera.
 local function updateCamera()
 	local partier = player:GetAttribute("Team") == "Partier"
@@ -36,7 +41,7 @@ local function updateCamera()
 	else
 		camera.CameraType = Enum.CameraType.Scriptable
 		-- Tilted up so the floating leaderboards over the party house are in view.
-		camera.CFrame = cameraPoint.CFrame * CFrame.Angles(math.rad(CAMERA_TILT), 0, 0)
+		camera.CFrame = cameraPoint().CFrame * CFrame.Angles(math.rad(CAMERA_TILT), 0, 0)
 	end
 end
 player.CharacterAdded:Connect(function()
@@ -57,6 +62,7 @@ player:GetAttributeChangedSignal("Team"):Connect(function()
 		updateCamera()
 	end
 end)
+player:GetAttributeChangedSignal("Station"):Connect(updateCamera)
 updateCamera()
 
 -- Party beams sweep the sky (built by the server's Decor; animated here so it's smooth and free).

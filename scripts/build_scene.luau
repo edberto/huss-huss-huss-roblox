@@ -191,20 +191,110 @@ town.Parent = workspace
 local homes = Instance.new("Folder")
 homes.Name = "Homes"
 
+-- Lot-local (x, y, z) -> CFrame. The house spans x -14..14, z 24..40 (front wall at z 24).
+local function at(lot: CFrame, x: number, y: number, z: number): CFrame
+	return lot * CFrame.new(x, y, z)
+end
+
+-- A camera behind a practice spot inside a room, looking out of the room's opening (door or
+-- window) and turned toward the party house down the street, so the party and its floating
+-- boards stay in view.
+local function roomCamera(home: Model, name: string, lot: CFrame, spot: CFrame, cameraLocal: Vector3)
+	local cameraPos = (lot * CFrame.new(cameraLocal)).Position
+	local out = lot:VectorToWorldSpace(Vector3.new(0, 0, -1))
+	local toParty = ((PARTY_CENTER - spot.Position) * Vector3.new(1, 0, 1)).Unit
+	local look = (out + toParty * 0.6).Unit
+	part(home, name, Vector3.new(1, 1, 1), CFrame.lookAt(cameraPos, cameraPos + look - Vector3.new(0, 0.05, 0)), C.cream, {
+		Transparency = 1,
+		CanCollide = false,
+		CanQuery = false,
+	})
+end
+
+-- The house as rooms: an open garage (Gym) and a kitchen behind a picture window (Burgers),
+-- both facing the street. The upper floor stays solid.
+local function rooms(home: Model, lot: CFrame, index: number)
+	local wall, floor = C.wall, Color3.fromHex("8C7A66")
+	local trim = wall:Lerp(Color3.new(0, 0, 0), 0.15)
+	part(home, "Floor", Vector3.new(27, 0.4, 15), at(lot, 0, 0.2, 32), floor)
+	part(home, "GarageFloor", Vector3.new(12.6, 0.42, 14.6), at(lot, -7, 0.2, 32), C.concrete)
+	part(home, "BackWall", Vector3.new(28, 14, 1), at(lot, 0, 7, 39.5), wall)
+	part(home, "SideWallL", Vector3.new(1, 14, 15), at(lot, -13.5, 7, 31.5), wall)
+	part(home, "SideWallR", Vector3.new(1, 14, 15), at(lot, 13.5, 7, 31.5), wall)
+	part(home, "UpperFloor", Vector3.new(28, 5, 16), at(lot, 0, 11.5, 32), wall)
+	part(home, "Divider", Vector3.new(1, 9, 15), at(lot, 0, 4.5, 31.5), trim)
+	-- Front wall around the garage opening (x -12..-2, up to 8) and the window (x 2..12, 3 to 8).
+	part(home, "FrontL", Vector3.new(2, 9, 1), at(lot, -13, 4.5, 24.5), wall)
+	part(home, "FrontMid", Vector3.new(4, 9, 1), at(lot, 0, 4.5, 24.5), wall)
+	part(home, "FrontR", Vector3.new(2, 9, 1), at(lot, 13, 4.5, 24.5), wall)
+	part(home, "GarageHeader", Vector3.new(10, 1, 1), at(lot, -7, 8.5, 24.5), wall)
+	part(home, "Sill", Vector3.new(10, 3, 1), at(lot, 7, 1.5, 24.5), wall)
+	part(home, "Lintel", Vector3.new(10, 1, 1), at(lot, 7, 8.5, 24.5), wall)
+	part(home, "Glass", Vector3.new(10, 5, 0.2), at(lot, 7, 5.5, 24.2), Color3.fromHex("BFE3FF"), {
+		Transparency = 0.85,
+		CastShadow = false,
+	})
+	-- The garage door, rolled up under the ceiling.
+	part(home, "GarageDoor", Vector3.new(10, 0.8, 1.6), at(lot, -7, 8.4, 25.6), C.concrete)
+	-- Upstairs window, lit like before.
+	local win = part(home, "Window", Vector3.new(5, 3, 0.4), at(lot, 6, 11.5, 23.9), C.amber, {
+		Material = Enum.Material.Neon,
+	})
+	light(win, C.amber, 14, 0.8)
+
+	-- Garage gym: rack and plates on the outer wall, a mirror on the divider, a bench, mats.
+	local steel, rubber = Color3.fromHex("8C8F99"), Color3.fromHex("1E1F24")
+	part(home, "Mat", Vector3.new(8, 0.1, 8), at(lot, -7, 0.46, 31), rubber)
+	for _, z in { 28, 34 } do
+		part(home, "RackPost", Vector3.new(0.4, 7, 0.4), at(lot, -12.3, 3.9, z), steel)
+	end
+	part(home, "RackBar", Vector3.new(0.3, 0.3, 7), at(lot, -12.3, 6.2, 31), steel)
+	for i, z in { 29, 30, 32, 33 } do
+		part(home, "Plate", Vector3.new(0.4, 2.2 - i % 2 * 0.6, 2.2 - i % 2 * 0.6), at(lot, -12.6, 1.6, z), C.navy, {
+			Shape = Enum.PartType.Cylinder,
+		})
+	end
+	part(home, "Mirror", Vector3.new(0.2, 5, 9), at(lot, -0.45, 4.2, 31.5), Color3.fromHex("C8E6FF"), {
+		Material = Enum.Material.Glass,
+		Reflectance = 0.35,
+		Transparency = 0.1,
+	})
+	part(home, "Bench", Vector3.new(2, 1.4, 4.5), at(lot, -10.5, 1.1, 36.5), C.orange)
+	local gymLamp = part(home, "GymLamp", Vector3.new(6, 0.3, 0.8), at(lot, -7, 8.85, 32), Color3.fromHex("E6F4FF"), {
+		Material = Enum.Material.Neon,
+		CastShadow = false,
+	})
+	light(gymLamp, Color3.fromHex("E6F4FF"), 16, 1.2)
+
+	-- Kitchen: the station brings its own grill counter under the window; a stove counter on
+	-- the divider wall, the fridge on the outer wall, both in the camera's view.
+	local wood = Color3.fromHex("5A4A3C")
+	part(home, "SideCounter", Vector3.new(2.4, 3, 8), at(lot, 1.7, 1.7, 32), wood)
+	part(home, "Worktop", Vector3.new(2.6, 0.3, 8.2), at(lot, 1.7, 3.35, 32), C.cream)
+	part(home, "Stove", Vector3.new(2, 0.2, 2.6), at(lot, 1.7, 3.55, 33.5), rubber)
+	part(home, "Pan", Vector3.new(0.3, 1.6, 1.6), at(lot, 1.7, 3.8, 33.5) * CFrame.Angles(0, 0, math.rad(90)), rubber, {
+		Shape = Enum.PartType.Cylinder,
+	})
+	local tile = if index % 2 == 0 then Color3.fromHex("2F6F73") else Color3.fromHex("8A3C4E")
+	part(home, "Backsplash", Vector3.new(0.2, 2.6, 8), at(lot, 0.6, 4.8, 32), tile)
+	part(home, "Cabinets", Vector3.new(1.4, 1.8, 8), at(lot, 1.2, 7.2, 32), wood)
+	part(home, "Fridge", Vector3.new(2.6, 7, 3), at(lot, 11.7, 3.9, 31.5), Color3.fromHex("E8EEF2"))
+	part(home, "FridgeHandle", Vector3.new(0.2, 2, 0.2), at(lot, 10.3, 4.6, 30.4), steel)
+	local kitchenLamp = part(home, "KitchenLamp", Vector3.new(1.4, 1.4, 1.4), at(lot, 7, 8.1, 31), C.amber, {
+		Material = Enum.Material.Neon,
+		Shape = Enum.PartType.Ball,
+		CastShadow = false,
+	})
+	light(kitchenLamp, C.amber, 16, 1.3)
+end
+
 local function buildHome(index: number, lot: CFrame)
 	local home = Instance.new("Model")
 	home.Name = `Home{index}`
+	-- Roof only from house(): the walls are built as rooms.
 	house(home, lot * CFrame.new(0, 0, 32), C.wall, C.roof)
-	part(home, "GarageDoor", Vector3.new(10, 8, 0.4), lot * CFrame.new(-7, 4, 23.9), C.concrete)
-	local win = part(
-		home,
-		"Window",
-		Vector3.new(5, 4, 0.4),
-		lot * CFrame.new(6, 8, 23.9),
-		C.amber,
-		{ Material = Enum.Material.Neon }
-	)
-	light(win, C.amber, 16, 1)
+	home:FindFirstChild("Walls"):Destroy()
+	rooms(home, lot, index)
 	part(home, "Driveway", Vector3.new(12, 0.2, 25), lot * CFrame.new(-7, 0.15, 11.5), C.concrete)
 
 	part(home, "Backboard", Vector3.new(7, 4.5, 0.3), lot * CFrame.new(-7, 12, 23.5), C.cream)
@@ -269,6 +359,19 @@ local function buildHome(index: number, lot: CFrame)
 			CanQuery = false,
 		}
 	)
+
+	-- Gym in the garage and Burgers in the kitchen, both facing the street.
+	local gymSpot = at(lot, -7, 3, 31)
+	local burgerSpot = at(lot, 7, 3, 29.4)
+	for station, spotCf in { Gym = gymSpot, Burgers = burgerSpot } do
+		part(home, `PracticeSpot_{station}`, Vector3.new(4, 1, 4), CFrame.lookAt(spotCf.Position, (spotCf * CFrame.new(0, 0, -10)).Position), C.cream, {
+			Transparency = 1,
+			CanCollide = false,
+			CanQuery = false,
+		})
+	end
+	roomCamera(home, "PracticeCamera_Gym", lot, gymSpot, Vector3.new(-5, 5.6, 37.5))
+	roomCamera(home, "PracticeCamera_Burgers", lot, burgerSpot, Vector3.new(8.5, 5.8, 36.8))
 	home.Parent = homes
 end
 

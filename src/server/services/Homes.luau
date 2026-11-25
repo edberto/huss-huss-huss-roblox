@@ -1,6 +1,8 @@
 --!strict
 -- One home per player (12 per server). The player's "Home" attribute names their model in
--- workspace.Homes; trainers are placed on its PracticeSpot whenever their character spawns.
+-- workspace.Homes; trainers are placed on its spot for their station (driveway for Basketball,
+-- PracticeSpot_Gym in the garage, PracticeSpot_Burgers in the kitchen) when their character
+-- spawns and when they pick a station.
 local Players = game:GetService("Players")
 
 local Homes = {}
@@ -24,6 +26,11 @@ function Homes.assign(player: Player): Model?
 		if home and not isTaken(home) and not npcHomes[home] then
 			owners[player] = home
 			player:SetAttribute("Home", home.Name)
+			player:GetAttributeChangedSignal("Station"):Connect(function()
+				if player:GetAttribute("Team") ~= "Partier" then
+					Homes.placeOnSpot(player)
+				end
+			end)
 			return home
 		end
 	end
@@ -52,7 +59,9 @@ end
 
 function Homes.placeOnSpot(player: Player)
 	local home = owners[player]
-	local spot = home and home:FindFirstChild("PracticeSpot") :: BasePart?
+	local station = player:GetAttribute("Station")
+	local spot = home
+		and (home:FindFirstChild(`PracticeSpot_{station}`) or home:FindFirstChild("PracticeSpot")) :: BasePart?
 	if spot and player.Character then
 		player.Character:PivotTo(spot.CFrame + Vector3.new(0, 2, 0))
 	end
