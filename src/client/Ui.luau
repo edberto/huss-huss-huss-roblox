@@ -90,7 +90,6 @@ function Ui.countdown(endsAt: number): string
 	return string.format("%d:%02d", left // 60, left % 60)
 end
 
-
 -- Keybinds ----------------------------------------------------------------------------------------
 -- `Ui.bind(button, pcKeys, padKeys, run)`: pressing any listed key runs `run` while the button is
 -- on screen, and a small badge in the button's corner names the key for the current device
@@ -107,7 +106,7 @@ local PAD = { -- label and colour for controller buttons
 	DPadUp = { "▲", "5A5A64" },
 	DPadRight = { "▶", "5A5A64" },
 }
-local KEY_NAMES = { Space = "SPACE", One = "1", Two = "2", Three = "3" }
+local KEY_NAMES = { Space = "SPACE", Return = "ENTER", One = "1", Two = "2", Three = "3" }
 
 local function device(): string
 	local last = UserInputService:GetLastInputType()
@@ -137,7 +136,12 @@ UserInputService.LastInputTypeChanged:Connect(function()
 	end
 end)
 
-function Ui.bind(button: GuiObject, pcKeys: { Enum.KeyCode }, padKeys: { Enum.KeyCode }, run: () -> ())
+function Ui.bind(
+	button: GuiObject,
+	pcKeys: { Enum.KeyCode },
+	padKeys: { Enum.KeyCode },
+	run: () -> ()
+)
 	local text = Ui.make("TextLabel", {
 		BackgroundTransparency = 1,
 		FontFace = Ui.display,
@@ -145,7 +149,9 @@ function Ui.bind(button: GuiObject, pcKeys: { Enum.KeyCode }, padKeys: { Enum.Ke
 		TextColor3 = Color3.new(0, 0, 0),
 		TextScaled = true,
 		ZIndex = button.ZIndex + 3,
-	}, { Ui.make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }) })
+	}, {
+		Ui.make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.12, 0) }),
+	})
 	local badge = Ui.make("Frame", {
 		AnchorPoint = Vector2.new(0.3, 0.3),
 		AutomaticSize = Enum.AutomaticSize.None,
@@ -157,7 +163,11 @@ function Ui.bind(button: GuiObject, pcKeys: { Enum.KeyCode }, padKeys: { Enum.Ke
 		Parent = button,
 	}, {
 		Ui.corner(8),
-		Ui.make("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2.5, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }),
+		Ui.make("UIStroke", {
+			Color = Color3.new(0, 0, 0),
+			Thickness = 2.5,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		}),
 		text,
 	})
 	local function refresh()
