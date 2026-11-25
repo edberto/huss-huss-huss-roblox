@@ -4,6 +4,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local MarketplaceService = game:GetService("MarketplaceService")
 
@@ -578,12 +579,14 @@ function ShopClient.start()
 		groupButton.Visible = player:GetAttribute("GroupClaimed") ~= true
 	end
 
-	-- Timing: tap along to 8 thuds; the average lateness becomes the saved calibration -------------
+	-- Timing: tap along to 8 thuds for a first guess, then fine-tune with the slider while a beat
+	-- plays and a ring flashes. The offset (sound lateness) is what the server subtracts from taps.
 	local CAL_BEATS, CAL_BPM = 8, 100
+	local MAX_OFFSET, STEP = 0.3, 0.01
 	local timing, timingBody, timingNote = panel(gui, "Timing")
 	label({
-		Size = UDim2.fromScale(1, 0.2),
-		Text = "Using earbuds? Tap along to the beat so we can match your sound.",
+		Size = UDim2.fromScale(1, 0.11),
+		Text = "Earbuds or lag? Tap along to the beat, then slide until the beat and the flash match.",
 		TextColor3 = WHITE,
 		TextWrapped = true,
 		ZIndex = 22,
@@ -594,44 +597,172 @@ function ShopClient.start()
 		calDots[i] = make("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = IDLE,
-			Position = UDim2.fromScale(0.15 + (i - 1) * 0.1, 0.3),
-			Size = UDim2.fromScale(0.06, 0.06),
+			Position = UDim2.fromScale(0.15 + (i - 1) * 0.1, 0.19),
+			Size = UDim2.fromScale(0.045, 0.045),
 			SizeConstraint = Enum.SizeConstraint.RelativeXX,
 			ZIndex = 22,
 			Parent = timingBody,
 		}, { corner(), outline(2.5) })
 	end
 	local calTap = button(timingBody, "TAP", C.orange)
-	calTap.Position = UDim2.fromScale(0.3, 0.4)
-	calTap.Size = UDim2.fromScale(0.4, 0.25)
+	calTap.Position = UDim2.fromScale(0.32, 0.26)
+	calTap.Size = UDim2.fromScale(0.36, 0.16)
 	local calResult = label({
-		Position = UDim2.fromScale(0, 0.68),
-		Size = UDim2.fromScale(1, 0.12),
+		Position = UDim2.fromScale(0, 0.44),
+		Size = UDim2.fromScale(1, 0.08),
 		Text = "",
 		TextColor3 = GOLD,
 		ZIndex = 22,
 		Parent = timingBody,
 	})
+
+	-- Slider: − [track with knob] +
+	local minus = button(timingBody, "−", IDLE)
+	minus.Position = UDim2.fromScale(0, 0.56)
+	minus.Size = UDim2.fromScale(0.09, 0.12)
+	local plus = button(timingBody, "+", IDLE)
+	plus.Position = UDim2.fromScale(0.91, 0.56)
+	plus.Size = UDim2.fromScale(0.09, 0.12)
+	local track = make("Frame", {
+		BackgroundColor3 = Color3.fromHex("140C28"),
+		Position = UDim2.fromScale(0.12, 0.595),
+		Size = UDim2.fromScale(0.76, 0.05),
+		ZIndex = 22,
+		Parent = timingBody,
+	}, {
+		corner(),
+		outline(2.5),
+		make("Frame", { -- the 0 ms mark
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = WHITE,
+			BackgroundTransparency = 0.5,
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.new(0, 3, 1.6, 0),
+			ZIndex = 23,
+		}),
+	})
+	local knob = make("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = GOLD,
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(2.4, 2.4),
+		SizeConstraint = Enum.SizeConstraint.RelativeYY,
+		ZIndex = 24,
+		Parent = track,
+	}, { corner(), outline(3) })
+	local flash = make("Frame", { -- flashes on the shifted beat
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = IDLE,
+		Position = UDim2.fromScale(0.25, 0.76),
+		Size = UDim2.fromScale(0.06, 0.06),
+		SizeConstraint = Enum.SizeConstraint.RelativeXX,
+		ZIndex = 22,
+		Parent = timingBody,
+	}, { corner(), outline(3) })
+	local offsetText = Ui.shout({
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.fromScale(0.31, 0.76),
+		Size = UDim2.fromScale(0.5, 0.08),
+		Text = "",
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Thickness = 2.5,
+		ZIndex = 22,
+		Parent = timingBody,
+	})
 	local calRetry = button(timingBody, "RETRY", IDLE)
-	calRetry.Position = UDim2.fromScale(0.2, 0.84)
-	calRetry.Size = UDim2.fromScale(0.25, 0.15)
+	calRetry.Position = UDim2.fromScale(0.04, 0.86)
+	calRetry.Size = UDim2.fromScale(0.27, 0.13)
+	local calReset = button(timingBody, "RESET", IDLE)
+	calReset.Position = UDim2.fromScale(0.365, 0.86)
+	calReset.Size = UDim2.fromScale(0.27, 0.13)
 	local calSave = button(timingBody, "SAVE", GREEN)
-	calSave.Position = UDim2.fromScale(0.55, 0.84)
-	calSave.Size = UDim2.fromScale(0.25, 0.15)
+	calSave.Position = UDim2.fromScale(0.69, 0.86)
+	calSave.Size = UDim2.fromScale(0.27, 0.13)
+
+	local offset = 0 -- seconds; positive = the sound reaches you late
+	local function setOffset(value: number)
+		offset = math.clamp(math.round(value / STEP) * STEP, -MAX_OFFSET, MAX_OFFSET)
+		knob.Position = UDim2.fromScale(0.5 + offset / (2 * MAX_OFFSET), 0.5)
+		local ms = math.round(offset * 1000)
+		offsetText.Text = if ms == 0
+			then "0 MS · NO ADJUSTMENT"
+			else `{if ms > 0 then "+" else ""}{ms} MS · SOUND {if ms > 0 then "LATE" else "EARLY"}`
+	end
+	minus.Activated:Connect(function()
+		setOffset(offset - STEP)
+	end)
+	plus.Activated:Connect(function()
+		setOffset(offset + STEP)
+	end)
+	calReset.Activated:Connect(function()
+		setOffset(0)
+	end)
+	local dragging = false
+	local function dragTo(x: number)
+		local fraction = (x - track.AbsolutePosition.X) / track.AbsoluteSize.X
+		setOffset((math.clamp(fraction, 0, 1) - 0.5) * 2 * MAX_OFFSET)
+	end
+	track.InputBegan:Connect(function(input)
+		if
+			input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch
+		then
+			dragging = true
+			dragTo(input.Position.X)
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if
+			dragging
+			and (
+				input.UserInputType == Enum.UserInputType.MouseMovement
+				or input.UserInputType == Enum.UserInputType.Touch
+			)
+		then
+			dragTo(input.Position.X)
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if
+			input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch
+		then
+			dragging = false
+		end
+	end)
 
 	local calTaps: { number } = {}
 	local calBeats: { number } = {}
-	local calOffset: number? = nil
 	local calRun = 0
+	local calibrating = false
+	-- The preview: a beat every 0.6 s, with the ring flashing `offset` after the sound.
+	local function preview(run: number)
+		local beat = os.clock() + 0.3
+		while run == calRun and timing.Visible and not calibrating do
+			local soundAt, flashAt = beat, beat + offset
+			task.delay(math.max(0, soundAt - os.clock()), function()
+				if timing.Visible and not calibrating then
+					StationFx.play("kick")
+				end
+			end)
+			task.delay(math.max(0, flashAt - os.clock()), function()
+				flash.BackgroundColor3 = GOLD
+				task.delay(0.12, function()
+					flash.BackgroundColor3 = IDLE
+				end)
+			end)
+			beat += 60 / CAL_BPM
+			task.wait(math.max(0, beat - os.clock() - 0.3))
+		end
+	end
 	local function runCalibration()
 		calRun += 1
 		local run = calRun
+		calibrating = true
 		table.clear(calTaps)
 		table.clear(calBeats)
-		calOffset = nil
-		calSave.Visible = false
-		local saved = math.round((tonumber(player:GetAttribute("TapOffset")) or 0) * 1000)
-		calResult.Text = `Get ready... (now {saved} ms)`
+		setOffset(tonumber(player:GetAttribute("TapOffset")) or 0)
+		calResult.Text = "Get ready... tap on every thud"
 		local first = os.clock() + 1.5
 		for i = 1, CAL_BEATS do
 			calBeats[i] = first + (i - 1) * 60 / CAL_BPM
@@ -640,6 +771,7 @@ function ShopClient.start()
 		for i, at in calBeats do
 			task.wait(math.max(0, at - os.clock()))
 			if run ~= calRun or not timing.Visible then
+				calibrating = false
 				return
 			end
 			StationFx.play("kick")
@@ -649,16 +781,15 @@ function ShopClient.start()
 		if run ~= calRun then
 			return
 		end
-		calOffset = BeatClock.averageOffset(calTaps, calBeats, 0.25, 5)
-		if calOffset then
-			local ms = math.round(calOffset * 1000)
-			calResult.Text = if math.abs(ms) < 15
-				then "Your timing is spot on!"
-				else `You tap {math.abs(ms)} ms {if ms > 0 then "late" else "early"} → Save to adjust`
-			calSave.Visible = true
+		calibrating = false
+		local measured = BeatClock.averageOffset(calTaps, calBeats, 0.25, 5)
+		if measured then
+			setOffset(measured)
+			calResult.Text = "Now slide until the beat and the flash match"
 		else
-			calResult.Text = "Not enough taps on the beat. Retry!"
+			calResult.Text = "Not enough taps on the beat. Retry, or just use the slider"
 		end
+		preview(run)
 	end
 	calTap.Activated:Connect(function()
 		table.insert(calTaps, os.clock())
@@ -667,10 +798,8 @@ function ShopClient.start()
 		task.spawn(runCalibration)
 	end)
 	calSave.Activated:Connect(function()
-		if calOffset then
-			local reason = offsetRemote:InvokeServer(calOffset)
-			timingNote.Text = if reason then REASONS[reason] or reason else "Saved ✓"
-		end
+		local reason = offsetRemote:InvokeServer(offset)
+		timingNote.Text = if reason then REASONS[reason] or reason else "SAVED ✓"
 	end)
 
 	-- Side buttons -----------------------------------------------------------------------------
