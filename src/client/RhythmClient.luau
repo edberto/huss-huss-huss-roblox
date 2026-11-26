@@ -131,7 +131,7 @@ function RhythmClient.start()
 		if screen.X / 2 - width / 2 >= left and screen.X / 2 + width / 2 <= right then
 			topBar.Position = UDim2.new(0.5, 0, 0, 8)
 		elseif right - left >= width then
-			topBar.Position = UDim2.new(0, (left + right) / 2, 0, 8)
+			topBar.Position = UDim2.fromOffset((left + right) / 2, 8)
 		else
 			topBar.Position = UDim2.new(0.5, 0, 0, math.max(Ui.topInset(), 46 * s + 8) + 6)
 		end

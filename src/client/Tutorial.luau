@@ -79,7 +79,7 @@ function Tutorial.start()
 	})
 	Ui.onResize(function()
 		local height = workspace.CurrentCamera.ViewportSize.Y
-		card.Position = UDim2.new(0, 150 * Ui.hudScale(), 0, height - Ui.trackClearance() - 6)
+		card.Position = UDim2.fromOffset(150 * Ui.hudScale(), height - Ui.trackClearance() - 6)
 	end)
 
 	local shown: { [string]: boolean } = {}

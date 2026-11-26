@@ -1137,7 +1137,7 @@ function ShopClient.start()
 		local column = math.min(height * 0.74, bottom - top)
 		side.SizeConstraint = Enum.SizeConstraint.RelativeXY
 		side.Size = UDim2.fromOffset(column * 0.09 / 0.74, column)
-		side.Position = UDim2.new(0, 28, 0, (top + bottom) / 2)
+		side.Position = UDim2.fromOffset(28, (top + bottom) / 2)
 	end)
 	local dots: { [string]: Frame } = {}
 	local SIDE = {
