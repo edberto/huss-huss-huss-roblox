@@ -2,6 +2,13 @@
 
 Manual place changes that a code publish doesn't carry. Newest first.
 
+## 2026-11-26: Shop thumbnails
+
+- Uploaded 23 shop thumbnails (assets/shop/, from `scripts/shop_thumbs.py`) as images under
+  user 7089502211; ids are in `THUMBS` in src/client/ShopClient.luau. Nothing to do per place.
+- [ ] Creator Hub: set the Party Animal pass (2100270141) icon to assets/icons/party_animal.png
+  (the shop falls back to the drawn thumb until then).
+
 ## 2026-11-26: Front practice cameras (PLAYTEST)
 
 - Moved PracticeCamera_Gym / PracticeCamera_Burgers in all 12 PLAYTEST homes to face the
