@@ -32,13 +32,22 @@ local function cameraPoint(): BasePart
 		or home:WaitForChild("PracticeCamera")
 	) :: BasePart
 end
--- Trainers get the fixed practice view; partiers walk around with the normal camera.
+-- Trainers practising at Night get the fixed practice view; everyone else (Dusk, Dawn,
+-- partiers) walks around with the normal camera.
+local function practising(): boolean
+	return ReplicatedStorage:GetAttribute("Phase") == "Night"
+		and player:GetAttribute("Team") ~= "Partier"
+end
 local function updateCamera()
-	local partier = player:GetAttribute("Team") == "Partier"
-	-- Trainers never walk; hiding the thumbstick and jump button keeps them off the TAP button.
-	GuiService.TouchControlsEnabled = partier
-	if partier then
+	local free = not practising()
+	-- Practising trainers never walk; hiding the thumbstick and jump button keeps them off TAP.
+	GuiService.TouchControlsEnabled = free
+	if free then
 		camera.CameraType = Enum.CameraType.Custom
+		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			camera.CameraSubject = humanoid
+		end
 	else
 		camera.CameraType = Enum.CameraType.Scriptable
 		-- The driveway view tilts up so the floating leaderboards over the party house are in
@@ -67,6 +76,7 @@ player:GetAttributeChangedSignal("Team"):Connect(function()
 	end
 end)
 player:GetAttributeChangedSignal("Station"):Connect(updateCamera)
+ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(updateCamera)
 updateCamera()
 
 -- Party beams sweep the sky (built by the server's Decor; animated here so it's smooth and free).
@@ -115,12 +125,15 @@ local stations = {
 local function currentStation()
 	return stations[player:GetAttribute("Station")] or stations.Basketball
 end
+-- Props only while practising, so they don't trail a player roaming at Dusk or Dawn.
 local function updateStation()
 	for _, station in stations do
-		station.setActive(station == currentStation())
+		station.setActive(station == currentStation() and practising())
 	end
 end
 player:GetAttributeChangedSignal("Station"):Connect(updateStation)
+player:GetAttributeChangedSignal("Team"):Connect(updateStation)
+ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(updateStation)
 updateStation()
 RhythmClient.onResult = function(grade, skill)
 	currentStation().onResult(grade, skill)

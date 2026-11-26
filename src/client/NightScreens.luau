@@ -314,6 +314,7 @@ function NightScreens.start()
 		local function pick()
 			StationFx.play("clap", 1.3)
 			pickEvent:FireServer(name)
+			task.delay(0.5, setPickerOpen, false) -- picked: fold away and let them roam
 		end
 		card.Activated:Connect(pick)
 		Ui.bind(

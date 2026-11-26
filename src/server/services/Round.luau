@@ -52,11 +52,14 @@ local function progressNow(): number
 	return math.clamp((os.clock() - nightStart) / Night.nightTime, 0, 1)
 end
 
+-- Free = walk around (partier speed at Night, normal speed at Dusk and Dawn); not free = held on
+-- the practice spot.
 local function setMovement(player: Player, free: boolean)
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
+		local night = ReplicatedStorage:GetAttribute("Phase") == "Night"
 		humanoid.UseJumpPower = false
-		humanoid.WalkSpeed = if free then Night.partierSpeed else 0
+		humanoid.WalkSpeed = if not free then 0 elseif night then Night.partierSpeed else 16
 		humanoid.JumpHeight = if free then 7.2 else 0
 	end
 end
@@ -84,6 +87,9 @@ end
 local function startTraining(player: Player)
 	Analytics.step(player, "Training")
 	player:SetAttribute("Team", "Trainer")
+	-- Roaming since Dusk: now to the picked station's spot, held there.
+	Homes.placeOnSpot(player)
+	setMovement(player, false)
 	Focus.begin(player, os.clock())
 	Rhythm.start(player, Night.bpm(progressNow()))
 end
@@ -207,11 +213,12 @@ function Round.run()
 		Homes.assign(player)
 		player.CharacterAdded:Connect(function(character)
 			character:WaitForChild("HumanoidRootPart")
+			-- Everyone starts at home; only a trainer spawning mid-Night is held on the spot.
 			local partier = player:GetAttribute("Team") == "Partier"
 			if not partier then
 				Homes.placeOnSpot(player)
 			end
-			setMovement(player, partier)
+			setMovement(player, partier or ReplicatedStorage:GetAttribute("Phase") ~= "Night")
 		end)
 		if ReplicatedStorage:GetAttribute("Phase") == "Night" then
 			startTraining(player)
@@ -232,6 +239,9 @@ function Round.run()
 		runNight()
 
 		setPhase("Dawn", Night.dawnTime)
+		for _, player in Players:GetPlayers() do
+			setMovement(player, true) -- free to roam until the next Dusk
+		end
 		local ranking = sortedResults()
 		-- Pay everyone: points, party points and placement bonuses become saved Huss Points,
 		-- and the night's points become XP for the station they practised.

@@ -20,10 +20,10 @@ describe("Progress", function()
 	end)
 
 	it("pays placement bonuses only with enough players", function()
-		expect(Progress.nightReward(100, 20, 1, 5, true)).toBe(10 + 20 + 300 + 30)
-		expect(Progress.nightReward(100, 0, 3, 5, false)).toBe(10 + 150)
-		expect(Progress.nightReward(100, 0, 1, 1, true)).toBe(10 + 30)
-		expect(Progress.nightReward(3009, 0, 4, 1, false)).toBe(300) -- rounds down
+		expect(Progress.nightReward(100, 20, 1, 5, true)).toBe(5 + 10 + 150 + 15)
+		expect(Progress.nightReward(100, 0, 3, 5, false)).toBe(5 + 75)
+		expect(Progress.nightReward(100, 0, 1, 1, true)).toBe(5 + 15)
+		expect(Progress.nightReward(3019, 0, 4, 1, false)).toBe(150) -- rounds down
 	end)
 
 	it("pays harder stations more", function()

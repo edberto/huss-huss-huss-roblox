@@ -17,13 +17,14 @@ Progress.ranks = table.freeze({
 })
 
 -- Dawn rewards in Huss Points (design doc).
-Progress.lastStandingBonus = 300
-Progress.topThreeBonus = 150
-Progress.finishBonus = 30
+Progress.lastStandingBonus = 150
+Progress.topThreeBonus = 75
+Progress.finishBonus = 15
 Progress.placementMinPlayers = 3 -- placement bonuses need a real field to beat
--- Practice points become Huss at this rate: a strong 2.5-minute night is ~200-300 Huss, in line with the
+-- Practice points become Huss at this rate: a strong 2.5-minute night is ~100-150 Huss, in line with the
 -- daily reward, gifts and the Robux packs. (1:1 paid ~3,000 a night and emptied the shop in four.)
-Progress.hussPerPoint = 0.1
+Progress.hussPerPoint = 0.05
+Progress.hussPerPartyPoint = 0.5 -- partiers earn, but less than lasting the night
 
 -- Total XP needed to reach `level` from level 1.
 function Progress.xpForLevel(level: number): number
@@ -62,7 +63,7 @@ function Progress.nightReward(
 	players: number,
 	finished: boolean
 ): number
-	local hp = math.floor(points * Progress.hussPerPoint) + math.floor(partyPoints)
+	local hp = math.floor(points * Progress.hussPerPoint) + math.floor(partyPoints * Progress.hussPerPartyPoint)
 	if players >= Progress.placementMinPlayers then
 		if place == 1 then
 			hp += Progress.lastStandingBonus
