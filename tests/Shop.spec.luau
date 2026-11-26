@@ -88,6 +88,6 @@ describe("Rewards", function()
 			nights += 1
 		end
 		expect(nights).toBe(5)
-		expect(Products.nightMultiplier(false, 0, false, left)).toBe(1) -- then back to normal
+		expect((Products.nightMultiplier(false, 0, false, left))).toBe(1) -- then back to normal
 	end)
 end)
