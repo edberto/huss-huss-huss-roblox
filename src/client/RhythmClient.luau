@@ -398,9 +398,11 @@ function RhythmClient.start()
 	})
 	local function refreshFriends()
 		local friends = tonumber(player:GetAttribute("FriendsHere")) or 0
-		local bonus = math.round(math.min(friends, Products.friendBonusMax) * Products.friendBonus * 100)
+		local bonus =
+			math.round(math.min(friends, Products.friendBonusMax) * Products.friendBonus * 100)
 		friendChip.Visible = friends > 0
-		friendChip.Text = `👥 {friends} friend{if friends == 1 then "" else "s"} · +{bonus}% Huss`
+		friendChip.Text =
+			`👥 {friends} friend{if friends == 1 then "" else "s"} · +{bonus}% Huss`
 	end
 	player:GetAttributeChangedSignal("FriendsHere"):Connect(refreshFriends)
 	refreshFriends()
