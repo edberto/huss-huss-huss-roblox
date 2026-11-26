@@ -351,31 +351,51 @@ function RhythmClient.start()
 		TweenService:Create(hitStroke, fade, { Transparency = 1 }):Play()
 	end
 
-	local segment: { startTime: number, bpm: number, pattern: BeatClock.Pattern }? = nil
-	local function refreshSegment()
-		local startTime, bpm = player:GetAttribute("BeatStart"), player:GetAttribute("BeatBpm")
-		local previous = segment
-		segment = if typeof(startTime) == "number" and typeof(bpm) == "number"
+	type Segment = { startTime: number, bpm: number, pattern: BeatClock.Pattern }
+	local function readSegment(startKey: string, bpmKey: string): Segment?
+		local startTime, bpm = player:GetAttribute(startKey), player:GetAttribute(bpmKey)
+		return if typeof(startTime) == "number" and typeof(bpm) == "number"
 			then {
 				startTime = startTime,
 				bpm = bpm,
 				pattern = Night.pattern(player:GetAttribute("Station")),
 			}
 			else nil
-		-- Tempo steps restart the beat half a second later, off the old grid: a deliberate
-		-- distraction, so announce it.
-		if previous and segment and segment.bpm > previous.bpm then
-			flashWord("TEMPO UP!", ORANGE, 1.2)
-			StationFx.play("tempo")
-		end
+	end
+	-- `segment` is the beat now; `nextSegment` is a tempo step waiting on the next bar line
+	-- (the server's Rhythm.changeTempo). The switch happens here on the bar line itself, so
+	-- the beat carries straight on at the new speed.
+	local segment: Segment? = nil
+	local nextSegment: Segment? = nil
+	local function refreshSegment()
+		segment = readSegment("BeatStart", "BeatBpm")
 		if not segment then
 			sessionPoints = 0
 			refreshPoints()
 		end
 	end
+	local function refreshNext()
+		local previous = nextSegment
+		nextSegment = readSegment("BeatNextStart", "BeatNextBpm")
+		if nextSegment and not previous then
+			flashWord("TEMPO UP!", ORANGE, 1.4) -- a bar ahead of the change
+			StationFx.play("tempo")
+		end
+	end
+	-- The segment to play at `now`: the waiting tempo step once its bar line has passed.
+	local function segmentAt(now: number): Segment?
+		local waiting = nextSegment
+		if waiting and now >= waiting.startTime then
+			return waiting
+		end
+		return segment
+	end
 	player:GetAttributeChangedSignal("BeatStart"):Connect(refreshSegment)
 	player:GetAttributeChangedSignal("BeatBpm"):Connect(refreshSegment)
+	player:GetAttributeChangedSignal("BeatNextStart"):Connect(refreshNext)
+	player:GetAttributeChangedSignal("BeatNextBpm"):Connect(refreshNext)
 	refreshSegment()
+	refreshNext()
 
 	-- The audible beat: a thud every beat, a clap on each skill note (up to a frame late).
 	-- On top, a training groove on eighth notes that builds as the tempo steps up:
@@ -384,7 +404,7 @@ function RhythmClient.start()
 	local BASSLINE = { 0, nil, 0, 3, nil, 0, nil, 5, 7, nil, 7, 5, nil, 3, nil, nil }
 	local clickStart, clickBeat, clapNote, eighth = 0, -1, -1, -1
 	RunService.RenderStepped:Connect(function()
-		local current = segment
+		local current = segmentAt(workspace:GetServerTimeNow())
 		if current then
 			local now = workspace:GetServerTimeNow()
 			local beat = math.floor((now - current.startTime) * current.bpm / 60)
@@ -454,20 +474,35 @@ function RhythmClient.start()
 				tick.Visible = true
 			end
 		end
-		local first = BeatClock.nearest(
-			current.startTime,
-			current.bpm,
-			now - interval * 0.25,
-			current.pattern
+		-- Notes to draw: this segment's up to a waiting tempo step's bar line, then the step's.
+		local upcoming: { { time: number, skill: boolean } } = {}
+		local waiting = if nextSegment and nextSegment ~= current then nextSegment else nil
+		local cutoff = if waiting then waiting.startTime else math.huge
+		local first = math.max(
+			0,
+			BeatClock.nearest(current.startTime, current.bpm, now - interval * 0.25, current.pattern)
 		)
-		first = math.max(0, first)
+		for beat = first, first + #dots - 1 do
+			local time = BeatClock.noteTime(current.startTime, current.bpm, beat, current.pattern)
+			if time >= cutoff then
+				break
+			end
+			table.insert(upcoming, { time = time, skill = BeatClock.isSkillBeat(beat, current.pattern) })
+		end
+		if waiting then
+			for beat = 0, #dots - #upcoming - 1 do
+				table.insert(upcoming, {
+					time = BeatClock.noteTime(waiting.startTime, waiting.bpm, beat, waiting.pattern),
+					skill = BeatClock.isSkillBeat(beat, waiting.pattern),
+				})
+			end
+		end
 		for i, dot in dots do
-			local beat = first + i - 1
-			local ahead = BeatClock.noteTime(current.startTime, current.bpm, beat, current.pattern)
-				- now
+			local note = upcoming[i]
+			local ahead = if note then note.time - now else math.huge
 			local x = RING_X + ahead / (interval * BEATS_SHOWN) * span
-			if x >= RING_X - 20 and x <= RING_X + span then
-				local skill = BeatClock.isSkillBeat(beat, current.pattern)
+			if note and x >= RING_X - 20 and x <= RING_X + span then
+				local skill = note.skill
 				local size = if skill then 36 else 24
 				dot.Size = UDim2.fromOffset(size, size)
 				dot.BackgroundColor3 = if skill then ORANGE else CREAM

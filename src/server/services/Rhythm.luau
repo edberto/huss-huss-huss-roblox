@@ -80,8 +80,8 @@ calibrate.OnServerInvoke = function(player: Player, offset: unknown): string?
 	end)
 end
 
-function Rhythm.start(player: Player, bpm: number, leadIn: number?)
-	local startTime = workspace:GetServerTimeNow() + (leadIn or 2)
+function Rhythm.start(player: Player, bpm: number, leadIn: number?, startAt: number?)
+	local startTime = startAt or workspace:GetServerTimeNow() + (leadIn or 2)
 	local previous = sessions[player]
 	sessions[player] = {
 		startTime = startTime,
@@ -98,6 +98,38 @@ function Rhythm.start(player: Player, bpm: number, leadIn: number?)
 	player:SetAttribute("BeatStart", startTime)
 end
 
+-- Tempo step without a jolt: the new tempo starts on the old beat's next bar line at least
+-- three-quarters of a bar away. Clients see it coming ("BeatNextStart"/"BeatNextBpm"), draw
+-- the old notes up to the bar line and the new ones after, and switch on the bar line.
+function Rhythm.changeTempo(player: Player, bpm: number)
+	local session = sessions[player]
+	if not session then
+		Rhythm.start(player, bpm)
+		return
+	end
+	local now = workspace:GetServerTimeNow()
+	local bar = 240 / session.bpm -- 8 eighth notes
+	local bars = math.ceil((now + bar * 0.75 - session.startTime) / bar)
+	local switchAt = session.startTime + bars * bar
+	player:SetAttribute("BeatNextStart", switchAt)
+	player:SetAttribute("BeatNextBpm", bpm)
+	task.delay(switchAt - now, function()
+		if sessions[player] ~= session then
+			return -- stopped or restarted meanwhile
+		end
+		-- The old segment's note on the bar line is the new segment's note 0: carry its tap.
+		local onBarLine = bars * #session.pattern
+		Rhythm.start(player, bpm, nil, switchAt)
+		local fresh = sessions[player]
+		if session.lastBeat >= onBarLine then
+			fresh.lastBeat = 0
+			fresh.tapped[0] = true
+		end
+		player:SetAttribute("BeatNextStart", nil)
+		player:SetAttribute("BeatNextBpm", nil)
+	end)
+end
+
 function Rhythm.isActive(player: Player): boolean
 	return sessions[player] ~= nil
 end
@@ -107,6 +139,8 @@ function Rhythm.stop(player: Player): Score.State?
 	sessions[player] = nil
 	player:SetAttribute("BeatStart", nil)
 	player:SetAttribute("BeatBpm", nil)
+	player:SetAttribute("BeatNextStart", nil)
+	player:SetAttribute("BeatNextBpm", nil)
 	if session then
 		return session.score
 	end

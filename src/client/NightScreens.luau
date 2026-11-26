@@ -489,10 +489,35 @@ function NightScreens.start()
 		promptButtonText.Text =
 			string.upper(if tapsLeft > 1 then `{buttonText} ({tapsLeft})` else buttonText)
 	end
+	-- Mashing E to pre-empt temptations: a press with nothing to answer (and no Invite flyer to
+	-- toss) locks answering for a moment, so spammers miss the next one.
+	local lockedUntil, answeredAt = 0, 0
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		local key = input.KeyCode
+		if gameProcessed or (key ~= Enum.KeyCode.E and key ~= Enum.KeyCode.ButtonX) then
+			return
+		end
+		local practising = ReplicatedStorage:GetAttribute("Phase") == "Night"
+			and player:GetAttribute("Team") ~= "Partier"
+		local justAnswered = os.clock() - answeredAt < 0.1 -- this same press closed the prompt
+		if
+			practising
+			and not prompt.Visible
+			and not justAnswered
+			and player:GetAttribute("FlyerUp") ~= true
+		then
+			lockedUntil = os.clock() + 1.5
+		end
+	end)
 	local function answer()
 		if tapsLeft <= 0 then
 			return
 		end
+		if os.clock() < lockedUntil then
+			promptButtonText.Text = "TOO EAGER!"
+			return
+		end
+		answeredAt = os.clock()
 		answerEvent:FireServer(activeId)
 		tapsLeft -= 1
 		if tapsLeft <= 0 then

@@ -222,6 +222,10 @@ function PartyClient.start()
 	local function tossFlyer()
 		flyer.Visible = false
 	end
+	-- NightScreens' E-spam lock ignores presses aimed at the flyer.
+	flyer:GetPropertyChangedSignal("Visible"):Connect(function()
+		player:SetAttribute("FlyerUp", flyer.Visible)
+	end)
 	flyer.Activated:Connect(tossFlyer)
 	Ui.bind(flyer, { Enum.KeyCode.E }, { Enum.KeyCode.ButtonX }, tossFlyer)
 	local fakeDots: { Frame } = {}

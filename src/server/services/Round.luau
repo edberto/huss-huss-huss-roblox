@@ -186,7 +186,7 @@ local function runNight()
 			bpm = Night.bpm(progress)
 			for _, player in Players:GetPlayers() do
 				if Rhythm.isActive(player) then
-					Rhythm.start(player, bpm, 0.5)
+					Rhythm.changeTempo(player, bpm)
 				end
 			end
 		end
