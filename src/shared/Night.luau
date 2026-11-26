@@ -31,6 +31,8 @@ end
 Night.focusStart = 100
 Night.missDrain = 2 -- focus lost per missed tap (doubled during a bass drop)
 Night.skipDrain = 1 -- focus lost per beat not tapped at all (idle all night = gives in)
+-- Focus won back per good tap, so steady play recovers from misses and temptations.
+Night.hitGain = table.freeze({ Perfect = 1, Good = 0.5 } :: { [string]: number })
 
 export type TemptationKind = "Doorbell" | "Phone" | "Friend" | "BassDrop"
 -- window: seconds to answer; taps: answers needed (0 = nothing to answer); drain: focus lost if

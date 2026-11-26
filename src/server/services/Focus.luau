@@ -90,6 +90,8 @@ function Focus.onGrade(player: Player, grade: string)
 	if state and grade == "Miss" then
 		local bass = os.clock() < state.bassUntil
 		setFocus(player, state, state.focus - Night.missDrain * (if bass then 2 else 1))
+	elseif state and Night.hitGain[grade] then
+		setFocus(player, state, math.min(Night.focusStart, state.focus + Night.hitGain[grade]))
 	end
 end
 

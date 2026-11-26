@@ -140,14 +140,16 @@ function RhythmClient.start()
 
 	-- Top right: Huss total in a gold pill with a coin; pops when it goes up.
 	local pointsScale = make("UIScale", {})
+	-- Centred in the space right of the coin.
 	local points = Ui.shout({
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -12, 0.5, 0),
-		Size = UDim2.new(1, -56, 0.7, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 48, 0.5, 0),
+		Size = UDim2.new(1, -58, 0.75, 0),
 		Text = "",
-		TextXAlignment = Enum.TextXAlignment.Right,
+		TextXAlignment = Enum.TextXAlignment.Center,
 		Thickness = 2.5,
 	})
+	make("UIPadding", { PaddingTop = UDim.new(0.14, 0), PaddingBottom = UDim.new(0.04, 0), Parent = points })
 	make("Frame", {
 		AnchorPoint = Vector2.new(1, 0),
 		BackgroundColor3 = Color3.new(1, 1, 1),

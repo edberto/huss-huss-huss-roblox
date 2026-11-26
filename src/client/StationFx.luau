@@ -135,10 +135,13 @@ function StationFx.handPosition(): Vector3?
 	local character = player.Character
 	local hand = character
 		and (character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm"))
-	if hand and hand:IsA("BasePart") then
-		return hand.Position - Vector3.new(0, hand.Size.Y / 2 + 0.6, 0)
-	end
 	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if hand and hand:IsA("BasePart") then
+		local at = hand.Position - Vector3.new(0, hand.Size.Y / 2 + 0.6, 0)
+		-- Avatars whose hands hang near the floor would hold the ball under the driveway.
+		local floor = if root then root.Position.Y - 2 else at.Y
+		return Vector3.new(at.X, math.max(at.Y, floor), at.Z)
+	end
 	if not root then
 		return nil
 	end
