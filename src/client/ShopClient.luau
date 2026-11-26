@@ -299,7 +299,7 @@ function ShopClient.start()
 	-- What goes in a cosmetic card's banner: the trail's gradient, the title as it shows
 	-- overhead, the ball's colour, or an emoji for dances and perks.
 	local EMOJI = { dance = "🕺", perk = "🎉" }
-	local function preview(banner: Frame, item: Cosmetics.Item)
+	local function bannerPreview(banner: Frame, item: Cosmetics.Item)
 		local colors = item.colors
 		if item.slot == "trail" and colors then
 			banner.BackgroundColor3 = WHITE
@@ -435,7 +435,7 @@ function ShopClient.start()
 				ZIndex = 23,
 				Parent = card,
 			}, { corner(10), outline(2.5) })
-			preview(banner, item)
+			bannerPreview(banner, item)
 			label({
 				Position = UDim2.fromScale(0.05, 0.42),
 				Size = UDim2.fromScale(0.9, 0.22),
