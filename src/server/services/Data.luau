@@ -209,7 +209,11 @@ function Data.creditNight(
 	data.stationXp[station] = (data.stationXp[station] or 0) + math.max(0, math.floor(xp))
 	data.nights += 1
 	publish(player, data)
-	return before, Progress.level(data.stationXp[station]), credited, boosted
+	local after = Progress.level(data.stationXp[station])
+	for level = before + 1, after do
+		Analytics.levelUp(player, station, level)
+	end
+	return before, after, credited, boosted
 end
 
 -- Lifetime leaderboard stats (best combo, dawns, drag-ins, party points).
