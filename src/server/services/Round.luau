@@ -9,6 +9,7 @@ local Night = require(ReplicatedStorage.Shared.Night)
 local Analytics = require(script.Parent.Analytics)
 local Badges = require(script.Parent.Badges)
 local QuestService = require(script.Parent.QuestService)
+local Referrals = require(script.Parent.Referrals)
 local Decor = require(script.Parent.Decor)
 local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
@@ -279,6 +280,7 @@ function Round.run()
 			player:SetAttribute("Team", "Trainer")
 			player:SetAttribute("PartyTonight", false) -- choose again each Dusk
 			task.spawn(QuestService.refresh, player) -- a new UTC day brings new quests
+			task.spawn(Referrals.collect, player) -- rewards for friends who joined elsewhere
 			player:SetAttribute("Focus", Night.focusStart)
 			task.spawn(player.LoadCharacter, player) -- everyone back to the driveway
 		end

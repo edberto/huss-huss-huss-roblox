@@ -38,6 +38,8 @@ export type Data = {
 	calmFlashing: boolean, -- Settings > Visual: calmer dance floor, no fireworks, no beat flare
 	quests: Quests.State, -- today's daily quests (QuestService)
 	starterPack: boolean, -- bought the one-time Starter Pack
+	referredBy: number, -- user id of whoever's referral link brought this player (0 = none)
+	referralsPaid: number, -- new players this player has been rewarded for (Referrals)
 }
 
 local TEMPLATE: Data = {
@@ -60,6 +62,8 @@ local TEMPLATE: Data = {
 	calmFlashing = false,
 	quests = { day = 0, ids = {}, progress = {}, done = {}, bonus = false },
 	starterPack = false,
+	referredBy = 0,
+	referralsPaid = 0,
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)

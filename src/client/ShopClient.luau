@@ -60,6 +60,7 @@ local THUMBS = {
 	trail_party = 104361770927158,
 	trail_gold = 113621687094789,
 	trail_streak = 101230609203595,
+	trail_starter = 72024198992120,
 	title_hooper = 76134100486639,
 	title_gymrat = 131364933082912,
 	title_burgerboss = 118928807169788,
