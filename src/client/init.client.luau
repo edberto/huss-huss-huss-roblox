@@ -10,6 +10,7 @@ local Gym = require(script.Gym)
 local NightScreens = require(script.NightScreens)
 local PartyClient = require(script.PartyClient)
 local PartyMusic = require(script.PartyMusic)
+local Pose = require(script.Pose)
 local Ranks = require(script.Ranks)
 local RhythmClient = require(script.RhythmClient)
 local ShopClient = require(script.ShopClient)
@@ -125,19 +126,15 @@ local stations = {
 local function currentStation()
 	return stations[player:GetAttribute("Station")] or stations.Basketball
 end
--- While practising, your own avatar turns see-through on your screen and your title tag hides,
--- so big avatars don't cover the ball, barbell or burger.
+-- While practising: station arm motions instead of the default animations (Pose), and your
+-- title tag hides so it doesn't sit over the ball, barbell or burger.
 local function updateGhost()
 	local character = player.Character
 	if not character then
 		return
 	end
 	local on = practising()
-	for _, item in character:GetDescendants() do
-		if item:IsA("BasePart") or item:IsA("Decal") then
-			item.LocalTransparencyModifier = if on then 0.65 else 0
-		end
-	end
+	Pose.set(if on then player:GetAttribute("Station") :: string? else nil)
 	local head = character:FindFirstChild("Head")
 	local tag = head and head:FindFirstChild("HussTag")
 	if tag and tag:IsA("BillboardGui") then
@@ -163,6 +160,7 @@ ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(updateStation)
 updateStation()
 RhythmClient.onResult = function(grade, skill)
 	currentStation().onResult(grade, skill)
+	Pose.hit(grade, skill)
 end
 RhythmClient.start()
 NightScreens.start()
