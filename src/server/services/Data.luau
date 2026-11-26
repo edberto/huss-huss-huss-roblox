@@ -2,6 +2,7 @@
 -- Saved player data through ProfileStore (session-locked, autosaving). Mirrors what the client
 -- shows into attributes: "HP" (Huss Points), "Lv_<Station>" per station, "Rank".
 -- Also fills the Roblox player list (leaderstats) with HP and Rank.
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -12,6 +13,7 @@ local Progress = require(ReplicatedStorage.Shared.Progress)
 local Products = require(ReplicatedStorage.Shared.Products)
 local Rewards = require(ReplicatedStorage.Shared.Rewards)
 local Stats = require(ReplicatedStorage.Shared.Stats)
+local Quests = require(ReplicatedStorage.Shared.Quests)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 local Analytics = require(script.Parent.Analytics)
 local Badges = require(script.Parent.Badges)
@@ -34,6 +36,7 @@ export type Data = {
 	volume: { music: number, beat: number, sfx: number }, -- Settings sliders, 0-2 (1 = default)
 	partyTickets: number, -- each skips one night's practice (Gifts; Party Animal skips for free)
 	calmFlashing: boolean, -- Settings > Visual: calmer dance floor, no fireworks, no beat flare
+	quests: Quests.State, -- today's daily quests (QuestService)
 }
 
 local TEMPLATE: Data = {
@@ -54,6 +57,7 @@ local TEMPLATE: Data = {
 	volume = { music = 1, beat = 1, sfx = 1 },
 	partyTickets = 0,
 	calmFlashing = false,
+	quests = { day = 0, ids = {}, progress = {}, done = {}, bonus = false },
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -101,6 +105,22 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("Vol_sfx", data.volume.sfx)
 	player:SetAttribute("PartyTickets", data.partyTickets)
 	player:SetAttribute("CalmFlashing", data.calmFlashing)
+	-- Today's quests for the client card: id, text, progress, goal, reward, done.
+	local quests = {}
+	for _, id in data.quests.ids do
+		local quest = Quests.get(id)
+		if quest then
+			table.insert(quests, {
+				text = quest.text,
+				progress = data.quests.progress[id] or 0,
+				goal = quest.goal,
+				reward = quest.reward,
+				done = data.quests.done[id] == true,
+			})
+		end
+	end
+	player:SetAttribute("Quests", HttpService:JSONEncode(quests))
+	player:SetAttribute("QuestsDay", data.quests.day)
 	-- Own leaderboard values, so the Ranks panel can pin the player's row.
 	for _, category in Stats.categories do
 		player:SetAttribute(`Stat_{category.key}`, Stats.value(data.hp, data.stats, category.key))

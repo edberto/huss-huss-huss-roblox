@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Night = require(ReplicatedStorage.Shared.Night)
 local Analytics = require(script.Parent.Analytics)
 local Badges = require(script.Parent.Badges)
+local QuestService = require(script.Parent.QuestService)
 local Decor = require(script.Parent.Decor)
 local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
@@ -277,6 +278,7 @@ function Round.run()
 		for _, player in Players:GetPlayers() do
 			player:SetAttribute("Team", "Trainer")
 			player:SetAttribute("PartyTonight", false) -- choose again each Dusk
+			task.spawn(QuestService.refresh, player) -- a new UTC day brings new quests
 			player:SetAttribute("Focus", Night.focusStart)
 			task.spawn(player.LoadCharacter, player) -- everyone back to the driveway
 		end
@@ -323,6 +325,7 @@ function Round.run()
 				Data.bankPlaytime(player)
 				result.levelBefore, result.levelAfter, result.earned, result.boosted =
 					Data.creditNight(player, hp, result.station, result.points)
+				QuestService.night(player, result)
 			end
 		end
 		resultsEvent:FireAllClients(ranking)

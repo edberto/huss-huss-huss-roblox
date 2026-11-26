@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Cosmetics = require(ReplicatedStorage.Shared.Cosmetics)
 local Data = require(script.Parent.Data)
+local QuestService = require(script.Parent.QuestService)
 
 local remotes = ReplicatedStorage:WaitForChild("RhythmRemotes")
 local buyEvent = Instance.new("RemoteFunction")
@@ -117,9 +118,13 @@ buyEvent.OnServerInvoke = function(player: Player, id: unknown): string?
 	if typeof(id) ~= "string" then
 		return "NotForSale"
 	end
-	return Data.update(player, function(data)
+	local refused = Data.update(player, function(data)
 		return Cosmetics.buy(data :: any, id)
 	end, "Shop", id)
+	if not refused then
+		QuestService.add(player, "shopBuy", 1)
+	end
+	return refused
 end
 
 equipEvent.OnServerInvoke = function(player: Player, slot: unknown, id: unknown): string?

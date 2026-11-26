@@ -11,6 +11,7 @@ local Homes = require(script.Parent.Homes)
 local Decor = require(script.Parent.Decor)
 local Looks = require(script.Parent.Looks)
 local Party = require(script.Parent.Party)
+local QuestService = require(script.Parent.QuestService)
 
 local FILL_TO = 6 -- real players + NPC trainers per night
 local NAMES = {
@@ -164,6 +165,9 @@ Party.abilityEvent.OnServerEvent:Connect(
 			return
 		end
 		npc.shieldUntil = os.clock() + Night.shieldTime
+	if ability == "Dance" then
+		QuestService.add(partier, "danceOff", 1)
+	end
 		npc.giveInAt -= PULL[ability :: string] or 0
 		npc.tempter, npc.temptedAt = partier, os.clock()
 		npc.humanoid.Jump = true -- a startled hop, so the partier sees it land

@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Night = require(ReplicatedStorage.Shared.Night)
 local Data = require(script.Parent.Data)
 local Focus = require(script.Parent.Focus)
+local QuestService = require(script.Parent.QuestService)
 
 local Party = {}
 
@@ -37,6 +38,7 @@ function Party.creditDragIn(tempter: Player)
 	if tempter.Parent then
 		addPoints(tempter, Night.giveInBonus)
 		Data.recordStats(tempter, { draggedIn = 1 })
+		QuestService.add(tempter, "dragIn", 1)
 	end
 end
 
@@ -156,6 +158,9 @@ abilityEvent.OnServerEvent:Connect(function(partier: Player, ability: unknown, t
 	end
 	mine[ability] = now + spec.cooldown
 	lastTempter[trainer] = partier
+	if ability == "Dance" then
+		QuestService.add(partier, "danceOff", 1)
+	end
 	addPoints(partier, spec.points)
 end)
 

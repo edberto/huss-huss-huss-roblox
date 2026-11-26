@@ -11,6 +11,7 @@ local Night = require(Shared.Night)
 local Score = require(Shared.Score)
 local Analytics = require(script.Parent.Analytics)
 local Data = require(script.Parent.Data)
+local QuestService = require(script.Parent.QuestService)
 
 type Session = {
 	startTime: number,
@@ -215,6 +216,10 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 	)
 	broadcast(player, grade, skill)
 	Rhythm.onGrade(player, grade)
+	if grade == "Perfect" then
+		QuestService.add(player, "perfects", 1)
+	end
+	QuestService.add(player, "multiplier", Score.multiplier(session.score.combo))
 	Analytics.step(player, "FirstTap")
 	if Score.multiplier(session.score.combo) >= 2 then
 		Analytics.step(player, "Combo")
