@@ -315,7 +315,12 @@ function ShopClient.start()
 				TextColor3 = Color3.fromHex("3DFFB0"),
 				ZIndex = 24,
 				Parent = banner,
-			}, { make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }) })
+			}, {
+				make(
+					"UIPadding",
+					{ PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }
+				),
+			})
 		elseif item.slot == "ball" and colors then
 			banner.BackgroundColor3 = C.navy
 			make("Frame", {
@@ -333,7 +338,12 @@ function ShopClient.start()
 				Text = EMOJI[item.slot],
 				ZIndex = 24,
 				Parent = banner,
-			}, { make("UIPadding", { PaddingTop = UDim.new(0.1, 0), PaddingBottom = UDim.new(0.1, 0) }) })
+			}, {
+				make(
+					"UIPadding",
+					{ PaddingTop = UDim.new(0.1, 0), PaddingBottom = UDim.new(0.1, 0) }
+				),
+			})
 		end
 	end
 
