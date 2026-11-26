@@ -406,7 +406,13 @@ local function buildHome(index: number, lot: CFrame)
 		)
 	end
 	frontCamera(home, "PracticeCamera_Gym", lot, Vector3.new(-7, 6.4, 21), Vector3.new(-7, 4, 31))
-	frontCamera(home, "PracticeCamera_Burgers", lot, Vector3.new(7, 6.4, 19.5), Vector3.new(7, 3.8, 29.4))
+	frontCamera(
+		home,
+		"PracticeCamera_Burgers",
+		lot,
+		Vector3.new(7, 6.4, 19.5),
+		Vector3.new(7, 3.8, 29.4)
+	)
 	home.Parent = homes
 end
 
