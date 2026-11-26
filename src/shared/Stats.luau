@@ -47,7 +47,8 @@ function Stats.apply(stats: Stats, change: Change)
 end
 
 -- The leaderboards, in board order. `key` names the OrderedDataStore; `board` groups the
--- categories that rotate on one floating board.
+-- categories that rotate on one floating board. All but Most Huss are WEEKLY: they count only
+-- this week (Monday 00:00 UTC) so new players get a fresh race (Stats.week, Data.weekValue).
 Stats.categories = table.freeze({
 	{ key = "hp", title = "MOST HUSS", short = "HUSS", board = "Center", color = "FFBE28" },
 	{
@@ -56,6 +57,7 @@ Stats.categories = table.freeze({
 		short = "COMBO",
 		board = "Left",
 		color = "50DCFF",
+		weekly = true,
 	},
 	{
 		key = "playtime",
@@ -63,6 +65,7 @@ Stats.categories = table.freeze({
 		short = "PLAYTIME",
 		board = "Left",
 		color = "50DCFF",
+		weekly = true,
 	},
 	{
 		key = "dawns_Basketball",
@@ -70,14 +73,23 @@ Stats.categories = table.freeze({
 		short = "BASKETBALL",
 		board = "Right",
 		color = "5AD278",
+		weekly = true,
 	},
-	{ key = "dawns_Gym", title = "GYM DAWNS", short = "GYM", board = "Right", color = "50AAFF" },
+	{
+		key = "dawns_Gym",
+		title = "GYM DAWNS",
+		short = "GYM",
+		board = "Right",
+		color = "50AAFF",
+		weekly = true,
+	},
 	{
 		key = "dawns_Burgers",
 		title = "BURGERS DAWNS",
 		short = "BURGERS",
 		board = "Right",
 		color = "FF5A5A",
+		weekly = true,
 	},
 	{
 		key = "draggedIn",
@@ -85,6 +97,7 @@ Stats.categories = table.freeze({
 		short = "DRAGGED IN",
 		board = "Party",
 		color = "FF50C8",
+		weekly = true,
 	},
 	{
 		key = "partyPoints",
@@ -92,8 +105,14 @@ Stats.categories = table.freeze({
 		short = "PARTY PTS",
 		board = "Party",
 		color = "FF50C8",
+		weekly = true,
 	},
 })
+
+-- Week number for the weekly boards; weeks start Monday 00:00 UTC (day 0 was a Thursday).
+function Stats.week(unixTime: number): number
+	return (unixTime - 4 * 86400) // (7 * 86400)
+end
 
 -- A category's value for a player's saved data (hp lives outside stats).
 function Stats.value(hp: number, stats: Stats, key: string): number

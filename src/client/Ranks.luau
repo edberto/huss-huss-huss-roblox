@@ -21,6 +21,7 @@ local scale: UIScale
 local list: ScrollingFrame
 local tabs: { [string]: TextButton } = {}
 local mine: { place: TextLabel, value: TextLabel }
+local period: TextLabel -- "This week · resets Monday" or "All time", under the title
 local current = "hp"
 
 local function stroke(thickness: number): UIStroke
@@ -41,6 +42,7 @@ end
 
 local function render()
 	local info = category(current)
+	period.Text = if (info :: any).weekly then "THIS WEEK · resets Monday" else "ALL TIME"
 	for key, tab in tabs do
 		local on = key == current
 		tab.BackgroundColor3 = if on
@@ -254,6 +256,17 @@ function Ranks.start()
 			TextColor3 = Color3.fromHex("FFD23C"),
 			Thickness = 4,
 		}),
+		(function()
+			period = Ui.label({
+				AnchorPoint = Vector2.new(0, 0),
+				Position = UDim2.new(0, 22, 0, 26),
+				Size = UDim2.new(0.28, 0, 0, 22),
+				Text = "",
+				TextColor3 = Color3.fromHex("C8B4E6"),
+				TextXAlignment = Enum.TextXAlignment.Left,
+			})
+			return period
+		end)(),
 		close,
 		tabRow,
 		list,

@@ -40,6 +40,8 @@ export type Data = {
 	starterPack: boolean, -- bought the one-time Starter Pack
 	referredBy: number, -- user id of whoever's referral link brought this player (0 = none)
 	referralsPaid: number, -- new players this player has been rewarded for (Referrals)
+	-- Weekly boards: this week's number, the lifetime values when it began, best combo this week.
+	weekly: { week: number, base: { [string]: number }, combo: number },
 }
 
 local TEMPLATE: Data = {
@@ -64,6 +66,7 @@ local TEMPLATE: Data = {
 	starterPack = false,
 	referredBy = 0,
 	referralsPaid = 0,
+	weekly = { week = 0, base = {}, combo = 0 },
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -77,6 +80,31 @@ local function totalLevels(data: Data): number
 		total += Progress.level(data.stationXp[station] or 0)
 	end
 	return total
+end
+
+-- A new week (Stats.week) starts the weekly boards from the lifetime values as they are now.
+local function ensureWeek(data: Data)
+	local week = Stats.week(os.time())
+	if data.weekly.week ~= week then
+		local base = {}
+		for _, category in Stats.categories do
+			base[category.key] = Stats.value(data.hp, data.stats, category.key)
+		end
+		data.weekly = { week = week, base = base, combo = 0 }
+	end
+end
+
+-- A board's value: this week's share for weekly categories, the lifetime value otherwise.
+function Data.weekValue(data: Data, category: { key: string, weekly: boolean? }): number
+	local lifetime = Stats.value(data.hp, data.stats, category.key)
+	if not category.weekly then
+		return lifetime
+	end
+	ensureWeek(data)
+	if category.key == "bestCombo" then
+		return data.weekly.combo
+	end
+	return math.max(0, lifetime - (data.weekly.base[category.key] or 0))
 end
 
 -- Push saved values to attributes and the player list.
@@ -130,7 +158,7 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("QuestsDay", data.quests.day)
 	-- Own leaderboard values, so the Ranks panel can pin the player's row.
 	for _, category in Stats.categories do
-		player:SetAttribute(`Stat_{category.key}`, Stats.value(data.hp, data.stats, category.key))
+		player:SetAttribute(`Stat_{category.key}`, Data.weekValue(data, category :: any))
 	end
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then
@@ -220,7 +248,11 @@ end
 function Data.recordStats(player: Player, change: Stats.Change)
 	local data = Data.get(player)
 	if data then
+		ensureWeek(data) -- before applying, so this change counts toward the new week
 		Stats.apply(data.stats, change)
+		if change.combo then
+			data.weekly.combo = math.max(data.weekly.combo, math.floor(change.combo))
+		end
 		publish(player, data)
 	end
 end

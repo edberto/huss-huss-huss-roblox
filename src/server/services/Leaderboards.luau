@@ -28,10 +28,21 @@ local fireworks = Instance.new("RemoteEvent")
 fireworks.Name = "Fireworks"
 fireworks.Parent = folder
 
+-- Weekly categories get a new store each week (LB_w<week>_<key>); Most Huss stays all-time.
 local stores: { [string]: OrderedDataStore } = {}
+local function storeFor(category: any): OrderedDataStore
+	local name = if category.weekly
+		then `LB_w{Stats.week(os.time())}_{category.key}`
+		else `LB_v1_{category.key}`
+	if not stores[name] then
+		stores[name] = DataStoreService:GetOrderedDataStore(name)
+	end
+	return stores[name]
+end
+local categoriesByKey = {}
 local values: { [string]: StringValue } = {}
 for _, category in Stats.categories do
-	stores[category.key] = DataStoreService:GetOrderedDataStore(`LB_v1_{category.key}`)
+	categoriesByKey[category.key] = category
 	local value = Instance.new("StringValue")
 	value.Name = category.key
 	value.Value = "[]"
@@ -66,7 +77,7 @@ local function valuesFor(player: Player): { [string]: number }?
 	end
 	local out = {}
 	for _, category in Stats.categories do
-		out[category.key] = Stats.value(data.hp, data.stats, category.key)
+		out[category.key] = Data.weekValue(data, category :: any)
 	end
 	return out
 end
@@ -78,14 +89,18 @@ function Leaderboards.write(player: Player)
 	if not current then
 		return
 	end
+	local week = Stats.week(os.time())
 	local last = written[player] or {}
+	if last.week ~= week then
+		last = { week = week } -- new week, new stores: write everything again
+	end
 	written[player] = last
 	for key, value in current do
 		if value > 0 and last[key] ~= value then
 			last[key] = value
 			task.spawn(function()
 				pcall(function()
-					stores[key]:SetAsync(tostring(player.UserId), math.floor(value))
+					storeFor(categoriesByKey[key]):SetAsync(tostring(player.UserId), math.floor(value))
 				end)
 			end)
 		end
@@ -121,7 +136,7 @@ end
 
 local function read(key: string)
 	local ok, pages = pcall(function()
-		return stores[key]:GetSortedAsync(false, TOP)
+		return storeFor(categoriesByKey[key]):GetSortedAsync(false, TOP)
 	end)
 	if not ok then
 		publish(key, localTop(key))

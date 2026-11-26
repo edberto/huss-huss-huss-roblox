@@ -226,7 +226,7 @@ local function render(board: Board)
 	local category = board.categories[board.index]
 	board.part:SetAttribute("Category", category.key)
 	board.header.BackgroundColor3 = Color3.fromHex(category.color)
-	board.title.Text = category.title
+	board.title.Text = if (category :: any).weekly then `{category.title} · THIS WEEK` else category.title
 	local value = ReplicatedStorage.Leaderboards:FindFirstChild(category.key) :: StringValue?
 	local entries = if value then HttpService:JSONDecode(value.Value) else {}
 	for i, row in board.rows do
