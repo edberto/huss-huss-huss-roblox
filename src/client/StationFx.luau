@@ -42,8 +42,11 @@ local ALMOST_COOLDOWN = 20
 local StationFx = {}
 
 -- What every station module's start() returns.
-export type Station =
-	{ onResult: (grade: string, skill: boolean) -> (), setActive: (boolean) -> () }
+export type Station = {
+	onResult: (grade: string, skill: boolean) -> (),
+	setActive: (boolean) -> (),
+	destroy: () -> (), -- the owner left
+}
 
 local sounds: { [string]: Sound } = {}
 for name, id in SOUND_IDS do
@@ -198,8 +201,8 @@ function StationFx.almost()
 end
 
 -- Just below the right hand, or in front of the player's right side for avatars without one.
-function StationFx.handPosition(): Vector3?
-	local character = player.Character
+function StationFx.handPosition(who: Player?): Vector3?
+	local character = (who or player).Character
 	local hand = character
 		and (character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm"))
 	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
@@ -215,10 +218,36 @@ function StationFx.handPosition(): Vector3?
 	return (root.CFrame * CFrame.new(1.6, -0.6, -1.4)).Position
 end
 
-function StationFx.rootCFrame(): CFrame?
-	local character = player.Character
+function StationFx.rootCFrame(who: Player?): CFrame?
+	local character = (who or player).Character
 	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 	return root and root.CFrame
+end
+
+-- What a station module uses: where the owner's hand and body are, plus the voice and sounds.
+-- Your own stations get the real ones; another trainer's stations (replayed on your screen) stay
+-- silent so a full street doesn't drown out your own beat.
+export type Fx = {
+	handPosition: () -> Vector3?,
+	rootCFrame: () -> CFrame?,
+	huss: () -> (),
+	play: (name: string, pitch: number?) -> (),
+	almost: () -> (),
+}
+local function silent() end
+function StationFx.forPlayer(who: Player): Fx
+	local mine = who == player
+	return {
+		handPosition = function()
+			return StationFx.handPosition(who)
+		end,
+		rootCFrame = function()
+			return StationFx.rootCFrame(who)
+		end,
+		huss = if mine then StationFx.huss else silent,
+		play = if mine then StationFx.play else silent :: any,
+		almost = if mine then StationFx.almost else silent,
+	}
 end
 
 return StationFx

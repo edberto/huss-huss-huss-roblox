@@ -48,6 +48,11 @@ tapEvent.Parent = remotes
 local resultEvent = Instance.new("RemoteEvent")
 resultEvent.Name = "Result" -- server -> client: beat, grade, earned, points, combo, skill
 resultEvent.Parent = remotes
+-- server -> every client: player, grade, skill. Others replay the hit on that player's avatar
+-- and props, so you can watch the trainer next door lift, dribble and stack.
+local stationHitEvent = Instance.new("RemoteEvent")
+stationHitEvent.Name = "StationHit"
+stationHitEvent.Parent = remotes
 local calibrate = Instance.new("RemoteFunction")
 calibrate.Name = "SetTapOffset" -- client -> server: seconds; saved, returns nil or a reason
 calibrate.Parent = remotes
@@ -187,6 +192,13 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 		session.score.combo,
 		skill
 	)
+	if grade ~= "Miss" then
+		for _, other in Players:GetPlayers() do
+			if other ~= player then
+				stationHitEvent:FireClient(other, player, grade, skill)
+			end
+		end
+	end
 	Rhythm.onGrade(player, grade)
 	Analytics.step(player, "FirstTap")
 	if Score.multiplier(session.score.combo) >= 2 then

@@ -1,7 +1,8 @@
 --!strict
 -- Basketball station: the ball follows the player, dribbles on every hit and is shot on the skill
 -- beat. A skill-beat "Almost" rims out with the "ahh almost almost" moment.
--- Everything here is local to the player's own screen; scoring stays on the server.
+-- Each client runs this for every trainer (theirs and others', from StationHit); scoring
+-- stays on the server.
 local RunService = game:GetService("RunService")
 
 local StationFx = require(script.Parent.StationFx)
@@ -14,7 +15,8 @@ type Motion = { kind: "dribble" | "make" | "rimout", start: number, from: Vector
 
 local Basketball = {}
 
-function Basketball.start(home: Model): StationFx.Station
+function Basketball.start(home: Model, owner: Player): StationFx.Station
+	local fx = StationFx.forPlayer(owner)
 	local ball = home:WaitForChild("Ball") :: BasePart
 	local active = true
 	-- The rim pieces ring the hoop, so their average position is its centre.
@@ -29,8 +31,8 @@ function Basketball.start(home: Model): StationFx.Station
 
 	local motion: Motion? = nil
 
-	RunService.RenderStepped:Connect(function()
-		local hand = StationFx.handPosition()
+	local stepped = RunService.RenderStepped:Connect(function()
+		local hand = fx.handPosition()
 		if not hand or not active then
 			return
 		end
@@ -79,7 +81,7 @@ function Basketball.start(home: Model): StationFx.Station
 		if grade == "Miss" then
 			return
 		end
-		StationFx.huss()
+		fx.huss()
 		local inFlight = motion
 			and motion.kind ~= "dribble"
 			and os.clock() - motion.start < FLIGHT_TIME
@@ -88,11 +90,11 @@ function Basketball.start(home: Model): StationFx.Station
 		end
 		if not skill then
 			motion = { kind = "dribble", start = os.clock() }
-			task.delay(DRIBBLE_TIME / 2, StationFx.play, "bounce")
+			task.delay(DRIBBLE_TIME / 2, fx.play, "bounce")
 		elseif grade == "Almost" then
 			motion = { kind = "rimout", start = os.clock(), from = ball.Position }
-			task.delay(FLIGHT_TIME, StationFx.play, "rim")
-			task.delay(FLIGHT_TIME, StationFx.almost)
+			task.delay(FLIGHT_TIME, fx.play, "rim")
+			task.delay(FLIGHT_TIME, fx.almost)
 		else
 			motion = { kind = "make", start = os.clock(), from = ball.Position }
 		end
@@ -104,6 +106,10 @@ function Basketball.start(home: Model): StationFx.Station
 			active = on
 			motion = nil
 			ball.LocalTransparencyModifier = if on then 0 else 1
+		end,
+		destroy = function()
+			stepped:Disconnect()
+			ball.LocalTransparencyModifier = 0
 		end,
 	}
 end

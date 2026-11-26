@@ -7,6 +7,7 @@ local Basketball = require(script.Basketball)
 local Burger = require(script.Burger)
 local Dance = require(script.Dance)
 local Sky = require(script.Sky)
+local StationFx = require(script.StationFx)
 local GiveIn = require(script.GiveIn)
 local Gym = require(script.Gym)
 local NightScreens = require(script.NightScreens)
@@ -119,24 +120,34 @@ task.spawn(function()
 	end
 end)
 
--- The station picked at Dusk gets every hit; the others hide their props.
-local stations = {
-	Basketball = Basketball.start(home),
-	Gym = Gym.start(),
-	Burgers = Burger.start(),
-}
-local function currentStation()
-	return stations[player:GetAttribute("Station")] or stations.Basketball
+-- Every trainer's station runs on every screen: yours from your own hits, everyone else's from
+-- StationHit, so you can watch the street practise. Joint poses and props are local, so each
+-- client draws them all. The station picked at Dusk gets every hit; the others hide their props.
+type Rig = { owner: Player, stations: { [string]: StationFx.Station } }
+local rigs: { [Player]: Rig } = {}
+
+local function isPractising(who: Player): boolean
+	return ReplicatedStorage:GetAttribute("Phase") == "Night"
+		and who:GetAttribute("Team") ~= "Partier"
+		and who:GetAttribute("Station") ~= nil
 end
--- While practising: station arm motions instead of the default animations (Pose), and your
+local function stationOf(rig: Rig): StationFx.Station
+	return rig.stations[rig.owner:GetAttribute("Station")] or rig.stations.Basketball
+end
+
+-- While practising: station arm motions instead of the default animations (Pose), and the
 -- title tag hides so it doesn't sit over the ball, barbell or burger.
-local function updateGhost()
-	local character = player.Character
+local function updateRig(rig: Rig)
+	local who = rig.owner
+	local on = if who == player then practising() else isPractising(who)
+	for _, station in rig.stations do
+		station.setActive(on and station == stationOf(rig))
+	end
+	local character = who.Character
 	if not character then
 		return
 	end
-	local on = practising()
-	Pose.set(if on then player:GetAttribute("Station") :: string? else nil)
+	Pose.set(who, if on then who:GetAttribute("Station") :: string? else nil)
 	local head = character:FindFirstChild("Head")
 	local tag = head and head:FindFirstChild("HussTag")
 	if tag and tag:IsA("BillboardGui") then
@@ -144,26 +155,71 @@ local function updateGhost()
 	end
 end
 
--- Props only while practising, so they don't trail a player roaming at Dusk or Dawn.
-local function updateStation()
-	for _, station in stations do
-		station.setActive(station == currentStation() and practising())
+local function addRig(who: Player)
+	if rigs[who] then
+		return
 	end
-	updateGhost()
+	while who.Parent and who:GetAttribute("Home") == nil do
+		who:GetAttributeChangedSignal("Home"):Wait()
+	end
+	local theirHome = who.Parent and workspace.Homes:WaitForChild(who:GetAttribute("Home"), 10)
+	if not theirHome or rigs[who] then
+		return
+	end
+	local rig: Rig = {
+		owner = who,
+		stations = {
+			Basketball = Basketball.start(theirHome :: Model, who),
+			Gym = Gym.start(who),
+			Burgers = Burger.start(who),
+		},
+	}
+	rigs[who] = rig
+	local function refresh()
+		updateRig(rig)
+	end
+	who:GetAttributeChangedSignal("Station"):Connect(refresh)
+	who:GetAttributeChangedSignal("Team"):Connect(refresh)
+	who.CharacterAdded:Connect(function(character)
+		character:WaitForChild("Head", 5)
+		task.wait(0.5) -- accessories and the title tag arrive a moment later
+		refresh()
+	end)
+	refresh()
 end
-player.CharacterAdded:Connect(function(character)
-	character:WaitForChild("Head", 5)
-	task.wait(0.5) -- accessories and the title tag arrive a moment later
-	updateGhost()
+ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(function()
+	for _, rig in rigs do
+		updateRig(rig)
+	end
 end)
-player:GetAttributeChangedSignal("Station"):Connect(updateStation)
-player:GetAttributeChangedSignal("Team"):Connect(updateStation)
-ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(updateStation)
-updateStation()
-RhythmClient.onResult = function(grade, skill)
-	currentStation().onResult(grade, skill)
-	Pose.hit(grade, skill)
+Players.PlayerRemoving:Connect(function(who)
+	local rig = rigs[who]
+	rigs[who] = nil
+	if rig then
+		for _, station in rig.stations do
+			station.destroy()
+		end
+	end
+end)
+addRig(player)
+for _, other in Players:GetPlayers() do
+	task.spawn(addRig, other)
 end
+Players.PlayerAdded:Connect(addRig)
+
+RhythmClient.onResult = function(grade, skill)
+	local rig = rigs[player]
+	stationOf(rig).onResult(grade, skill)
+	Pose.hit(player, grade, skill)
+end
+local stationHit = ReplicatedStorage:WaitForChild("RhythmRemotes"):WaitForChild("StationHit") :: RemoteEvent
+stationHit.OnClientEvent:Connect(function(who: Player, grade: string, skill: boolean)
+	local rig = rigs[who]
+	if rig and isPractising(who) then
+		stationOf(rig).onResult(grade, skill)
+		Pose.hit(who, grade, skill)
+	end
+end)
 RhythmClient.start()
 NightScreens.start()
 PartyClient.start()

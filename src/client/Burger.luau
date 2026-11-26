@@ -1,7 +1,7 @@
 --!strict
 -- Burger station: each hit stacks a layer on the counter; the skill beat wraps the burger and
 -- slides it onto the served pile. A skill-beat "Almost" topples the stack: "ahh almost almost".
--- Props are local to the player's own screen, like the basketball's dribble.
+-- Each client runs this for every trainer, like the basketball's dribble.
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
@@ -32,7 +32,8 @@ local function part(parent: Instance, size: Vector3, color: Color3): Part
 	return p
 end
 
-function Burger.start(): StationFx.Station
+function Burger.start(owner: Player): StationFx.Station
+	local fx = StationFx.forPlayer(owner)
 	local folder = Instance.new("Folder")
 	folder.Name = "BurgerProps"
 	local counter = part(folder, Vector3.new(6, 0.4, 2.6), Color3.fromHex("C9C2B0"))
@@ -44,14 +45,14 @@ function Burger.start(): StationFx.Station
 
 	-- The counter sits in front of the player; everything is placed from its top centre.
 	local function counterTop(): CFrame?
-		local root = StationFx.rootCFrame()
+		local root = fx.rootCFrame()
 		if not root then
 			return nil
 		end
 		return CFrame.lookAlong(root * Vector3.new(0, -0.4, -2.4), root.LookVector)
 	end
 
-	RunService.RenderStepped:Connect(function()
+	local stepped = RunService.RenderStepped:Connect(function()
 		local top = counterTop()
 		if not active or not top then
 			return
@@ -88,7 +89,7 @@ function Burger.start(): StationFx.Station
 		):Play()
 		stackHeight += spec.height
 		table.insert(stack, layer)
-		StationFx.play("thud", 1.2)
+		fx.play("thud", 1.2)
 	end
 
 	local function wrap()
@@ -114,7 +115,7 @@ function Burger.start(): StationFx.Station
 		TweenService:Create(box, slide, { CFrame = target }):Play()
 		TweenService:Create(band, slide, { CFrame = target }):Play()
 		table.insert(served, box)
-		StationFx.play("wrap")
+		fx.play("wrap")
 	end
 
 	local function topple()
@@ -127,8 +128,8 @@ function Burger.start(): StationFx.Station
 			layer.CanCollide = true
 			layer.AssemblyLinearVelocity = Vector3.new(math.random(-4, 4), 4, math.random(-6, -2))
 		end
-		StationFx.play("thud", 0.7)
-		StationFx.almost()
+		fx.play("thud", 0.7)
+		fx.almost()
 		task.delay(2, function()
 			for _, layer in fallen do
 				layer:Destroy()
@@ -140,7 +141,7 @@ function Burger.start(): StationFx.Station
 		if grade == "Miss" then
 			return
 		end
-		StationFx.huss()
+		fx.huss()
 		if not skill then
 			addLayer()
 		elseif grade == "Almost" then
@@ -156,6 +157,10 @@ function Burger.start(): StationFx.Station
 			active = on
 			clearStack()
 			folder.Parent = if on then workspace else nil
+		end,
+		destroy = function()
+			stepped:Disconnect()
+			folder:Destroy()
 		end,
 	}
 end

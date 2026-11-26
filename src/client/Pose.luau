@@ -1,9 +1,11 @@
 --!strict
--- Station arm motions for your own avatar while practising. The default animations (the
--- character's Animate script) are switched off for the night and switched back on after, and
--- the arms are posed here by setting the shoulder and elbow joint Transforms each Stepped
--- (after animations): a rest pose per station plus a short motion on every hit. Works for
--- Motor6D and AnimationConstraint joints. No animation assets needed.
+-- Station arm motions while practising, for every trainer on your screen: your own avatar
+-- and, replayed from StationHit, everyone else's. Joint Transforms don't replicate, so each
+-- client poses everyone. For your own avatar the default animations (its Animate script) are
+-- switched off for the night and back on after; that also stops them for everyone else, so
+-- other avatars only need posing. The arms are posed by setting the shoulder and elbow joint
+-- Transforms each Stepped (after animations): a rest pose per station plus a short motion on
+-- every hit. Works for Motor6D and AnimationConstraint joints. No animation assets needed.
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -110,10 +112,23 @@ local MOVES: { [string]: Move } = {
 
 local Pose = {}
 
-local station: string? = nil -- posing for this station; nil = off
-local move: Move? = nil
-local moveStart = 0
-local animate: LocalScript? = nil
+type State = { station: string?, move: Move?, moveStart: number, animate: LocalScript? }
+local states: { [Player]: State } = {}
+local function stateOf(who: Player): State
+	local state = states[who]
+	if not state then
+		state = { station = nil, move = nil, moveStart = 0, animate = nil }
+		states[who] = state
+		-- A new character has its own Animate (running) and its own joints.
+		who.CharacterAdded:Connect(function()
+			state.station, state.move, state.animate = nil, nil, nil
+		end)
+	end
+	return state :: State
+end
+Players.PlayerRemoving:Connect(function(who)
+	states[who] = nil
+end)
 
 local MOTORS = {
 	RightShoulder = { "RightUpperArm", "RightShoulder", "Torso", "Right Shoulder" },
@@ -138,40 +153,47 @@ local function motors(character: Model): { [string]: any }
 	return found
 end
 
--- Turn station posing on (default animations off) or off (animations back on).
-function Pose.set(name: string?)
-	local character = player.Character
-	if name == station or not character then
+-- Turn station posing on (default animations off) or off (animations back on) for `who`.
+function Pose.set(who: Player, name: string?)
+	local state = stateOf(who)
+	local character = who.Character
+	if name == state.station or not character then
 		return
 	end
-	station = name
-	move = nil
+	state.station = name
+	state.move = nil
+	local mine = who == player
 	if name then
-		local script = character:FindFirstChild("Animate")
-		if script and script:IsA("LocalScript") then
-			animate = script
-			script.Enabled = false
-		end
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
-		if animator then
-			for _, track in animator:GetPlayingAnimationTracks() do
-				track:Stop(0.1)
+		if mine then
+			local script = character:FindFirstChild("Animate")
+			if script and script:IsA("LocalScript") then
+				state.animate = script
+				script.Enabled = false
+			end
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+			if animator then
+				for _, track in animator:GetPlayingAnimationTracks() do
+					track:Stop(0.1)
+				end
 			end
 		end
 	else
 		for _, motor in motors(character) do
 			motor.Transform = CFrame.identity
 		end
+		local animate = state.animate
 		if animate and animate.Parent then
 			animate.Enabled = true
 		end
-		animate = nil
+		state.animate = nil
 	end
 end
 
--- A hit at the current station: plays that station's motion.
-function Pose.hit(grade: string, skill: boolean)
+-- A hit at `who`'s current station: plays that station's motion.
+function Pose.hit(who: Player, grade: string, skill: boolean)
+	local state = stateOf(who)
+	local station = state.station
 	if not station or grade == "Miss" then
 		return
 	end
@@ -179,37 +201,33 @@ function Pose.hit(grade: string, skill: boolean)
 		then (if skill then "shoot" else "dribble")
 		elseif station == "Gym" then (if skill then "press" else "curl")
 		else (if skill then "wrap" else "chop")
-	move = MOVES[kind]
-	moveStart = os.clock()
+	state.move = MOVES[kind]
+	state.moveStart = os.clock()
 end
 
--- Every frame while posing.
+-- Every frame: pose everyone who's practising.
 RunService.Stepped:Connect(function()
-	local character = player.Character
-	if not station or not character then
-		return
-	end
-	local joints = table.clone(REST[station] or {})
-	local current = move
-	if current then
-		local p = (os.clock() - moveStart) / current.duration
-		if p >= 1 then
-			move = nil
-		else
-			for name, cf in current.at(p) do
-				joints[name] = cf
+	for who, state in states do
+		local character = who.Character
+		local station = state.station
+		if station and character then
+			local joints = table.clone(REST[station] or {})
+			local current = state.move
+			if current then
+				local p = (os.clock() - state.moveStart) / current.duration
+				if p >= 1 then
+					state.move = nil
+				else
+					for name, cf in current.at(p) do
+						joints[name] = cf
+					end
+				end
+			end
+			for name, motor in motors(character) do
+				motor.Transform = joints[name] or CFrame.identity
 			end
 		end
 	end
-	for name, motor in motors(character) do
-		motor.Transform = joints[name] or CFrame.identity
-	end
-end)
-
-player.CharacterAdded:Connect(function()
-	station = nil -- the new character has its own Animate, running, and its own joints
-	move = nil
-	animate = nil
 end)
 
 return Pose

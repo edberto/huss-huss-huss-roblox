@@ -1,7 +1,7 @@
 --!strict
 -- Gym station: every hit pulls the barbell up to the chest; the skill beat presses it overhead. A skill-beat
 -- "Almost" gets the bar halfway up, then it drops with a clank: "ahh almost almost".
--- Props are local to the player's own screen, like the basketball's dribble.
+-- Each client runs this for every trainer, like the basketball's dribble.
 local RunService = game:GetService("RunService")
 
 local StationFx = require(script.Parent.StationFx)
@@ -49,15 +49,16 @@ local function weight(parent: Instance, barLength: number, plate: number): (Mode
 		end
 end
 
-function Gym.start(): StationFx.Station
+function Gym.start(owner: Player): StationFx.Station
+	local fx = StationFx.forPlayer(owner)
 	local folder = Instance.new("Folder")
 	folder.Name = "GymProps"
 	local _, placeBarbell = weight(folder, 6, 2.2)
 	local active = false
 	local motion: Motion? = nil
 
-	RunService.RenderStepped:Connect(function()
-		local root = StationFx.rootCFrame()
+	local stepped = RunService.RenderStepped:Connect(function()
+		local root = fx.rootCFrame()
 		if not active or not root then
 			return
 		end
@@ -107,7 +108,7 @@ function Gym.start(): StationFx.Station
 		if grade == "Miss" then
 			return
 		end
-		StationFx.huss()
+		fx.huss()
 		if motion and motion.kind ~= "curl" and os.clock() - motion.start < PRESS_TIME then
 			return
 		end
@@ -115,11 +116,11 @@ function Gym.start(): StationFx.Station
 			motion = { kind = "curl", start = os.clock() }
 		elseif grade == "Almost" then
 			motion = { kind = "fail", start = os.clock() }
-			task.delay(PRESS_TIME * 0.6, StationFx.play, "clank", 0.8)
-			task.delay(PRESS_TIME * 0.6, StationFx.almost)
+			task.delay(PRESS_TIME * 0.6, fx.play, "clank", 0.8)
+			task.delay(PRESS_TIME * 0.6, fx.almost)
 		else
 			motion = { kind = "press", start = os.clock() }
-			task.delay(PRESS_TIME, StationFx.play, "clank")
+			task.delay(PRESS_TIME, fx.play, "clank")
 		end
 	end
 
@@ -129,6 +130,10 @@ function Gym.start(): StationFx.Station
 			active = on
 			motion = nil
 			folder.Parent = if on then workspace else nil
+		end,
+		destroy = function()
+			stepped:Disconnect()
+			folder:Destroy()
 		end,
 	}
 end
