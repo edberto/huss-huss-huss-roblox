@@ -437,7 +437,7 @@ function NightScreens.start()
 	refreshCards()
 	label({
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.fromScale(0.5, 0.93),
+		Position = UDim2.fromScale(0.5, 0.87), -- above the DANCE button
 		Size = UDim2.fromScale(0.6, 0.05),
 		Text = "In this town, everybody goes out partying… except me.",
 		TextColor3 = Color3.fromHex("B4B2A9"),

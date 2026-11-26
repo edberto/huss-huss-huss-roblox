@@ -37,8 +37,12 @@ function Dance.start(practising: () -> boolean)
 			Thickness = 4,
 		}),
 	}) :: TextButton
-	local label = Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "DANCE", Thickness = 3, Parent = button })
-	Ui.make("UIPadding", { PaddingTop = UDim.new(0.22, 0), PaddingBottom = UDim.new(0.14, 0), Parent = label })
+	local label =
+		Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "DANCE", Thickness = 3, Parent = button })
+	Ui.make(
+		"UIPadding",
+		{ PaddingTop = UDim.new(0.22, 0), PaddingBottom = UDim.new(0.14, 0), Parent = label }
+	)
 
 	local track: AnimationTrack? = nil
 	local function stop()
@@ -60,8 +64,9 @@ function Dance.start(practising: () -> boolean)
 			return
 		end
 		local equipped = player:GetAttribute("Equipped_dance")
-		local item = Cosmetics.items[if typeof(equipped) == "string" then equipped else "dance_groove"]
-			or Cosmetics.items.dance_groove
+		local item = Cosmetics.items[if typeof(equipped) == "string"
+			then equipped
+			else "dance_groove"] or Cosmetics.items.dance_groove
 		local animation = Instance.new("Animation")
 		animation.AnimationId = `rbxassetid://{item.anim}`
 		local loaded = animator:LoadAnimation(animation)
