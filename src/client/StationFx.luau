@@ -73,29 +73,33 @@ function StationFx.play(name: string, pitch: number?)
 	end
 end
 
--- Speech bubble over the head: small "huss" or the big "ahh almost almost". PlayerGui clears it
--- when the character respawns (every Dusk), so it's rebuilt whenever it's gone; reusing the
--- destroyed one errored and stopped every station's hit animation after the first night.
+-- Over the head: a "HUSS!" pop per hit (each one lands at a slightly different spot and angle,
+-- so a run of hits stacks up like comic sound effects) and the big "ahh almost almost" bubble.
+-- PlayerGui clears the BillboardGui when the character respawns (every Dusk), so it's rebuilt
+-- whenever it's gone; reusing the destroyed one errored and stopped every station's hit
+-- animation after the first night.
 local bubble: BillboardGui, bubbleText: TextLabel
 local function newBubble()
 	bubble = Instance.new("BillboardGui")
-	bubble.Size = UDim2.fromOffset(160, 50)
-	bubble.StudsOffset = Vector3.new(0, 3.2, 0)
+	bubble.Size = UDim2.fromOffset(240, 120)
+	bubble.StudsOffset = Vector3.new(0, 3.6, 0)
 	bubble.AlwaysOnTop = true
 	bubble.ResetOnSpawn = false
 	bubbleText = Ui.label({
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Ui.colors.cream,
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.5, 0.6),
+		Size = UDim2.fromOffset(170, 48),
 		TextColor3 = Ui.colors.navy,
 		TextTransparency = 1,
+		BackgroundTransparency = 1,
+		ZIndex = 2,
 		Parent = bubble,
 	}, { Ui.make("UICorner", { CornerRadius = UDim.new(0.4, 0) }) })
 end
 newBubble()
 
-function StationFx.say(text: string, big: boolean)
+local function attach()
 	local ok = pcall(function()
 		bubble.Parent = player:FindFirstChildOfClass("PlayerGui")
 	end)
@@ -106,14 +110,42 @@ function StationFx.say(text: string, big: boolean)
 	local character = player.Character
 	local head = character and character:FindFirstChild("Head")
 	bubble.Adornee = head or (character and character.PrimaryPart)
+end
+
+function StationFx.say(text: string)
+	attach()
 	bubbleText.Text = text
-	bubbleText.Size = if big then UDim2.fromScale(1, 0.9) else UDim2.fromScale(0.5, 0.6)
 	bubbleText.TextTransparency = 0
 	bubbleText.BackgroundTransparency = 0
-	local fade =
-		TweenInfo.new(if big then 1.4 else 0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	local fade = TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 	TweenService:Create(bubbleText, fade, { TextTransparency = 1, BackgroundTransparency = 1 })
 		:Play()
+end
+
+local POP_COLORS = { Color3.fromHex("FFD75A"), Color3.new(1, 1, 1), Color3.fromHex("3DFFB0") }
+-- One "HUSS!": pops in at a random spot near the middle with a slight tilt, drifts up, fades.
+function StationFx.pop()
+	attach()
+	local label = Ui.shout({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5 + (math.random() - 0.5) * 0.4, 0.5 + (math.random() - 0.5) * 0.4),
+		Rotation = math.random(-14, 14),
+		Size = UDim2.fromOffset(110, 40),
+		Text = "HUSS!",
+		TextColor3 = POP_COLORS[math.random(#POP_COLORS)],
+		Thickness = 3,
+		Parent = bubble,
+	})
+	local scale = Ui.make("UIScale", { Scale = 0.4, Parent = label })
+	local stroke = label:FindFirstChildOfClass("UIStroke") :: UIStroke
+	TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	local fade = TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, 0.15)
+	TweenService:Create(label, fade, {
+		TextTransparency = 1,
+		Position = label.Position - UDim2.fromScale(0, 0.12),
+	}):Play()
+	TweenService:Create(stroke, fade, { Transparency = 1 }):Play()
+	task.delay(0.75, label.Destroy, label)
 end
 
 -- Every hit: the next take in order, so steady hits say "huss huss huss" (1-3), then again (4-6).
@@ -126,7 +158,7 @@ function StationFx.huss()
 	lastHuss = os.clock()
 	hussIndex = hussIndex % 6 + 1
 	StationFx.play("huss" .. hussIndex)
-	StationFx.say("huss", false)
+	StationFx.pop()
 end
 
 local lastAlmost = -math.huge
@@ -137,7 +169,7 @@ function StationFx.almost()
 	end
 	lastAlmost = os.clock()
 	StationFx.play("almost")
-	StationFx.say("ahh almost almost", true)
+	StationFx.say("ahh almost almost")
 	local camera = workspace.CurrentCamera
 	local punch = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, true)
 	TweenService:Create(camera, punch, { FieldOfView = camera.FieldOfView - 8 }):Play()
