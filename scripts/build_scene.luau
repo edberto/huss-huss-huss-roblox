@@ -222,7 +222,10 @@ local function rooms(home: Model, lot: CFrame, index: number)
 	part(home, "SideWallL", Vector3.new(1, 14, 15), at(lot, -13.5, 7, 31.5), wall)
 	part(home, "SideWallR", Vector3.new(1, 14, 15), at(lot, 13.5, 7, 31.5), wall)
 	part(home, "UpperFloor", Vector3.new(28, 5, 16), at(lot, 0, 11.5, 32), wall)
-	part(home, "Divider", Vector3.new(1, 9, 15), at(lot, 0, 4.5, 31.5), trim)
+	-- Divider with a doorway at the back, so the kitchen (window front, no street door) has a way
+	-- out through the open garage.
+	part(home, "Divider", Vector3.new(1, 9, 12.4), at(lot, 0, 4.5, 30.2), trim)
+	part(home, "DividerHeader", Vector3.new(1, 2, 2.6), at(lot, 0, 8, 37.7), trim)
 	-- Front wall around the garage opening (x -12..-2, up to 8) and the window (x 2..12, 3 to 8).
 	part(home, "FrontL", Vector3.new(2, 9, 1), at(lot, -13, 4.5, 24.5), wall)
 	part(home, "FrontMid", Vector3.new(4, 9, 1), at(lot, 0, 4.5, 24.5), wall)
