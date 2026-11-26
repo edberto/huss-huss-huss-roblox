@@ -79,11 +79,15 @@ function PartyClient.start()
 		make("UIPadding", { PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5) }),
 	})
 	local pointsScale = make("UIScale", { Parent = pointsLabel })
-	Ui.onResize(function()
+	-- Below the Huss pill, and below the friend bonus chip when it shows (RhythmClient).
+	local function placePoints()
 		local s = Ui.hudScale()
+		local friends = (tonumber(player:GetAttribute("FriendsHere")) or 0) > 0
 		pointsScale.Scale = s
-		pointsLabel.Position = UDim2.new(1, -16, 0, (8 + 46 + 8) * s)
-	end)
+		pointsLabel.Position = UDim2.new(1, -16, 0, (8 + 46 + 8 + (if friends then 32 else 0)) * s)
+	end
+	Ui.onResize(placePoints)
+	player:GetAttributeChangedSignal("FriendsHere"):Connect(placePoints)
 	-- Just above the DANCE button, bottom centre.
 	label({
 		AnchorPoint = Vector2.new(0.5, 1),

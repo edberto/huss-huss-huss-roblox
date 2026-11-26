@@ -1271,7 +1271,7 @@ function ShopClient.start()
 	player:GetAttributeChangedSignal("FriendsHere"):Connect(function()
 		local now = tonumber(player:GetAttribute("FriendsHere")) or 0
 		if now > friendsHere then
-			local bonus = math.min(now, Products.friendBonusMax) * Products.friendBonus * 100
+			local bonus = math.round(math.min(now, Products.friendBonusMax) * Products.friendBonus * 100)
 			pcall(StarterGui.SetCore, StarterGui, "SendNotification", {
 				Title = "A friend joined!",
 				Text = `Friend bonus: +{bonus}% Huss every night`,

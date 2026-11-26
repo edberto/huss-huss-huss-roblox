@@ -8,6 +8,7 @@ local TweenService = game:GetService("TweenService")
 
 local BeatClock = require(ReplicatedStorage.Shared.BeatClock)
 local Night = require(ReplicatedStorage.Shared.Night)
+local Products = require(ReplicatedStorage.Shared.Products)
 local Progress = require(ReplicatedStorage.Shared.Progress)
 local Score = require(ReplicatedStorage.Shared.Score)
 local StationFx = require(script.Parent.StationFx)
@@ -87,7 +88,7 @@ function RhythmClient.start()
 	local focusBar = make("Frame", {
 		AnchorPoint = Vector2.new(0, 1),
 		BackgroundColor3 = Color3.fromHex("140C28"),
-		Position = UDim2.new(0, 14, 0, -10),
+		Position = UDim2.fromOffset(14, -10),
 		Size = UDim2.new(0.6, 0, 0, 40),
 	}, {
 		corner(),
@@ -182,7 +183,7 @@ function RhythmClient.start()
 		"UIPadding",
 		{ PaddingTop = UDim.new(0.14, 0), PaddingBottom = UDim.new(0.04, 0), Parent = points }
 	)
-	make("Frame", {
+	local pill = make("Frame", {
 		AnchorPoint = Vector2.new(1, 0),
 		BackgroundColor3 = Color3.new(1, 1, 1),
 		Position = UDim2.new(1, -16, 0, 8),
@@ -379,6 +380,30 @@ function RhythmClient.start()
 	end
 	player:GetAttributeChangedSignal("HP"):Connect(refreshPoints)
 	refreshPoints()
+
+	-- Under the pill: the friend bonus, while friends share the server (Products.nightMultiplier).
+	local friendChip = Ui.label({
+		AnchorPoint = Vector2.new(1, 0),
+		BackgroundColor3 = Color3.fromHex("C8287A"),
+		BackgroundTransparency = 0,
+		Position = UDim2.new(1, 0, 1, 6),
+		Size = UDim2.new(1, 0, 0, 26),
+		TextColor3 = Color3.new(1, 1, 1),
+		Visible = false,
+		Parent = pill,
+	}, {
+		corner(),
+		stroke(2.5),
+		make("UIPadding", { PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4) }),
+	})
+	local function refreshFriends()
+		local friends = tonumber(player:GetAttribute("FriendsHere")) or 0
+		local bonus = math.round(math.min(friends, Products.friendBonusMax) * Products.friendBonus * 100)
+		friendChip.Visible = friends > 0
+		friendChip.Text = `👥 {friends} friend{if friends == 1 then "" else "s"} · +{bonus}% Huss`
+	end
+	player:GetAttributeChangedSignal("FriendsHere"):Connect(refreshFriends)
+	refreshFriends()
 
 	local function flashWord(text: string, color: Color3, seconds: number)
 		hitWord.Text = text
