@@ -19,9 +19,10 @@ local C = Ui.colors
 local make, corner, label = Ui.make, Ui.corner, Ui.label
 
 local BUTTONS = {
-	{ ability = "Invite", color = C.pink },
-	{ ability = "Speaker", color = C.orange },
-	{ ability = "Dance", color = C.purple },
+	{ ability = "Invite", name = "Invite", color = C.pink },
+	{ ability = "Speaker", name = "Speaker", color = C.orange },
+	-- Shown as Dance-Off so it isn't confused with the DANCE emote button.
+	{ ability = "Dance", name = "Dance-Off", color = C.purple },
 }
 
 local PartyClient = {}
@@ -108,7 +109,7 @@ function PartyClient.start()
 			LayoutOrder = i,
 			Size = UDim2.fromScale(1, 1),
 			SizeConstraint = Enum.SizeConstraint.RelativeYY,
-			Text = spec.ability,
+			Text = spec.name,
 			TextColor3 = C.cream,
 			TextScaled = true,
 			Parent = buttonRow,
@@ -185,7 +186,7 @@ function PartyClient.start()
 		for _, spec in BUTTONS do
 			local left = math.ceil((readyAt[spec.ability] or 0) - os.clock())
 			local button = buttons[spec.ability]
-			button.Text = if left > 0 then `{left} s` else spec.ability
+			button.Text = if left > 0 then `{left} s` else spec.name
 			button.BackgroundColor3 = if left > 0 or not target then C.panel else spec.color
 		end
 	end)
