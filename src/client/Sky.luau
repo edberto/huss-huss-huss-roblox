@@ -75,7 +75,8 @@ function Sky.start()
 		for i = 1, #keys - 1 do
 			local h0, h1 = keys[i][1] :: number, keys[i + 1][1] :: number
 			if h >= h0 and h <= h1 then
-				local p = mix(keys[i][2] :: Palette, keys[i + 1][2] :: Palette, (h - h0) / (h1 - h0))
+				local p =
+					mix(keys[i][2] :: Palette, keys[i + 1][2] :: Palette, (h - h0) / (h1 - h0))
 				if atmosphere then
 					atmosphere.Color = p.haze
 					atmosphere.Decay = p.decay
