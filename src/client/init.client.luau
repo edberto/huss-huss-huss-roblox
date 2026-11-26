@@ -125,12 +125,38 @@ local stations = {
 local function currentStation()
 	return stations[player:GetAttribute("Station")] or stations.Basketball
 end
+-- While practising, your own avatar turns see-through on your screen and your title tag hides,
+-- so big avatars don't cover the ball, barbell or burger.
+local function updateGhost()
+	local character = player.Character
+	if not character then
+		return
+	end
+	local on = practising()
+	for _, item in character:GetDescendants() do
+		if item:IsA("BasePart") or item:IsA("Decal") then
+			item.LocalTransparencyModifier = if on then 0.65 else 0
+		end
+	end
+	local head = character:FindFirstChild("Head")
+	local tag = head and head:FindFirstChild("HussTag")
+	if tag and tag:IsA("BillboardGui") then
+		tag.Enabled = not on
+	end
+end
+
 -- Props only while practising, so they don't trail a player roaming at Dusk or Dawn.
 local function updateStation()
 	for _, station in stations do
 		station.setActive(station == currentStation() and practising())
 	end
+	updateGhost()
 end
+player.CharacterAdded:Connect(function(character)
+	character:WaitForChild("Head", 5)
+	task.wait(0.5) -- accessories and the title tag arrive a moment later
+	updateGhost()
+end)
 player:GetAttributeChangedSignal("Station"):Connect(updateStation)
 player:GetAttributeChangedSignal("Team"):Connect(updateStation)
 ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(updateStation)

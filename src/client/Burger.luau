@@ -9,11 +9,11 @@ local StationFx = require(script.Parent.StationFx)
 local Ui = require(script.Parent.Ui)
 
 local LAYERS = {
-	{ color = Color3.fromHex("E3A857"), height = 0.35 }, -- bottom bun
-	{ color = Color3.fromHex("5A3825"), height = 0.3 }, -- patty
-	{ color = Color3.fromHex("F5C542"), height = 0.12 }, -- cheese
-	{ color = Color3.fromHex("6BBF59"), height = 0.15 }, -- lettuce
-	{ color = Color3.fromHex("E3A857"), height = 0.45 }, -- top bun
+	{ color = Color3.fromHex("E3A857"), height = 0.5 }, -- bottom bun
+	{ color = Color3.fromHex("5A3825"), height = 0.45 }, -- patty
+	{ color = Color3.fromHex("F5C542"), height = 0.18 }, -- cheese
+	{ color = Color3.fromHex("6BBF59"), height = 0.22 }, -- lettuce
+	{ color = Color3.fromHex("E3A857"), height = 0.65 }, -- top bun
 }
 local MAX_SERVED = 8
 
@@ -74,9 +74,9 @@ function Burger.start(): StationFx.Station
 			return
 		end
 		local spec = LAYERS[(#stack % #LAYERS) + 1]
-		local layer = part(folder, Vector3.new(1.6, spec.height, 1.6), spec.color)
+		local layer = part(folder, Vector3.new(2.4, spec.height, 2.4), spec.color)
 		layer.Shape = Enum.PartType.Cylinder
-		layer.Size = Vector3.new(spec.height, 1.6, 1.6)
+		layer.Size = Vector3.new(spec.height, 2.4, 2.4)
 		local resting = top
 			* CFrame.new(-0.8, stackHeight + spec.height / 2, 0)
 			* CFrame.Angles(0, 0, math.rad(90))
