@@ -79,3 +79,5 @@ Manual place changes that a code publish doesn't carry. Newest first.
 - 2026-11-26 Production published (v0.1.0). Then found players with Burgers were walled into the kitchen (no exit). Cut a doorway at the back of the kitchen/garage Divider (DividerHeader above it) in all 12 homes, in PLAYTEST and Production Edit; build_scene.luau matches. Needs a Production republish.
 - 2026-11-26 Production v0.1.3 published (menu/focus/friend bonus). Created badges 1-5 (Welcome, First Dawn, Party Starter, Life of the Party, Can't Resist) via Open Cloud, free; ids in Badges.luau, the rest queued in docs/badges.md (5 per day).
 - 2026-11-26 Content rating questionnaire done (Global: Minimal). Regional pricing already on for passes. Auto-translation on (user).
+- 2026-11-26 Created developer product Starter Pack (3736548404, 49 Robux, regional pricing requested, icon assets/icons/starter_pack.png) via Open Cloud. Uploaded shop thumb trail_starter (72024198992120) and granted it to the Production universe.
+- To do in Creator Hub: Engagement > Referral Rewards banner ("250 Huss for you and your friend"); the referral code itself ships with the next publish.
