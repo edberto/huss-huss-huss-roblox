@@ -454,15 +454,15 @@ function ShopClient.start()
 		local icon = make("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0),
 			BackgroundTransparency = 1,
-			Position = UDim2.fromScale(0.5, 0.08),
-			Size = UDim2.fromScale(0.8, 0.38),
+			Position = UDim2.fromScale(0.5, 0.04),
+			Size = UDim2.fromScale(0.95, 0.46),
 			ScaleType = Enum.ScaleType.Fit,
 			ZIndex = 23,
 			Parent = cell,
 		})
 		local amount = Ui.shout({
-			Position = UDim2.fromScale(0.05, 0.47),
-			Size = UDim2.fromScale(0.9, 0.22),
+			Position = UDim2.fromScale(0.05, 0.5),
+			Size = UDim2.fromScale(0.9, 0.21),
 			Text = "",
 			Thickness = 2,
 			ZIndex = 23,
@@ -545,8 +545,8 @@ function ShopClient.start()
 	end
 	local groupButton =
 		button(rewardsBody, `JOIN THE GROUP · {Rewards.groupHp} HUSS`, Color3.fromHex("FF50C8"))
-	groupButton.Position = UDim2.fromScale(0, 0.76)
-	groupButton.Size = UDim2.fromScale(1, 0.07)
+	groupButton.Position = UDim2.fromScale(0, 0.755)
+	groupButton.Size = UDim2.fromScale(1, 0.08)
 	groupButton.Activated:Connect(function()
 		local reason = groupRemote:InvokeServer()
 		rewardsNote.Text = if reason then REASONS[reason] or reason else `+{Rewards.groupHp} Huss`

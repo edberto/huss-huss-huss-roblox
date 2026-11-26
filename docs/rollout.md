@@ -2,6 +2,14 @@
 
 Manual place changes that a code publish doesn't carry. Newest first.
 
+## 2026-11-26: Party Tickets
+
+- Uploaded via Studio MCP: ticket icon 96730617685238 and coin icon 117706289482395
+  (assets/ui/). Party Animal pass icon is assets/icons/party_animal.png.
+- [ ] Create the **Party Animal** game pass (149 Robux, on sale) on the Production experience
+  with assets/icons/party_animal.png, then put its id in `Products.partyAnimalPassId`. Open
+  Cloud refused to create it from the PLAYTEST Studio ("Resources not authorized").
+
 ## 2026-11-25: Practice rooms (PLAYTEST)
 
 - Rebuilt workspace.Homes in PLAYTEST from `scripts/build_scene.luau` (homes section only): each
