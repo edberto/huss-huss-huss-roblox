@@ -5,6 +5,8 @@ local Products = {}
 
 -- game pass: Party Animal (149 Robux): skip practice and party any night.
 Products.partyAnimalPassId = 2100270141
+Products.starterPassId = 2102291673 -- game pass: Starter Pack (49 Robux), granted once (Store)
+Products.starterHp = 1000 -- plus the Starter trail and Products.boostNights of x2
 Products.vipPassId = 2100887538 -- game pass: VIP (199 Robux): x2 Huss Points, VIP tag
 Products.vipMultiplier = 2
 
@@ -16,8 +18,6 @@ Products.items = table.freeze({
 	second_wind = { id = 3736028871, name = "Second Wind", robux = 15 },
 	throw_party = { id = 3736028927, name = "Throw a Party", robux = 99 },
 	huss_boost = { id = 3736030396, name = "x2 Boost: 3 nights", robux = 29 },
-	-- One per account (Data.starterPack): 1,000 Huss + the Starter trail + 3 Boost nights.
-	starter_pack = { id = 3736548404, name = "Starter Pack", robux = 49, hp = 1000 },
 } :: { [string]: Product })
 
 Products.boostNights = 3 -- nights of x2 Huss per Huss Boost purchase (they stack)

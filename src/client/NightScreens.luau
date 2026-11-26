@@ -834,7 +834,7 @@ function NightScreens.start()
 			-- the favorite prompt).
 			offeredStarter = true
 			ask = function()
-				MarketplaceService:PromptProductPurchase(player, Products.items.starter_pack.id)
+				MarketplaceService:PromptGamePassPurchase(player, Products.starterPassId)
 			end
 		end
 		if ask then

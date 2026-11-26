@@ -74,11 +74,6 @@ MarketplaceService.ProcessReceipt = function(receipt)
 		elseif key == "huss_boost" then
 			data.boostNights += Products.boostNights
 		end
-		if key == "starter_pack" then
-			data.owned.trail_starter = true
-			data.boostNights += Products.boostNights
-			data.starterPack = true
-		end
 		table.insert(data.receipts, receipt.PurchaseId)
 		while #data.receipts > RECEIPTS_KEPT do
 			table.remove(data.receipts, 1)
@@ -131,6 +126,42 @@ local function checkPartyAnimal(player: Player)
 	end
 end
 
+-- Starter Pack pass: its Huss, trail and Boost nights are granted once (Data.starterPack),
+-- whether it was bought here or on the game page.
+local function checkStarter(player: Player)
+	for _ = 1, 30 do -- wait for the save
+		if Data.get(player) or not player.Parent then
+			break
+		end
+		task.wait(1)
+	end
+	local data = Data.get(player)
+	if not data or data.starterPack then
+		return
+	end
+	local ok, owns = pcall(
+		MarketplaceService.UserOwnsGamePassAsync,
+		MarketplaceService,
+		player.UserId,
+		Products.starterPassId
+	)
+	if not (ok and owns) then
+		return
+	end
+	Data.update(player, function(fresh)
+		if fresh.starterPack then
+			return "AlreadyGranted"
+		end
+		fresh.starterPack = true
+		fresh.hp += Products.starterHp
+		fresh.owned.trail_starter = true
+		fresh.boostNights += Products.boostNights
+		return nil
+	end, "IAP", "starter_pack")
+	Data.save(player)
+end
+
+Players.PlayerAdded:Connect(checkStarter)
 Players.PlayerAdded:Connect(checkVip)
 Players.PlayerAdded:Connect(checkPartyAnimal)
 MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, purchased)
@@ -138,6 +169,8 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passI
 		player:SetAttribute("VIP", true)
 	elseif purchased and passId == Products.partyAnimalPassId then
 		player:SetAttribute("PartyAnimal", true)
+	elseif purchased and passId == Products.starterPassId then
+		task.spawn(checkStarter, player)
 	end
 end)
 

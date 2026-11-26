@@ -98,6 +98,7 @@ local function promptRobux(key: string): string?
 	local passId = if key == "vip"
 		then Products.vipPassId
 		elseif key == "party_animal" then Products.partyAnimalPassId
+		elseif key == "starter_pack" then Products.starterPassId
 		else nil
 	if passId then
 		if passId == 0 then
@@ -250,8 +251,9 @@ local function iconFor(key: string): string
 	if icons[key] == nil then
 		icons[key] = ""
 		local ok, info = pcall(function()
-			if key == "vip" then
-				return MarketplaceService:GetProductInfo(Products.vipPassId, Enum.InfoType.GamePass)
+			if key == "vip" or key == "starter_pack" then
+				local passId = if key == "vip" then Products.vipPassId else Products.starterPassId
+				return MarketplaceService:GetProductInfo(passId, Enum.InfoType.GamePass)
 			end
 			return MarketplaceService:GetProductInfo(Products.items[key].id, Enum.InfoType.Product)
 		end)
