@@ -339,33 +339,32 @@ function NightScreens.start()
 		AnchorPoint = Vector2.new(0, 0),
 		BackgroundColor3 = Color3.fromHex("FF2E93"),
 		FontFace = Ui.display,
-		Position = UDim2.fromScale(0.44, 0.715),
-		Size = UDim2.fromScale(0.27, 0.07),
-		Text = "SKIP PRACTICE, JUST PARTY",
-		TextColor3 = WHITE,
-		TextScaled = true,
+		Position = UDim2.fromScale(0.44, 0.715), -- right of DONE
+		Size = UDim2.fromScale(0.3, 0.07),
+		Text = "",
 		Parent = dusk,
 	}, {
 		corner(),
 		outline(4),
-		make("UIStroke", {
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
-			Color = BLACK,
-			Thickness = 2.5,
-		}),
-		make("UIPadding", {
-			PaddingTop = UDim.new(0.22, 0),
-			PaddingBottom = UDim.new(0.16, 0),
-			PaddingLeft = UDim.new(0.05, 0),
-			PaddingRight = UDim.new(0.3, 0),
-		}),
 	})
 	local skipStroke = skip:FindFirstChildOfClass("UIStroke") :: UIStroke
+	local skipLabel = Ui.shout({
+		Position = UDim2.fromScale(0.07, 0),
+		Size = UDim2.fromScale(0.68, 1),
+		Text = "SKIP PRACTICE, JUST PARTY",
+		Thickness = 2.5,
+		Parent = skip,
+	})
+	make("UIPadding", {
+		PaddingTop = UDim.new(0.24, 0),
+		PaddingBottom = UDim.new(0.16, 0),
+		Parent = skipLabel,
+	})
 	local ticketChip = make("Frame", {
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundColor3 = Color3.fromHex("FFD246"),
 		Position = UDim2.new(1, -6, 0.5, 0),
-		Size = UDim2.fromScale(0.27, 0.78),
+		Size = UDim2.fromScale(0.2, 0.78),
 		Parent = skip,
 	}, {
 		corner(),
@@ -392,7 +391,7 @@ function NightScreens.start()
 		local tickets = tonumber(player:GetAttribute("PartyTickets")) or 0
 		local on = player:GetAttribute("PartyTonight") == true
 		ticketCount.Text = if animal then "∞" else `x{tickets}`
-		skip.Text = if on then "✓ PARTYING TONIGHT" else "SKIP PRACTICE, JUST PARTY"
+		skipLabel.Text = if on then "✓ PARTYING TONIGHT" else "SKIP PRACTICE, JUST PARTY"
 		skip.BackgroundColor3 = if on then Color3.fromHex("FF64B4") else Color3.fromHex("FF2E93")
 		skipStroke.Color = if on then WHITE else BLACK
 	end
