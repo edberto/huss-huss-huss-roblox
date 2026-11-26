@@ -1,9 +1,9 @@
 --!strict
 -- Station arm motions for your own avatar while practising. The default animations (the
 -- character's Animate script) are switched off for the night and switched back on after, and
--- the arms are posed here by offsetting the shoulder and elbow joint C0s each frame (the
--- Animator still resets Transform, so C0 is what sticks): a rest pose per station plus a short
--- motion on every hit. The original C0s come back when posing stops. No animation assets.
+-- the arms are posed here by setting the shoulder and elbow joint Transforms each Stepped
+-- (after animations): a rest pose per station plus a short motion on every hit. Works for
+-- Motor6D and AnimationConstraint joints. No animation assets needed.
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -114,7 +114,6 @@ local station: string? = nil -- posing for this station; nil = off
 local move: Move? = nil
 local moveStart = 0
 local animate: LocalScript? = nil
-local originalC0: { [any]: CFrame } = {}
 
 local MOTORS = {
 	RightShoulder = { "RightUpperArm", "RightShoulder", "Torso", "Right Shoulder" },
@@ -131,7 +130,7 @@ local function motors(character: Model): { [string]: any }
 			local torso = character:FindFirstChild(path[3])
 			motor = torso and torso:FindFirstChild(path[4])
 		end
-		-- Newer avatars use AnimationConstraint joints instead of Motor6D; both have a C0.
+		-- Newer avatars use AnimationConstraint joints instead of Motor6D; both have a Transform.
 		if motor and (motor:IsA("Motor6D") or motor:IsA("AnimationConstraint")) then
 			found[name] = motor
 		end
@@ -161,10 +160,9 @@ function Pose.set(name: string?)
 			end
 		end
 	else
-		for motor, c0 in originalC0 do
-			motor.C0 = c0
+		for _, motor in motors(character) do
+			motor.Transform = CFrame.identity
 		end
-		table.clear(originalC0)
 		if animate and animate.Parent then
 			animate.Enabled = true
 		end
@@ -204,20 +202,14 @@ RunService.Stepped:Connect(function()
 		end
 	end
 	for name, motor in motors(character) do
-		local c0 = originalC0[motor]
-		if not c0 then
-			c0 = motor.C0
-			originalC0[motor] = c0
-		end
-		motor.C0 = c0 * (joints[name] or CFrame.identity)
+		motor.Transform = joints[name] or CFrame.identity
 	end
 end)
 
 player.CharacterAdded:Connect(function()
-	station = nil -- the new character has its own Animate, running, and its own C0s
+	station = nil -- the new character has its own Animate, running, and its own joints
 	move = nil
 	animate = nil
-	table.clear(originalC0)
 end)
 
 return Pose
