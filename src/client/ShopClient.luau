@@ -298,8 +298,18 @@ function ShopClient.start()
 
 	-- What goes in a cosmetic card's banner: the trail's gradient, the title as it shows
 	-- overhead, the ball's colour, or an emoji for dances and perks.
-	local EMOJI = { dance = "🕺", perk = "🎉" }
-	local function bannerPreview(banner: Frame, item: Cosmetics.Item)
+	local EMOJI = {
+		dance_groove = "🕺",
+		dance_shuffle = "👟",
+		dance_bounce = "🦘",
+		dance_cheer = "📣",
+		dance_hype = "🔥",
+		dance_floss = "💃",
+		dance_robot = "🤖",
+		dance_celebrate = "🎉",
+		perk_party_animal = "🥳",
+	}
+	local function bannerPreview(banner: Frame, id: string, item: Cosmetics.Item)
 		local colors = item.colors
 		if item.slot == "trail" and colors then
 			banner.BackgroundColor3 = WHITE
@@ -310,7 +320,8 @@ function ShopClient.start()
 		elseif item.slot == "title" then
 			label({
 				Size = UDim2.fromScale(1, 1),
-				FontFace = Ui.display,
+				-- Same font and colour as the tag over your head.
+				FontFace = Font.fromEnum(Enum.Font.FredokaOne),
 				Text = item.name,
 				TextColor3 = Color3.fromHex("3DFFB0"),
 				ZIndex = 24,
@@ -332,17 +343,14 @@ function ShopClient.start()
 				ZIndex = 24,
 				Parent = banner,
 			}, { corner(999), outline(2.5) })
-		elseif EMOJI[item.slot] then
+		elseif EMOJI[id] then
 			label({
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(0.5, 0.5),
 				Size = UDim2.fromScale(1, 1),
-				Text = EMOJI[item.slot],
+				Text = EMOJI[id],
 				ZIndex = 24,
 				Parent = banner,
-			}, {
-				make(
-					"UIPadding",
-					{ PaddingTop = UDim.new(0.1, 0), PaddingBottom = UDim.new(0.1, 0) }
-				),
 			})
 		end
 	end
@@ -378,8 +386,8 @@ function ShopClient.start()
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundTransparency = 1,
 					Position = UDim2.fromScale(0.5, 0.5),
-					-- Fits inside the banner (it used to spill over the title).
-					Size = UDim2.fromScale(0.92, 0.92),
+					-- Pokes just past the banner but stops short of the title.
+					Size = UDim2.fromScale(1.25, 1.25),
 					SizeConstraint = Enum.SizeConstraint.RelativeYY,
 					ZIndex = 24,
 					Parent = swatch,
@@ -445,7 +453,7 @@ function ShopClient.start()
 				ZIndex = 23,
 				Parent = card,
 			}, { corner(10), outline(2.5) })
-			bannerPreview(banner, item)
+			bannerPreview(banner, id, item)
 			label({
 				Position = UDim2.fromScale(0.05, 0.42),
 				Size = UDim2.fromScale(0.9, 0.22),
