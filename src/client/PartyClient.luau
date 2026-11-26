@@ -27,25 +27,40 @@ local BUTTONS = {
 
 local PartyClient = {}
 
-local function rootOf(p: Player): BasePart?
-	local character = p.Character
+-- A trainer is a player, or an NPC trainer's model (workspace.Npcs, "NpcTrainer" attribute).
+type Target = Player | Model
+local function rootOf(target: Target): BasePart?
+	local character = if target:IsA("Player") then target.Character else target
 	return character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+end
+local function nameOf(target: Target): string
+	return if target:IsA("Player") then target.DisplayName else target.Name
 end
 
 -- Nearest trainer within ability range, or nil.
-local function nearestTrainer(): Player?
+local function nearestTrainer(): Target?
 	local mine = rootOf(player)
 	if not mine then
 		return nil
 	end
-	local best, bestDistance = nil, Night.abilityRange
+	local candidates: { Target } = {}
 	for _, other in Players:GetPlayers() do
-		local root = rootOf(other)
-		if other ~= player and other:GetAttribute("Team") == "Trainer" and root then
-			local distance = (root.Position - mine.Position).Magnitude
-			if distance <= bestDistance then
-				best, bestDistance = other, distance
-			end
+		if other ~= player and other:GetAttribute("Team") == "Trainer" then
+			table.insert(candidates, other)
+		end
+	end
+	local npcs = workspace:FindFirstChild("Npcs")
+	for _, model in if npcs then npcs:GetChildren() else {} do
+		if model:IsA("Model") and model:GetAttribute("NpcTrainer") == true then
+			table.insert(candidates, model)
+		end
+	end
+	local best, bestDistance = nil, Night.abilityRange
+	for _, candidate in candidates do
+		local root = rootOf(candidate)
+		local distance = if root then (root.Position - mine.Position).Magnitude else math.huge
+		if distance <= bestDistance then
+			best, bestDistance = candidate, distance
 		end
 	end
 	return best
@@ -193,7 +208,7 @@ function PartyClient.start()
 		marker.Enabled = target ~= nil
 		if target then
 			marker.Adornee = rootOf(target)
-			markerText.Text = `{target.DisplayName} · in range`
+			markerText.Text = `{nameOf(target)} · in range`
 		end
 		for _, spec in BUTTONS do
 			local left = math.ceil((readyAt[spec.ability] or 0) - os.clock())

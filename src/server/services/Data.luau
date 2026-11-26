@@ -33,6 +33,7 @@ export type Data = {
 	stats: Stats.Stats, -- lifetime stats for the leaderboards
 	volume: { music: number, beat: number, sfx: number }, -- Settings sliders, 0-2 (1 = default)
 	partyTickets: number, -- each skips one night's practice (Gifts; Party Animal skips for free)
+	calmFlashing: boolean, -- Settings > Visual: calmer dance floor, no fireworks, no beat flare
 }
 
 local TEMPLATE: Data = {
@@ -52,6 +53,7 @@ local TEMPLATE: Data = {
 	stats = Stats.new(),
 	volume = { music = 1, beat = 1, sfx = 1 },
 	partyTickets = 0,
+	calmFlashing = false,
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -98,6 +100,7 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("Vol_beat", data.volume.beat)
 	player:SetAttribute("Vol_sfx", data.volume.sfx)
 	player:SetAttribute("PartyTickets", data.partyTickets)
+	player:SetAttribute("CalmFlashing", data.calmFlashing)
 	-- Own leaderboard values, so the Ranks panel can pin the player's row.
 	for _, category in Stats.categories do
 		player:SetAttribute(`Stat_{category.key}`, Stats.value(data.hp, data.stats, category.key))

@@ -30,6 +30,11 @@ local NAMES = {
 	"Dimas",
 }
 local TEMPT_EVERY = 12 -- seconds between an NPC partier's tries
+-- Real partiers can tempt NPC trainers too (so a quiet server still has someone to drag in):
+-- each ability pulls the NPC's give-in point earlier by this much night progress.
+local PULL = { Invite = 0.05, Speaker = 0.05, Dance = 0.1 }
+local DRAG_IN_WINDOW = 20 -- seconds: giving in this soon after a tempt credits the partier
+local DANCE_POINTS = 15 -- what a full Dance-Off drains from a player, as points
 
 type Npc = {
 	name: string,
@@ -40,6 +45,9 @@ type Npc = {
 	lasted: string?,
 	progress: number,
 	points: number,
+	tempter: Player?, -- last real partier to tempt them, for drag-in credit
+	temptedAt: number,
+	shieldUntil: number,
 }
 
 local Npcs = {}
@@ -76,6 +84,7 @@ local function spawnNpc(home: Model, index: number): Npc?
 	humanoid.WalkSpeed = 0
 	local spot = home:FindFirstChild("PracticeSpot") :: BasePart
 	model:PivotTo(spot.CFrame + Vector3.new(0, 2, 0))
+	model:SetAttribute("NpcTrainer", true) -- partiers' clients can aim at it (PartyClient)
 	model.Parent = folder
 	return {
 		name = name,
@@ -85,6 +94,8 @@ local function spawnNpc(home: Model, index: number): Npc?
 		partier = false,
 		progress = 1,
 		points = 0,
+		temptedAt = 0,
+		shieldUntil = 0,
 	}
 end
 
@@ -120,6 +131,43 @@ local function tempt(npc: Npc)
 	end)
 end
 
+Party.abilityEvent.OnServerEvent:Connect(function(partier: Player, ability: unknown, target: unknown)
+	if
+		typeof(target) ~= "Instance"
+		or not target:IsA("Model")
+		or target.Parent ~= folder
+		or ReplicatedStorage:GetAttribute("Phase") ~= "Night"
+	then
+		return
+	end
+	local npc
+	for _, candidate in npcs do
+		if candidate.model == target and not candidate.partier then
+			npc = candidate
+		end
+	end
+	local mine = partier.Character and partier.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local theirs = npc and npc.model:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if
+		not npc
+		or not mine
+		or not theirs
+		or (mine.Position - theirs.Position).Magnitude > Night.abilityRange
+		or os.clock() < npc.shieldUntil
+	then
+		return
+	end
+	local spec = Party.spend(partier, ability)
+	if not spec then
+		return
+	end
+	npc.shieldUntil = os.clock() + Night.shieldTime
+	npc.giveInAt -= PULL[ability :: string] or 0
+	npc.tempter, npc.temptedAt = partier, os.clock()
+	npc.humanoid.Jump = true -- a startled hop, so the partier sees it land
+	Party.addPoints(partier, spec.points + (if ability == "Dance" then DANCE_POINTS else 0))
+end)
+
 -- Fill free homes at the start of a night.
 function Npcs.beginNight()
 	Npcs.clear()
@@ -143,6 +191,10 @@ function Npcs.tick(progress: number, clockText: string, bpm: number)
 			npc.points += math.random(2, 4) * bpm / 60
 			if progress >= npc.giveInAt then
 				npc.partier = true
+				npc.model:SetAttribute("NpcTrainer", false)
+				if npc.tempter and os.clock() - npc.temptedAt < DRAG_IN_WINDOW then
+					Party.creditDragIn(npc.tempter)
+				end
 				Decor.dressPartier(npc.model)
 				npc.lasted = clockText
 				npc.progress = progress

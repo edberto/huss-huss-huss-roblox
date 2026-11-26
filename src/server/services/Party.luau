@@ -32,15 +32,45 @@ local function addPoints(player: Player, points: number)
 	player:SetAttribute("PartyPoints", (tonumber(player:GetAttribute("PartyPoints")) or 0) + points)
 end
 
--- Called by Round when a trainer gives in: whoever tempted them last gets the bonus.
-function Party.creditGiveIn(trainer: Player)
-	local tempter = lastTempter[trainer]
-	lastTempter[trainer] = nil
-	if tempter and tempter.Parent then
+-- A trainer (player or NPC) gave in right after this partier tempted them.
+function Party.creditDragIn(tempter: Player)
+	if tempter.Parent then
 		addPoints(tempter, Night.giveInBonus)
 		Data.recordStats(tempter, { draggedIn = 1 })
 	end
 end
+
+-- Called by Round when a trainer gives in: whoever tempted them last gets the bonus.
+function Party.creditGiveIn(trainer: Player)
+	local tempter = lastTempter[trainer]
+	lastTempter[trainer] = nil
+	if tempter then
+		Party.creditDragIn(tempter)
+	end
+end
+
+-- For abilities aimed at NPC trainers (Npcs): the same team and cooldown rules as players.
+-- Returns the ability's spec if it can be used now, and starts its cooldown.
+function Party.spend(partier: Player, ability: unknown): { cooldown: number, points: number }?
+	local spec = if typeof(ability) == "string" then (Night.abilities :: any)[ability] else nil
+	if not spec or partier:GetAttribute("Team") ~= "Partier" then
+		return nil
+	end
+	local now = os.clock()
+	local mine = cooldowns[partier] or {}
+	cooldowns[partier] = mine
+	if now < (mine[ability :: string] or 0) then
+		return nil
+	end
+	mine[ability :: string] = now + spec.cooldown
+	return spec
+end
+
+function Party.addPoints(partier: Player, points: number)
+	addPoints(partier, points)
+end
+
+Party.abilityEvent = abilityEvent
 
 function Party.reset(player: Player)
 	cooldowns[player] = nil

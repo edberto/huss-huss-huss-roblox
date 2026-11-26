@@ -500,11 +500,13 @@ function RhythmClient.start()
 			if beat > clickBeat then
 				clickBeat = beat
 				StationFx.play("kick")
-				-- Pulse the button glow and the hit ring on the beat.
-				tapGlow.Transparency = 0.1
-				ringGlow.Transparency = 0.05
-				TweenService:Create(tapGlow, TweenInfo.new(0.35), { Transparency = 0.7 }):Play()
-				TweenService:Create(ringGlow, TweenInfo.new(0.35), { Transparency = 0.6 }):Play()
+				-- Pulse the button glow and the hit ring on the beat (not with Reduce flashing).
+				if player:GetAttribute("CalmFlashing") ~= true then
+					tapGlow.Transparency = 0.1
+					ringGlow.Transparency = 0.05
+					TweenService:Create(tapGlow, TweenInfo.new(0.35), { Transparency = 0.7 }):Play()
+					TweenService:Create(ringGlow, TweenInfo.new(0.35), { Transparency = 0.6 }):Play()
+				end
 			end
 			if note > clapNote then
 				clapNote = note

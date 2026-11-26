@@ -111,8 +111,10 @@ local TILE_COLORS = {
 local TILE_STEP = 0.48
 local TILE_HALF = 1.05 -- tiles are 1.9 wide on a 2-stud grid
 game:GetService("RunService").Heartbeat:Connect(function()
-	local step = math.floor(os.clock() / TILE_STEP)
-	local onBeat = os.clock() % TILE_STEP < TILE_STEP * 0.5
+	-- Settings > Visual > Reduce flashing: colours drift 4x slower and feet don't flash white.
+	local calm = player:GetAttribute("CalmFlashing") == true
+	local step = math.floor(os.clock() / (if calm then TILE_STEP * 4 else TILE_STEP))
+	local onBeat = not calm and os.clock() % TILE_STEP < TILE_STEP * 0.5
 	local feet = {}
 	for _, other in Players:GetPlayers() do
 		local root = other.Character and other.Character:FindFirstChild("HumanoidRootPart")

@@ -103,6 +103,9 @@ end
 
 -- A short volley over the boards; bigger at Dawn.
 function Spectacle.fireworks(count: number)
+	if game:GetService("Players").LocalPlayer:GetAttribute("CalmFlashing") == true then
+		return -- Settings > Visual > Reduce flashing
+	end
 	local center = workspace:FindFirstChild("Town")
 		and workspace.Town:FindFirstChild("Board_Center") :: BasePart?
 	if not center then

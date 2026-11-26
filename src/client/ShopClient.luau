@@ -27,6 +27,7 @@ local giftRemote = remotes:WaitForChild("ClaimGift") :: RemoteFunction
 local groupRemote = remotes:WaitForChild("ClaimGroup") :: RemoteFunction
 local codeRemote = remotes:WaitForChild("RedeemCode") :: RemoteFunction
 local offsetRemote = remotes:WaitForChild("SetTapOffset") :: RemoteFunction
+local calmRemote = remotes:WaitForChild("SetCalmFlashing") :: RemoteFunction
 local volumeRemote = remotes:WaitForChild("SetVolume") :: RemoteFunction
 
 local C = Ui.colors
@@ -706,6 +707,50 @@ function ShopClient.start()
 		ZIndex = 21,
 		Parent = settingsBody,
 	})
+	local visualBody = make("Frame", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromScale(0, 0.16),
+		Size = UDim2.fromScale(1, 0.84),
+		Visible = false,
+		ZIndex = 21,
+		Parent = settingsBody,
+	})
+	-- Visual: Reduce flashing (calmer dance floor, no fireworks, no beat flare). Saved.
+	label({
+		Size = UDim2.fromScale(0.7, 0.1),
+		Text = "REDUCE FLASHING",
+		FontFace = Ui.display,
+		TextColor3 = WHITE,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 22,
+		Parent = visualBody,
+	})
+	local calmToggle = button(visualBody, "OFF", IDLE)
+	calmToggle.AnchorPoint = Vector2.new(1, 0)
+	calmToggle.Position = UDim2.fromScale(1, 0)
+	calmToggle.Size = UDim2.fromScale(0.22, 0.12)
+	label({
+		Position = UDim2.fromScale(0, 0.14),
+		Size = UDim2.fromScale(1, 0.14),
+		Text = "Calmer dance floor, no fireworks and no flashing beat glow. For players sensitive to flashing lights.",
+		TextColor3 = Color3.fromHex("C8B4E6"),
+		TextWrapped = true,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 22,
+		Parent = visualBody,
+	})
+	local function showCalm()
+		local on = player:GetAttribute("CalmFlashing") == true
+		calmToggle.Text = if on then "ON" else "OFF"
+		calmToggle.BackgroundColor3 = if on then Color3.fromHex("46EBA0") else IDLE
+	end
+	calmToggle.Activated:Connect(function()
+		local on = player:GetAttribute("CalmFlashing") ~= true
+		player:SetAttribute("CalmFlashing", on) -- at once; the server saves it
+		task.spawn(calmRemote.InvokeServer, calmRemote, on)
+	end)
+	player:GetAttributeChangedSignal("CalmFlashing"):Connect(showCalm)
+	showCalm()
 
 	-- Volume rows: NAME ... 100%, then − [bar] +, then a hint. 0-200%, saved shortly after the
 	-- last change. The attribute is set locally at once so the sound follows the slider.
@@ -1100,6 +1145,7 @@ function ShopClient.start()
 		settingsTab = tab
 		soundBody.Visible = tab == "sound"
 		timingBody.Visible = tab == "timing"
+		visualBody.Visible = tab == "visual"
 		for key, tabButton in settingsTabs do
 			tabButton.BackgroundColor3 = if key == tab then Color3.fromHex("FFBE28") else IDLE
 		end
@@ -1111,7 +1157,7 @@ function ShopClient.start()
 			refreshVolumes()
 		end
 	end
-	for _, tab in { { "sound", "SOUND" }, { "timing", "TIMING" } } do
+	for _, tab in { { "sound", "SOUND" }, { "timing", "TIMING" }, { "visual", "VISUAL" } } do
 		local tabButton = button(settingsTabRow, tab[2], IDLE)
 		tabButton.Size = UDim2.fromScale(0.22, 1)
 		tabButton.Activated:Connect(function()

@@ -67,7 +67,20 @@ calibrate.Parent = remotes
 local setVolume = Instance.new("RemoteFunction")
 setVolume.Name = "SetVolume" -- client -> server: "music" | "beat" | "sfx", 0-2; saved, returns nil or a reason
 setVolume.Parent = remotes
+local setCalm = Instance.new("RemoteFunction")
+setCalm.Name = "SetCalmFlashing" -- client -> server: boolean; saved, returns nil or a reason
+setCalm.Parent = remotes
 remotes.Parent = ReplicatedStorage
+
+setCalm.OnServerInvoke = function(player: Player, on: unknown): string?
+	if typeof(on) ~= "boolean" then
+		return "Invalid"
+	end
+	return Data.update(player, function(data)
+		data.calmFlashing = on
+		return nil
+	end)
+end
 
 setVolume.OnServerInvoke = function(player: Player, kind: unknown, value: unknown): string?
 	if
