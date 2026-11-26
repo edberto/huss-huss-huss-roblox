@@ -1,8 +1,9 @@
 --!strict
 -- Station arm motions for your own avatar while practising. The default animations (the
 -- character's Animate script) are switched off for the night and switched back on after, and
--- the arms are posed here by setting the shoulder and elbow Motor6D transforms each frame:
--- a rest pose per station plus a short motion on every hit. No animation assets needed.
+-- the arms are posed here by offsetting the shoulder and elbow Motor6D C0s each frame (the
+-- Animator still resets Transform, so C0 is what sticks): a rest pose per station plus a short
+-- motion on every hit. The original C0s come back when posing stops. No animation assets.
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -40,7 +41,10 @@ local MOVES: { [string]: Move } = {
 	dribble = { -- push the ball down and catch it
 		duration = 0.28,
 		at = function(p)
-			return { RightShoulder = arm(45 - 25 * bump(p), 0), RightElbow = arm(30 - 25 * bump(p), 0) }
+			return {
+				RightShoulder = arm(45 - 25 * bump(p), 0),
+				RightElbow = arm(30 - 25 * bump(p), 0),
+			}
 		end,
 	},
 	shoot = { -- both arms up, release
@@ -110,6 +114,7 @@ local station: string? = nil -- posing for this station; nil = off
 local move: Move? = nil
 local moveStart = 0
 local animate: LocalScript? = nil
+local originalC0: { [Motor6D]: CFrame } = {}
 
 local MOTORS = {
 	RightShoulder = { "RightUpperArm", "RightShoulder", "Torso", "Right Shoulder" },
@@ -155,9 +160,10 @@ function Pose.set(name: string?)
 			end
 		end
 	else
-		for _, motor in motors(character) do
-			motor.Transform = CFrame.identity
+		for motor, c0 in originalC0 do
+			motor.C0 = c0
 		end
+		table.clear(originalC0)
 		if animate and animate.Parent then
 			animate.Enabled = true
 		end
@@ -178,7 +184,7 @@ function Pose.hit(grade: string, skill: boolean)
 	moveStart = os.clock()
 end
 
--- Stepped runs after the animator, so these transforms are what gets drawn.
+-- Every frame while posing.
 RunService.Stepped:Connect(function()
 	local character = player.Character
 	if not station or not character then
@@ -197,14 +203,20 @@ RunService.Stepped:Connect(function()
 		end
 	end
 	for name, motor in motors(character) do
-		motor.Transform = joints[name] or CFrame.identity
+		local c0 = originalC0[motor]
+		if not c0 then
+			c0 = motor.C0
+			originalC0[motor] = c0
+		end
+		motor.C0 = c0 * (joints[name] or CFrame.identity)
 	end
 end)
 
 player.CharacterAdded:Connect(function()
-	station = nil -- the new character has its own Animate, running
+	station = nil -- the new character has its own Animate, running, and its own C0s
 	move = nil
 	animate = nil
+	table.clear(originalC0)
 end)
 
 return Pose
