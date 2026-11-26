@@ -155,7 +155,7 @@ end
 -- at once. Takes 1-3 and 4-6 are two recordings of the phrase; each round of four uses one for
 -- the singles and the other for the phrase, then they swap. While the phrase plays, the next
 -- hit keeps quiet (its pop still shows) so voices don't pile up. A pause over 1.5 s starts over.
-local PHRASE_GAP = 0.2 -- each take is about 0.2 s long
+local PHRASE_GAP = 0.16 -- takes are ~0.2 s; tight so the phrase ends before the next bar starts
 local hits, round, lastHuss, quietUntil = 0, 0, -math.huge, 0
 function StationFx.huss()
 	local now = os.clock()
@@ -179,7 +179,7 @@ function StationFx.huss()
 			StationFx.pop()
 		end)
 	end
-	quietUntil = now + 3 * PHRASE_GAP
+	quietUntil = now + 2 * PHRASE_GAP + 0.05 -- until the last take has started
 	hits, round = 0, round + 1
 end
 
