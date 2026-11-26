@@ -1,6 +1,5 @@
 --!strict
--- Gym station: every hit pulls the barbell up to the chest (and curls the dumbbell); the skill
--- beat presses it overhead. A skill-beat
+-- Gym station: every hit pulls the barbell up to the chest; the skill beat presses it overhead. A skill-beat
 -- "Almost" gets the bar halfway up, then it drops with a clank: "ahh almost almost".
 -- Props are local to the player's own screen, like the basketball's dribble.
 local RunService = game:GetService("RunService")
@@ -53,35 +52,23 @@ end
 function Gym.start(): StationFx.Station
 	local folder = Instance.new("Folder")
 	folder.Name = "GymProps"
-	local _, placeDumbbell = weight(folder, 1.4, 0.9)
 	local _, placeBarbell = weight(folder, 6, 2.2)
 	local active = false
 	local motion: Motion? = nil
 
 	RunService.RenderStepped:Connect(function()
 		local root = StationFx.rootCFrame()
-		local hand = StationFx.handPosition()
-		if not active or not root or not hand then
+		if not active or not root then
 			return
 		end
-		-- Plates resting on the driveway in front of the player.
-		local barRest = CFrame.lookAlong(root * Vector3.new(0, -2, -2.6), root.RightVector)
-		local barTop = CFrame.lookAlong(root * Vector3.new(0, 3.6, -0.8), root.RightVector)
-		local barChest = CFrame.lookAlong(root * Vector3.new(0, 0.8, -1.2), root.RightVector)
-		local dumbbellRest = CFrame.lookAlong(hand, root.LookVector)
+		-- The bar runs left-right across the player (a part's length is its X axis, so face the
+		-- frame forward), resting on the mat in front of them.
+		local barRest = CFrame.lookAlong(root * Vector3.new(0, -2, -2.6), root.LookVector)
+		local barTop = CFrame.lookAlong(root * Vector3.new(0, 3.6, -0.8), root.LookVector)
+		local barChest = CFrame.lookAlong(root * Vector3.new(0, 0.8, -1.2), root.LookVector)
 
 		local current = motion
 		local elapsed = if current then os.clock() - current.start else 0
-		if current and current.kind == "curl" then
-			local p = math.clamp(elapsed / CURL_TIME, 0, 1)
-			local lift = math.sin(p * math.pi) * 1.6
-			placeDumbbell(dumbbellRest + Vector3.new(0, lift, 0))
-			if p >= 1 then
-				motion = nil
-			end
-		else
-			placeDumbbell(dumbbellRest)
-		end
 
 		if current and current.kind == "press" then
 			local p = math.clamp(elapsed / PRESS_TIME, 0, 1)
@@ -96,7 +83,7 @@ function Gym.start(): StationFx.Station
 			-- Halfway to the chest, wobble, then drop.
 			if p < 0.45 then
 				placeBarbell(
-					barRest:Lerp(barChest, p / 0.45) * CFrame.Angles(math.sin(p * 40) * 0.15, 0, 0)
+					barRest:Lerp(barChest, p / 0.45) * CFrame.Angles(0, 0, math.sin(p * 40) * 0.15)
 				)
 			else
 				placeBarbell(barChest:Lerp(barRest, math.clamp((p - 0.45) / 0.15, 0, 1)))
@@ -105,9 +92,12 @@ function Gym.start(): StationFx.Station
 				motion = nil
 			end
 		elseif current and current.kind == "curl" then
-			-- A quick pull to the chest, so every hit shows on the big bar.
+			-- A quick pull to the chest on every hit.
 			local p = math.clamp(elapsed / CURL_TIME, 0, 1)
 			placeBarbell(barRest:Lerp(barChest, math.sin(p * math.pi)))
+			if p >= 1 then
+				motion = nil
+			end
 		else
 			placeBarbell(barRest)
 		end
