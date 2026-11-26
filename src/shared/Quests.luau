@@ -58,7 +58,7 @@ Quests.pool = table.freeze({
 	{
 		id = "hardnight",
 		group = "practice",
-		text = "Practise a night at Gym or Burgers",
+		text = "Practise at Gym or Burgers",
 		stat = "hardnight",
 		goal = 1,
 		reward = 75,
@@ -90,7 +90,7 @@ Quests.pool = table.freeze({
 	{
 		id = "friend",
 		group = "social",
-		text = "Play a night with a friend",
+		text = "Play with a friend here",
 		stat = "friendNight",
 		goal = 1,
 		reward = 100,
