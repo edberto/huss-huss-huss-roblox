@@ -81,3 +81,4 @@ Manual place changes that a code publish doesn't carry. Newest first.
 - 2026-11-26 Content rating questionnaire done (Global: Minimal). Regional pricing already on for passes. Auto-translation on (user).
 - 2026-11-26 Created developer product Starter Pack (3736548404, 49 Robux, regional pricing requested, icon assets/icons/starter_pack.png) via Open Cloud. Uploaded shop thumb trail_starter (72024198992120) and granted it to the Production universe.
 - Starter Pack moved to a game pass (2102291673, 49 Robux, same icon) the same day; the developer product 3736548404 is unused: take it off sale in Creator Hub. Referral Rewards banner published (user).
+- 2026-11-26 Uploaded trailer (huss_trailer_30s_roblox.mp4, asset 78514678796498) rejected: Video Quality Guidelines (cinematic cut, caption cards, staged hero). Pending: a plain gameplay recording of the live game, cut with no added text. 2 of 3 uploads left until 26 Dec.
