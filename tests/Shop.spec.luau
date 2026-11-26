@@ -15,6 +15,10 @@ describe("Cosmetics", function()
 		expect(Cosmetics.buy(wallet, "trail_gold")).toBe("NotEnoughHP")
 		expect(Cosmetics.buy(wallet, "trail_streak")).toBe("NotForSale")
 		expect(wallet.hp).toBe(100)
+		expect(Cosmetics.buy(wallet, "dance_groove")).toBe(nil) -- free
+		expect(wallet.hp).toBe(100)
+		expect(Cosmetics.buy(wallet, "perk_party_animal")).toBe("NotEnoughHP")
+		expect(Cosmetics.equip(wallet, "perk", "perk_party_animal")).toBe("BadSlot") -- not equippable
 	end)
 
 	it("equips only owned items in their own slot", function()

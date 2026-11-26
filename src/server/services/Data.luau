@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local Cosmetics = require(ReplicatedStorage.Shared.Cosmetics)
 local Night = require(ReplicatedStorage.Shared.Night)
 local Progress = require(ReplicatedStorage.Shared.Progress)
 local Products = require(ReplicatedStorage.Shared.Products)
@@ -79,7 +80,10 @@ local function publish(player: Player, data: Data)
 		table.insert(owned, id)
 	end
 	player:SetAttribute("Owned", table.concat(owned, ","))
-	for _, slot in { "trail", "title", "ball" } do
+	if data.owned.perk_party_animal then
+		player:SetAttribute("PartyAnimal", true) -- bought with Huss; the pass sets it too (Store)
+	end
+	for _, slot in Cosmetics.slots do
 		player:SetAttribute(`Equipped_{slot}`, data.equipped[slot])
 	end
 	player:SetAttribute("DailyLastDay", data.daily.lastDay)

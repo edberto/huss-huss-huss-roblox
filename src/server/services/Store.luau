@@ -121,7 +121,9 @@ local function checkPartyAnimal(player: Player)
 		player.UserId,
 		Products.partyAnimalPassId
 	)
-	player:SetAttribute("PartyAnimal", ok and owns)
+	if ok and owns then -- never false: the Huss-bought perk sets it too (Data)
+		player:SetAttribute("PartyAnimal", true)
+	end
 end
 
 Players.PlayerAdded:Connect(checkVip)

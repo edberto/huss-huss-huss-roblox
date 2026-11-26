@@ -33,11 +33,14 @@ local TABS = {
 	{ slot = "trail", name = "Trails" },
 	{ slot = "title", name = "Titles" },
 	{ slot = "ball", name = "Ball" },
+	{ slot = "dance", name = "Dances" },
+	{ slot = "perk", name = "Perks" },
 	{ slot = "robux", name = "Robux" },
 }
 -- Robux tab cards, in order.
 local ROBUX_CARDS = {
 	{ key = "vip", name = "VIP: x2 Huss", robux = 199, color = "FAC775" },
+	{ key = "party_animal", name = "Party Animal", robux = 149, color = "FF2E93" },
 	{ key = "hp_small", name = "500 Huss", robux = 25, color = "FFB547" },
 	{ key = "hp_medium", name = "1,750 Huss", robux = 75, color = "FFB547" },
 	{ key = "hp_large", name = "5,000 Huss", robux = 199, color = "FFB547" },
@@ -59,11 +62,15 @@ local ShopClient = {}
 
 -- Opens the Robux prompt for a card; returns a note to show, or nil.
 local function promptRobux(key: string): string?
-	if key == "vip" then
-		if Products.vipPassId == 0 then
+	local passId = if key == "vip"
+		then Products.vipPassId
+		elseif key == "party_animal" then Products.partyAnimalPassId
+		else nil
+	if passId then
+		if passId == 0 then
 			return "Coming soon"
 		end
-		MarketplaceService:PromptGamePassPurchase(player, Products.vipPassId)
+		MarketplaceService:PromptGamePassPurchase(player, passId)
 		return nil
 	end
 	local product = Products.items[key]
@@ -278,6 +285,8 @@ function ShopClient.start()
 			if not reason then
 				reason = equipRemote:InvokeServer(item.slot, id)
 			end
+		elseif item.slot == "perk" then
+			reason = "AlreadyOwned"
 		elseif player:GetAttribute(`Equipped_{item.slot}`) == id then
 			reason = equipRemote:InvokeServer(item.slot, nil)
 		else
@@ -335,7 +344,8 @@ function ShopClient.start()
 					ZIndex = 23,
 					Parent = frame,
 				})
-				local owns = card.key == "vip" and player:GetAttribute("VIP") == true
+				local owns = (card.key == "vip" and player:GetAttribute("VIP") == true)
+					or (card.key == "party_animal" and player:GetAttribute("PartyAnimal") == true)
 				local action = button(
 					frame,
 					if owns then "OWNED" else `R$ {card.robux}`,
@@ -367,6 +377,7 @@ function ShopClient.start()
 			local status = if equipped
 				then "Equipped"
 				elseif mine[id] then "Owned"
+				elseif item.price == 0 then "Free"
 				else `{item.price} Huss`
 			local card = make("Frame", {
 				BackgroundColor3 = CARD,
@@ -405,7 +416,7 @@ function ShopClient.start()
 
 	for _, tab in TABS do
 		local tabButton = button(tabRow, string.upper(tab.name), IDLE)
-		tabButton.Size = UDim2.fromScale(0.18, 1)
+		tabButton.Size = UDim2.fromScale(0.155, 1)
 		tabButton.Activated:Connect(function()
 			currentTab = tab.slot
 			shopNote.Text = ""
@@ -1196,6 +1207,9 @@ function ShopClient.start()
 			"Equipped_trail",
 			"Equipped_title",
 			"Equipped_ball",
+			"Equipped_dance",
+			"PartyAnimal",
+			"VIP",
 			"DailyLastDay",
 			"GroupClaimed",
 		}
