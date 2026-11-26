@@ -12,9 +12,9 @@ end
 function Ui.topInset(): number
 	return GuiService.TopbarInset.Max.Y
 end
--- Right edge of those buttons.
+-- Right edge of those buttons (TopbarInset is the free strip to their right).
 function Ui.topInsetRight(): number
-	return GuiService.TopbarInset.Max.X
+	return GuiService.TopbarInset.Min.X
 end
 -- Calls `layout` now and whenever the screen size or Roblox's top bar changes.
 function Ui.onResize(layout: () -> ())
