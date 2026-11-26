@@ -196,27 +196,14 @@ local function at(lot: CFrame, x: number, y: number, z: number): CFrame
 	return lot * CFrame.new(x, y, z)
 end
 
--- A camera behind a practice spot inside a room, looking out of the room's opening (door or
--- window) and turned toward the party house down the street, so the party and its floating
--- boards stay in view.
-local function roomCamera(
-	home: Model,
-	name: string,
-	lot: CFrame,
-	spot: CFrame,
-	cameraLocal: Vector3,
-	turn: number, -- how far the view turns toward the party
-	down: number
-)
-	local cameraPos = (lot * CFrame.new(cameraLocal)).Position
-	local out = lot:VectorToWorldSpace(Vector3.new(0, 0, -1))
-	local toParty = ((PARTY_CENTER - spot.Position) * Vector3.new(1, 0, 1)).Unit
-	local look = (out + toParty * turn).Unit
+-- A practice camera in front of the player, looking back at them through the garage door or
+-- the kitchen window, so you see your avatar and the prop (barbell, burger counter) head-on.
+local function frontCamera(home: Model, name: string, lot: CFrame, from: Vector3, at: Vector3)
 	part(
 		home,
 		name,
 		Vector3.new(1, 1, 1),
-		CFrame.lookAt(cameraPos, cameraPos + look - Vector3.new(0, down, 0)),
+		CFrame.lookAt((lot * CFrame.new(from)).Position, (lot * CFrame.new(at)).Position),
 		C.cream,
 		{
 			Transparency = 1,
@@ -226,8 +213,6 @@ local function roomCamera(
 	)
 end
 
--- The house as rooms: an open garage (Gym) and a kitchen behind a picture window (Burgers),
--- both facing the street. The upper floor stays solid.
 local function rooms(home: Model, lot: CFrame, index: number)
 	local wall, floor = C.wall, Color3.fromHex("8C7A66")
 	local trim = wall:Lerp(Color3.new(0, 0, 0), 0.15)
@@ -420,8 +405,8 @@ local function buildHome(index: number, lot: CFrame)
 			}
 		)
 	end
-	roomCamera(home, "PracticeCamera_Gym", lot, gymSpot, Vector3.new(-5, 5.6, 37.5), 0.6, 0.05)
-	roomCamera(home, "PracticeCamera_Burgers", lot, burgerSpot, Vector3.new(8, 6.6, 37.2), 0.3, 0.2)
+	frontCamera(home, "PracticeCamera_Gym", lot, Vector3.new(-7, 6.4, 21), Vector3.new(-7, 4, 31))
+	frontCamera(home, "PracticeCamera_Burgers", lot, Vector3.new(7, 6.4, 19.5), Vector3.new(7, 3.8, 29.4))
 	home.Parent = homes
 end
 

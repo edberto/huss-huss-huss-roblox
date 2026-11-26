@@ -73,26 +73,39 @@ function StationFx.play(name: string, pitch: number?)
 	end
 end
 
--- Speech bubble over the head: small "huss" or the big "ahh almost almost".
-local bubble = Instance.new("BillboardGui")
-bubble.Size = UDim2.fromOffset(160, 50)
-bubble.StudsOffset = Vector3.new(0, 3.2, 0)
-bubble.AlwaysOnTop = true
-local bubbleText = Ui.label({
-	AnchorPoint = Vector2.new(0.5, 0.5),
-	BackgroundColor3 = Ui.colors.cream,
-	Position = UDim2.fromScale(0.5, 0.5),
-	Size = UDim2.fromScale(0.5, 0.6),
-	TextColor3 = Ui.colors.navy,
-	TextTransparency = 1,
-	Parent = bubble,
-}, { Ui.make("UICorner", { CornerRadius = UDim.new(0.4, 0) }) })
+-- Speech bubble over the head: small "huss" or the big "ahh almost almost". PlayerGui clears it
+-- when the character respawns (every Dusk), so it's rebuilt whenever it's gone; reusing the
+-- destroyed one errored and stopped every station's hit animation after the first night.
+local bubble: BillboardGui, bubbleText: TextLabel
+local function newBubble()
+	bubble = Instance.new("BillboardGui")
+	bubble.Size = UDim2.fromOffset(160, 50)
+	bubble.StudsOffset = Vector3.new(0, 3.2, 0)
+	bubble.AlwaysOnTop = true
+	bubble.ResetOnSpawn = false
+	bubbleText = Ui.label({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Ui.colors.cream,
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.5, 0.6),
+		TextColor3 = Ui.colors.navy,
+		TextTransparency = 1,
+		Parent = bubble,
+	}, { Ui.make("UICorner", { CornerRadius = UDim.new(0.4, 0) }) })
+end
+newBubble()
 
 function StationFx.say(text: string, big: boolean)
+	local ok = pcall(function()
+		bubble.Parent = player:FindFirstChildOfClass("PlayerGui")
+	end)
+	if not ok then
+		newBubble()
+		bubble.Parent = player:FindFirstChildOfClass("PlayerGui")
+	end
 	local character = player.Character
 	local head = character and character:FindFirstChild("Head")
 	bubble.Adornee = head or (character and character.PrimaryPart)
-	bubble.Parent = player:FindFirstChildOfClass("PlayerGui")
 	bubbleText.Text = text
 	bubbleText.Size = if big then UDim2.fromScale(1, 0.9) else UDim2.fromScale(0.5, 0.6)
 	bubbleText.TextTransparency = 0

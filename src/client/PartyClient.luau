@@ -199,15 +199,19 @@ function PartyClient.start()
 		Size = UDim2.new(0.62, 0, 0, 56),
 		Parent = gui,
 	})
-	local flyer = label({
+	-- The Invite flyer covers the beat track until it times out, or until you toss it (tap it,
+	-- E, or X on a controller).
+	local flyer = make("TextButton", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
+		AutoButtonColor = false,
 		BackgroundColor3 = C.gold,
-		BackgroundTransparency = 0,
+		FontFace = Ui.font,
 		Position = UDim2.fromScale(0.45, 0.3),
 		Rotation = -8,
 		Size = UDim2.fromOffset(120, 110),
 		Text = "PARTY\nTONIGHT",
 		TextColor3 = C.partyWall,
+		TextScaled = true,
 		Visible = false,
 		ZIndex = 5,
 		Parent = trackOverlay,
@@ -215,6 +219,11 @@ function PartyClient.start()
 		corner(4),
 		make("UIPadding", { PaddingTop = UDim.new(0.2, 0), PaddingBottom = UDim.new(0.2, 0) }),
 	})
+	local function tossFlyer()
+		flyer.Visible = false
+	end
+	flyer.Activated:Connect(tossFlyer)
+	Ui.bind(flyer, { Enum.KeyCode.E }, { Enum.KeyCode.ButtonX }, tossFlyer)
 	local fakeDots: { Frame } = {}
 	for i = 1, 4 do
 		fakeDots[i] = make("Frame", {

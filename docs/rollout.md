@@ -2,6 +2,12 @@
 
 Manual place changes that a code publish doesn't carry. Newest first.
 
+## 2026-11-26: Front practice cameras (PLAYTEST)
+
+- Moved PracticeCamera_Gym / PracticeCamera_Burgers in all 12 PLAYTEST homes to face the
+  player from the garage door / outside the kitchen window (same as `scripts/build_scene.luau`).
+  Production gets them when the scene script is run there.
+
 ## 2026-11-26: Party Tickets
 
 - Uploaded via Studio MCP: ticket icon 96730617685238 and coin icon 117706289482395
