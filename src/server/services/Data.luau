@@ -123,14 +123,24 @@ end
 
 -- Change saved data and push the result to the client. `change` returns a reason string to
 -- refuse (nothing is published) or nil to accept.
-function Data.update(player: Player, change: (Data) -> string?): string?
+-- transaction/sku: when the change moves Huss, logged as an economy event (Analytics.economy).
+function Data.update(
+	player: Player,
+	change: (Data) -> string?,
+	transaction: string?,
+	sku: string?
+): string?
 	local data = Data.get(player)
 	if not data then
 		return "NotLoaded"
 	end
+	local before = data.hp
 	local refused = change(data)
 	if not refused then
 		publish(player, data)
+		if transaction and data.hp ~= before then
+			Analytics.economy(player, data.hp - before, data.hp, transaction, sku)
+		end
 	end
 	return refused
 end
@@ -160,6 +170,9 @@ function Data.creditNight(
 	data.boostNights = boostLeft
 	local credited = math.max(0, math.floor(hp * multiplier))
 	data.hp += credited
+	if credited > 0 then
+		Analytics.economy(player, credited, data.hp, "Gameplay", `Night_{station}`)
+	end
 	data.stationXp[station] = (data.stationXp[station] or 0) + math.max(0, math.floor(xp))
 	data.nights += 1
 	publish(player, data)

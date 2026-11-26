@@ -41,7 +41,7 @@ redeemCode.OnServerInvoke = function(player: Player, input: unknown): (number?, 
 		data.hp += hp
 		granted = hp
 		return nil
-	end)
+	end, "TimedReward", "Code")
 	return granted, failure
 end
 
@@ -53,7 +53,7 @@ completeTutorial.OnServerInvoke = function(player: Player): string?
 		data.tutorialDone = true
 		data.hp += TUTORIAL_HP
 		return nil
-	end)
+	end, "Onboarding", "Tutorial")
 end
 
 local joinedAt: { [Player]: number } = {}
@@ -71,7 +71,7 @@ claimDaily.OnServerInvoke = function(player: Player): string?
 			data.owned[Rewards.dailyItem] = true
 		end
 		return nil
-	end)
+	end, "TimedReward", "Daily")
 end
 
 claimGift.OnServerInvoke = function(player: Player, minutes: unknown): string?
@@ -94,7 +94,7 @@ claimGift.OnServerInvoke = function(player: Player, minutes: unknown): string?
 		data.hp += gift.hp or 0
 		data.partyTickets += gift.tickets or 0
 		return nil
-	end)
+	end, "TimedReward", "PlaytimeGift")
 end
 
 claimGroup.OnServerInvoke = function(player: Player): string?
@@ -113,7 +113,7 @@ claimGroup.OnServerInvoke = function(player: Player): string?
 		data.groupClaimed = true
 		data.hp += Rewards.groupHp
 		return nil
-	end)
+	end, "TimedReward", "Group")
 end
 
 Players.PlayerAdded:Connect(function(player)

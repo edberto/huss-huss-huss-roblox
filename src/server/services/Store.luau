@@ -51,7 +51,7 @@ local function throwParty(thrower: Player)
 		Data.update(player, function(data)
 			data.hp += Products.partyHpForEveryone
 			return nil
-		end)
+		end, "Gameplay", "ThrownParty")
 	end
 end
 
@@ -79,7 +79,7 @@ MarketplaceService.ProcessReceipt = function(receipt)
 			table.remove(data.receipts, 1)
 		end
 		return nil
-	end)
+	end, "IAP", key)
 	if not alreadyGranted then
 		Data.save(player)
 		if key == "second_wind" then

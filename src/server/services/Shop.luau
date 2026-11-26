@@ -119,7 +119,7 @@ buyEvent.OnServerInvoke = function(player: Player, id: unknown): string?
 	end
 	return Data.update(player, function(data)
 		return Cosmetics.buy(data :: any, id)
-	end)
+	end, "Shop", id)
 end
 
 equipEvent.OnServerInvoke = function(player: Player, slot: unknown, id: unknown): string?
