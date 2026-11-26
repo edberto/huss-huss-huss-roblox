@@ -209,9 +209,9 @@ function Pose.hit(who: Player, grade: string, skill: boolean)
 	if not station then
 		return
 	end
-	local kind = if grade == "Miss" then "fumble"
-		elseif station == "Basketball"
-		then (if skill then "shoot" else "dribble")
+	local kind = if grade == "Miss"
+		then "fumble"
+		elseif station == "Basketball" then (if skill then "shoot" else "dribble")
 		elseif station == "Gym" then (if skill then "press" else "curl")
 		else (if skill then "wrap" else "chop")
 	state.move = MOVES[kind]
