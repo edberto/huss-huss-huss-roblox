@@ -75,7 +75,33 @@ def gear(d, cx, cy):
     d.ellipse([cx - 65, cy - 65, cx + 65, cy + 65], fill=(70, 200, 255, 255), outline=INK, width=18)
 
 
-for name, fn in (('shop', cart), ('daily', calendar), ('gifts', gift), ('timing', metronome), ('ranks', trophy), ('settings', gear)):
+def ticket(d, cx, cy):
+    """Yellow party ticket (rewards and the skip-practice chip)."""
+    from PIL import ImageFont
+    import glob
+    w, h = 400, 220
+    x0, y0, x1, y1 = cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2
+    d.rounded_rectangle([x0 - 14, y0 - 14, x1 + 14, y1 + 14], 44, fill=INK)
+    d.rounded_rectangle([x0, y0, x1, y1], 32, fill=(255, 210, 60, 255))
+    for nx in (x0, x1):
+        d.ellipse([nx - 44, cy - 44, nx + 44, cy + 44], fill=INK)
+        d.ellipse([nx - 30, cy - 30, nx + 30, cy + 30], fill=(0, 0, 0, 0))
+    d.line([(x0 + 120, y0 + 26), (x0 + 120, y1 - 26)], fill=INK, width=12)
+    font = ImageFont.truetype(glob.glob('/usr/share/fonts/**/Anton*.ttf', recursive=True)[0], 84)
+    d.text(((x0 + 120 + x1 - 40) / 2 + 4, cy), 'PARTY', font=font, fill=INK, anchor='mm')
+
+
+def coin(d, cx, cy):
+    """Gold Huss coin."""
+    from PIL import ImageFont
+    import glob
+    for r, col in ((200, INK), (186, (180, 100, 10, 255)), (160, (255, 205, 60, 255)), (120, (255, 225, 120, 255))):
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=col)
+    font = ImageFont.truetype(glob.glob('/usr/share/fonts/**/Anton*.ttf', recursive=True)[0], 200)
+    d.text((cx, cy + 4), 'H', font=font, fill=(150, 80, 10, 255), anchor='mm')
+
+
+for name, fn in (('shop', cart), ('daily', calendar), ('gifts', gift), ('timing', metronome), ('ranks', trophy), ('settings', gear), ('ticket', ticket), ('coin', coin)):
     icon(name, fn)
 print('ok')
 

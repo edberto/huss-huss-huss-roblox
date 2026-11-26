@@ -269,6 +269,32 @@ def game_icon():
     img.alpha_composite(t.rotate(7, resample=Image.BICUBIC), (0, 0))
     img.resize((S, S), Image.LANCZOS).convert('RGB').save('assets/icon.png')
 
+def ticket(w, h, angle, fill, label, label_size):
+    """A tilted ticket with notched ends and a label."""
+    tile = Image.new('RGBA', (int(w) + 40, int(h) + 40), (0, 0, 0, 0))
+    td = ImageDraw.Draw(tile)
+    x0, y0, x1, y1 = 20, 20, 20 + w, 20 + h
+    td.rounded_rectangle([x0 + 6, y0 + 8, x1 + 6, y1 + 8], 18, fill=INK)
+    td.rounded_rectangle([x0, y0, x1, y1], 18, fill=fill, outline=INK, width=7)
+    for nx in (x0, x1):
+        td.ellipse([nx - 18, (y0 + y1) / 2 - 18, nx + 18, (y0 + y1) / 2 + 18], fill=(0, 0, 0, 0), outline=INK, width=7)
+    td.line([(x0 + w * 0.28, y0 + 14), (x0 + w * 0.28, y1 - 14)], fill=INK, width=4)
+    td.text(((x0 + w * 0.28 + x1) / 2, (y0 + y1) / 2), label, font=ImageFont.truetype(FONT, label_size), fill=INK, anchor='mm')
+    return tile.rotate(angle, resample=Image.BICUBIC, expand=True)
+
+
+def party_animal():
+    img = background()
+    back = ticket(250, 120, 18, CYAN, 'PARTY', 56)
+    front = ticket(280, 130, -10, YELLOW, 'PARTY', 64)
+    img.alpha_composite(back, (int(S * 0.5 - back.width / 2 + 40), int(S * 0.52 - back.height / 2 - 30)))
+    img.alpha_composite(front, (int(S * 0.5 - front.width / 2 - 20), int(S * 0.6 - front.height / 2 + 20)))
+    d = ImageDraw.Draw(img)
+    text(d, (S / 2, S * 0.21), 'PARTY ANIMAL', 60, PINK, 9)
+    text(d, (S / 2, S * 0.9), 'SKIP PRACTICE', 46)
+    save(img, 'party_animal')
+
+
 vip()
 game_icon()
 huss_boost()
@@ -277,9 +303,10 @@ huss_pack('huss_1750', '1,750', [2, 3, 2])
 huss_pack('huss_5000', '5,000', [3, 5, 3])
 second_wind()
 throw_party()
+party_animal()
 
 # Contact sheet with the circular crop, for review.
-names = ['vip_pass', 'huss_500', 'huss_1750', 'huss_5000', 'second_wind', 'throw_party', 'huss_boost']
+names = ['vip_pass', 'huss_500', 'huss_1750', 'huss_5000', 'second_wind', 'throw_party', 'huss_boost', 'party_animal']
 sheet = Image.new('RGB', (4 * 260, 2 * 260), (240, 240, 240))
 mask = Image.new('L', (250, 250), 0)
 ImageDraw.Draw(mask).ellipse([0, 0, 250, 250], fill=255)
