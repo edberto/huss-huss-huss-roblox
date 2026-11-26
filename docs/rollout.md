@@ -6,9 +6,8 @@ Manual place changes that a code publish doesn't carry. Newest first.
 
 - Uploaded via Studio MCP: ticket icon 96730617685238 and coin icon 117706289482395
   (assets/ui/). Party Animal pass icon is assets/icons/party_animal.png.
-- [ ] Create the **Party Animal** game pass (149 Robux, on sale) on the Production experience
-  with assets/icons/party_animal.png, then put its id in `Products.partyAnimalPassId`. Open
-  Cloud refused to create it from the PLAYTEST Studio ("Resources not authorized").
+- [x] Party Animal game pass 2100270141 created in Creator Hub (149 Robux) and set in
+  `Products.partyAnimalPassId`. (Open Cloud refused to create it from the PLAYTEST Studio.)
 
 ## 2026-11-25: Practice rooms (PLAYTEST)
 

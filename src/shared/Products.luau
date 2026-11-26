@@ -3,8 +3,8 @@
 -- (universe 10778958069), so purchases only work there; an id of 0 shows "Coming soon".
 local Products = {}
 
--- game pass: Party Animal (149 Robux): skip practice and party any night. 0 = not created yet.
-Products.partyAnimalPassId = 0
+-- game pass: Party Animal (149 Robux): skip practice and party any night.
+Products.partyAnimalPassId = 2100270141
 Products.vipPassId = 2100887538 -- game pass: VIP (199 Robux): x2 Huss Points, VIP tag
 Products.vipMultiplier = 2
 
