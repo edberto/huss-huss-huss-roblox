@@ -143,9 +143,7 @@ function QuestClient.start()
 				allDone = allDone and quest.done
 			end
 		end
-		bonus.Text = if allDone
-			then "All 3 done!"
-			else `All 3: +{Quests.bonus} bonus`
+		bonus.Text = if allDone then "All 3 done!" else `All 3: +{Quests.bonus} bonus`
 		card.Visible = #list > 0 and ReplicatedStorage:GetAttribute("Phase") ~= "Night"
 	end
 	player:GetAttributeChangedSignal("Quests"):Connect(refresh)
