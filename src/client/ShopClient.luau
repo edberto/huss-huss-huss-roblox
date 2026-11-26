@@ -296,6 +296,47 @@ function ShopClient.start()
 		renderShop()
 	end
 
+	-- What goes in a cosmetic card's banner: the trail's gradient, the title as it shows
+	-- overhead, the ball's colour, or an emoji for dances and perks.
+	local EMOJI = { dance = "🕺", perk = "🎉" }
+	local function preview(banner: Frame, item: Cosmetics.Item)
+		local colors = item.colors
+		if item.slot == "trail" and colors then
+			banner.BackgroundColor3 = WHITE
+			make("UIGradient", {
+				Color = ColorSequence.new(Color3.fromHex(colors[1]), Color3.fromHex(colors[2])),
+				Parent = banner,
+			})
+		elseif item.slot == "title" then
+			label({
+				Size = UDim2.fromScale(1, 1),
+				FontFace = Ui.display,
+				Text = item.name,
+				TextColor3 = Color3.fromHex("3DFFB0"),
+				ZIndex = 24,
+				Parent = banner,
+			}, { make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }) })
+		elseif item.slot == "ball" and colors then
+			banner.BackgroundColor3 = C.navy
+			make("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromHex(colors[1]),
+				Position = UDim2.fromScale(0.5, 0.5),
+				Size = UDim2.fromScale(0.78, 0.78),
+				SizeConstraint = Enum.SizeConstraint.RelativeYY,
+				ZIndex = 24,
+				Parent = banner,
+			}, { corner(999), outline(2.5) })
+		elseif EMOJI[item.slot] then
+			label({
+				Size = UDim2.fromScale(1, 1),
+				Text = EMOJI[item.slot],
+				ZIndex = 24,
+				Parent = banner,
+			}, { make("UIPadding", { PaddingTop = UDim.new(0.1, 0), PaddingBottom = UDim.new(0.1, 0) }) })
+		end
+	end
+
 	renderShop = function()
 		shopNote.Text = if shopNote.Text ~= ""
 			then shopNote.Text
@@ -327,7 +368,8 @@ function ShopClient.start()
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundTransparency = 1,
 					Position = UDim2.fromScale(0.5, 0.5),
-					Size = UDim2.fromScale(1.5, 1.5),
+					-- Fits inside the banner (it used to spill over the title).
+					Size = UDim2.fromScale(0.92, 0.92),
 					SizeConstraint = Enum.SizeConstraint.RelativeYY,
 					ZIndex = 24,
 					Parent = swatch,
@@ -385,13 +427,15 @@ function ShopClient.start()
 				ZIndex = 22,
 				Parent = grid,
 			}, { corner(14), outline(3) })
-			make("Frame", {
+			local banner = make("Frame", {
 				BackgroundColor3 = if item.colors then Color3.fromHex(item.colors[1]) else C.navy,
+				ClipsDescendants = true,
 				Position = UDim2.fromScale(0.08, 0.08),
 				Size = UDim2.fromScale(0.84, 0.3),
 				ZIndex = 23,
 				Parent = card,
 			}, { corner(10), outline(2.5) })
+			preview(banner, item)
 			label({
 				Position = UDim2.fromScale(0.05, 0.42),
 				Size = UDim2.fromScale(0.9, 0.22),

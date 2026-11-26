@@ -202,10 +202,8 @@ local function runNight()
 					and #Players:GetPlayers() > Night.lockedInCount
 			)
 		end
-		-- Everyone gave in: the night ends early (design doc).
-		if #Players:GetPlayers() > 0 and trainersLeft() == 0 then
-			break
-		end
+		-- No early end when everyone gives in: partiers (and Party Animal skippers) get the
+		-- whole night to party.
 		task.wait(1)
 	end
 	ReplicatedStorage:SetAttribute("NightClock", Night.clockText(1))
