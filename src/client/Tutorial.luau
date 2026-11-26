@@ -38,7 +38,7 @@ function Tutorial.start()
 		DisplayOrder = 6,
 		Parent = player:WaitForChild("PlayerGui"),
 	})
-	-- Hint card: bottom left, above the beat track and beside the side buttons, so it never
+	-- Hint card: bottom left, just above the beat track and beside the side buttons, so it never
 	-- covers the player's avatar, the HUSS button or the temptation prompt. Pops in when it changes.
 	local cardScale = Ui.make("UIScale", {})
 	local card = Ui.label({
@@ -77,6 +77,10 @@ function Tutorial.start()
 			Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "i", Thickness = 2 }),
 		}),
 	})
+	Ui.onResize(function()
+		local height = workspace.CurrentCamera.ViewportSize.Y
+		card.Position = UDim2.new(0, 150 * Ui.hudScale(), 0, height - Ui.trackClearance() - 6)
+	end)
 
 	local shown: { [string]: boolean } = {}
 	local token = 0

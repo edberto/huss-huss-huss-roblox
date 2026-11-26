@@ -118,6 +118,27 @@ function RhythmClient.start()
 		}),
 		focusBar,
 	})
+	-- Phones: shrink, and keep clear of Roblox's own top-left buttons and the Huss pill. Centred
+	-- on the screen when there's room; otherwise centred in the gap; otherwise a row lower.
+	local topScale = make("UIScale", { Parent = topBar })
+	local function placeTopBar()
+		local s = Ui.hudScale()
+		topScale.Scale = s
+		local screen = workspace.CurrentCamera.ViewportSize
+		local width = topBar.AbsoluteSize.X -- already scaled
+		local left = Ui.topInsetRight() + 8
+		local right = screen.X - (16 + 168 + 8) * s
+		if screen.X / 2 - width / 2 >= left and screen.X / 2 + width / 2 <= right then
+			topBar.Position = UDim2.new(0.5, 0, 0, 8)
+		elseif right - left >= width then
+			topBar.Position = UDim2.new(0, (left + right) / 2, 0, 8)
+		else
+			topBar.Position = UDim2.new(0.5, 0, 0, math.max(Ui.topInset(), 46 * s + 8) + 6)
+		end
+	end
+	Ui.onResize(placeTopBar)
+	topBar:GetPropertyChangedSignal("AbsoluteSize"):Connect(placeTopBar)
+
 	local function refreshFocus()
 		local focus = math.clamp(tonumber(player:GetAttribute("Focus")) or 100, 0, 100)
 		focusFill.Size = UDim2.fromScale(focus / 100, 1)
@@ -252,6 +273,14 @@ function RhythmClient.start()
 		Size = UDim2.new(0.62, 0, 0, 60),
 		Parent = gui,
 	}, { corner(), stroke(3), gradient("2D1E5A", "190F37") })
+	-- Phones: the pill and the track shrink with the rest of the HUD (track width stays 62%).
+	local trackScale = make("UIScale", { Parent = track })
+	Ui.onResize(function()
+		local s = Ui.hudScale()
+		pointsScale.Scale = s
+		trackScale.Scale = s
+		track.Size = UDim2.new(0.62 / s, 0, 0, 60)
+	end)
 	local RING_X = 36
 	local ringGlow =
 		make("UIStroke", { Color = Color3.fromHex("50DCFF"), Thickness = 8, Transparency = 0.5 })
@@ -331,9 +360,10 @@ function RhythmClient.start()
 		local saved = tonumber(player:GetAttribute("HP")) or 0
 		local text = tostring(saved + sessionPoints)
 		if text ~= points.Text and points.Text ~= "" then
-			pointsScale.Scale = 1.12
+			local base = Ui.hudScale()
+			pointsScale.Scale = base * 1.12
 			TweenService
-				:Create(pointsScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 })
+				:Create(pointsScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = base })
 				:Play()
 		end
 		points.Text = text
@@ -462,7 +492,8 @@ function RhythmClient.start()
 		end
 		local now = workspace:GetServerTimeNow()
 		local interval = 60 / current.bpm
-		local span = track.AbsoluteSize.X - RING_X - 100
+		-- Children are laid out before the track's UIScale, so measure in unscaled pixels.
+		local span = track.AbsoluteSize.X / trackScale.Scale - RING_X - 100
 		local firstBeat = math.ceil((now - current.startTime) / interval - 0.25)
 		for i, tick in ticks do
 			local x = RING_X

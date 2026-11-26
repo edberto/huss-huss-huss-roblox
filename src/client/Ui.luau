@@ -1,6 +1,31 @@
 --!strict
 -- Shared UI helpers and the art-style palette (design doc) for every screen.
+local GuiService = game:GetService("GuiService")
+
 local Ui = {}
+
+-- Small screens (phones in landscape): fixed-size HUD pieces shrink by this (1 on a desktop).
+function Ui.hudScale(): number
+	return math.clamp(workspace.CurrentCamera.ViewportSize.Y / 600, 0.62, 1)
+end
+-- Bottom edge of Roblox's own top-left buttons (menu, chat, mic), in screen pixels.
+function Ui.topInset(): number
+	return GuiService.TopbarInset.Max.Y
+end
+-- Right edge of those buttons.
+function Ui.topInsetRight(): number
+	return GuiService.TopbarInset.Max.X
+end
+-- Calls `layout` now and whenever the screen size or Roblox's top bar changes.
+function Ui.onResize(layout: () -> ())
+	layout()
+	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
+	GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(layout)
+end
+-- Height the bottom beat track takes (track + margins), so other things can sit above it.
+function Ui.trackClearance(): number
+	return (60 + 16) * Ui.hudScale() + 10
+end
 
 Ui.colors = table.freeze({
 	navy = Color3.fromHex("141B36"),

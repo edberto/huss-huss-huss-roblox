@@ -65,10 +65,12 @@ function PartyClient.start()
 		"Frame",
 		{ BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, Parent = gui }
 	)
+	-- Under the Huss pill, top right (top left belongs to Roblox's buttons and the side menu).
 	local pointsLabel = label({
+		AnchorPoint = Vector2.new(1, 0),
 		BackgroundColor3 = C.partyWall,
 		BackgroundTransparency = 0,
-		Position = UDim2.fromOffset(16, 56),
+		Position = UDim2.new(1, -16, 0, 62),
 		Size = UDim2.fromOffset(200, 28),
 		TextColor3 = C.pink,
 		Parent = partierView,
@@ -76,13 +78,19 @@ function PartyClient.start()
 		corner(10),
 		make("UIPadding", { PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5) }),
 	})
+	local pointsScale = make("UIScale", { Parent = pointsLabel })
+	Ui.onResize(function()
+		local s = Ui.hudScale()
+		pointsScale.Scale = s
+		pointsLabel.Position = UDim2.new(1, -16, 0, (8 + 46 + 8) * s)
+	end)
+	-- Just above the DANCE button, bottom centre.
 	label({
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 16, 1, -20),
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 0.925, -22),
 		Size = UDim2.fromOffset(320, 20),
 		Text = "Walk up to a trainer, then tap an ability",
 		TextColor3 = Color3.fromHex("B4B2A9"),
-		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = partierView,
 	})
 	local buttonRow = make("Frame", {

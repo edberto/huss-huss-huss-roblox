@@ -1128,6 +1128,17 @@ function ShopClient.start()
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Parent = gui,
 	}, { make("UIListLayout", { Padding = UDim.new(0.05, 0) }) })
+	-- The column fits between Roblox's top-left buttons and the beat track, so on phones it
+	-- shrinks instead of sliding under either (74% of the screen height at most).
+	Ui.onResize(function()
+		local height = workspace.CurrentCamera.ViewportSize.Y
+		local top = Ui.topInset() + 10
+		local bottom = height - Ui.trackClearance() - 14 -- the bottom label spills a bit
+		local column = math.min(height * 0.74, bottom - top)
+		side.SizeConstraint = Enum.SizeConstraint.RelativeXY
+		side.Size = UDim2.fromOffset(column * 0.09 / 0.74, column)
+		side.Position = UDim2.new(0, 28, 0, (top + bottom) / 2)
+	end)
 	local dots: { [string]: Frame } = {}
 	local SIDE = {
 		{ "Shop", "74703712629649", "FF9628", "EB5A14" },
