@@ -295,23 +295,25 @@ def party_animal():
     save(img, 'party_animal')
 
 
-vip()
-game_icon()
-huss_boost()
-huss_pack('huss_500', '500', [1, 2])
-huss_pack('huss_1750', '1,750', [2, 3, 2])
-huss_pack('huss_5000', '5,000', [3, 5, 3])
-second_wind()
-throw_party()
-party_animal()
 
-# Contact sheet with the circular crop, for review.
-names = ['vip_pass', 'huss_500', 'huss_1750', 'huss_5000', 'second_wind', 'throw_party', 'huss_boost', 'party_animal']
-sheet = Image.new('RGB', (4 * 260, 2 * 260), (240, 240, 240))
-mask = Image.new('L', (250, 250), 0)
-ImageDraw.Draw(mask).ellipse([0, 0, 250, 250], fill=255)
-for i, n in enumerate(names):
-    icon = Image.open(f'{OUT}/{n}.png').resize((250, 250), Image.LANCZOS)
-    sheet.paste(icon, (5 + (i % 4) * 260, 5 + (i // 4) * 260), mask)
-sheet.save('/tmp/icon_sheet.png')
-print('ok')
+if __name__ == '__main__':
+    vip()
+    game_icon()
+    huss_boost()
+    huss_pack('huss_500', '500', [1, 2])
+    huss_pack('huss_1750', '1,750', [2, 3, 2])
+    huss_pack('huss_5000', '5,000', [3, 5, 3])
+    second_wind()
+    throw_party()
+    party_animal()
+
+    # Contact sheet with the circular crop, for review.
+    names = ['vip_pass', 'huss_500', 'huss_1750', 'huss_5000', 'second_wind', 'throw_party', 'huss_boost', 'party_animal']
+    sheet = Image.new('RGB', (4 * 260, 2 * 260), (240, 240, 240))
+    mask = Image.new('L', (250, 250), 0)
+    ImageDraw.Draw(mask).ellipse([0, 0, 250, 250], fill=255)
+    for i, n in enumerate(names):
+        icon = Image.open(f'{OUT}/{n}.png').resize((250, 250), Image.LANCZOS)
+        sheet.paste(icon, (5 + (i % 4) * 260, 5 + (i // 4) * 260), mask)
+    sheet.save('/tmp/icon_sheet.png')
+    print('ok')
