@@ -212,7 +212,8 @@ RhythmClient.onResult = function(grade, skill)
 	stationOf(rig).onResult(grade, skill)
 	Pose.hit(player, grade, skill)
 end
-local stationHit = ReplicatedStorage:WaitForChild("RhythmRemotes"):WaitForChild("StationHit") :: RemoteEvent
+local stationHit =
+	ReplicatedStorage:WaitForChild("RhythmRemotes"):WaitForChild("StationHit") :: RemoteEvent
 stationHit.OnClientEvent:Connect(function(who: Player, grade: string, skill: boolean)
 	local rig = rigs[who]
 	if rig and isPractising(who) then
