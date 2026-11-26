@@ -40,7 +40,14 @@ end
 -- Station levels as progression paths (Creator Hub > Analytics > Progression): one complete
 -- event per level gained, path = the station.
 function Analytics.levelUp(player: Player, station: string, level: number)
-	pcall(AnalyticsService.LogProgressionCompleteEvent, AnalyticsService, player, station, level, `Lv {level}`)
+	pcall(
+		AnalyticsService.LogProgressionCompleteEvent,
+		AnalyticsService,
+		player,
+		station,
+		level,
+		`Lv {level}`
+	)
 end
 
 -- Huss Points sources and sinks for Creator Hub > Analytics > Economy. transaction: a Roblox

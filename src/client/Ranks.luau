@@ -259,7 +259,7 @@ function Ranks.start()
 		(function()
 			period = Ui.label({
 				AnchorPoint = Vector2.new(0, 0),
-				Position = UDim2.new(0, 22, 0, 26),
+				Position = UDim2.fromOffset(22, 26),
 				Size = UDim2.new(0.28, 0, 0, 22),
 				Text = "",
 				TextColor3 = Color3.fromHex("C8B4E6"),

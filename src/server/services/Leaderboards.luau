@@ -100,7 +100,10 @@ function Leaderboards.write(player: Player)
 			last[key] = value
 			task.spawn(function()
 				pcall(function()
-					storeFor(categoriesByKey[key]):SetAsync(tostring(player.UserId), math.floor(value))
+					storeFor(categoriesByKey[key]):SetAsync(
+						tostring(player.UserId),
+						math.floor(value)
+					)
 				end)
 			end)
 		end
