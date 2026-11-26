@@ -26,6 +26,7 @@ function Homes.assign(player: Player): Model?
 		if home and not isTaken(home) and not npcHomes[home] then
 			owners[player] = home
 			player:SetAttribute("Home", home.Name)
+			home:SetAttribute("Owner", player.DisplayName) -- the yard sign (Decor) shows it
 			player:GetAttributeChangedSignal("Station"):Connect(function()
 				if player:GetAttribute("Team") ~= "Partier" then
 					Homes.placeOnSpot(player)
@@ -50,6 +51,9 @@ function Homes.claimForNpc(): Model?
 end
 
 function Homes.releaseNpcHomes()
+	for home in npcHomes do
+		home:SetAttribute("Owner", nil)
+	end
 	table.clear(npcHomes)
 end
 
@@ -70,6 +74,10 @@ function Homes.placeOnSpot(player: Player)
 end
 
 Players.PlayerRemoving:Connect(function(player)
+	local home = owners[player]
+	if home then
+		home:SetAttribute("Owner", nil)
+	end
 	owners[player] = nil
 end)
 

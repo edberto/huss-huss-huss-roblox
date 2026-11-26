@@ -86,6 +86,26 @@ game:GetService("RunService").RenderStepped:Connect(function()
 	end
 end)
 
+-- The dance floor (Decor's DanceTile parts) steps through the party colours, about one beat
+-- apart, on each client.
+local TILE_COLORS = {
+	Color3.fromRGB(255, 70, 200),
+	Color3.fromRGB(80, 220, 255),
+	Color3.fromRGB(255, 220, 60),
+	Color3.fromRGB(150, 90, 255),
+}
+task.spawn(function()
+	local step = 0
+	while true do
+		step += 1
+		for _, tile in CollectionService:GetTagged("DanceTile") do
+			local index = tonumber(tile:GetAttribute("Index")) or 0
+			(tile :: BasePart).Color = TILE_COLORS[(index + step) % #TILE_COLORS + 1]
+		end
+		task.wait(0.48)
+	end
+end)
+
 -- The station picked at Dusk gets every hit; the others hide their props.
 local stations = {
 	Basketball = Basketball.start(home),

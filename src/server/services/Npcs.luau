@@ -129,6 +129,7 @@ function Npcs.beginNight()
 		local home = Homes.claimForNpc()
 		local npc = home and spawnNpc(home, i)
 		if npc then
+			(home :: Model):SetAttribute("Owner", npc.name)
 			table.insert(npcs, npc)
 		end
 	end
