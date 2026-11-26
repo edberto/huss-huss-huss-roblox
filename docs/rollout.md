@@ -43,8 +43,8 @@ Manual place changes that a code publish doesn't carry. Newest first.
 
 ## Before the first Production publish (checklist)
 
-- [ ] Game Settings: max players 12 (both places).
-- [ ] Game Settings > Security: enable Studio Access to API Services (PlayTest) so saves can be tested.
+- [x] Game Settings: max players 12 (Production place serverSize 12, checked 2026-11-26).
+- [x] Game Settings > Security: enable Studio Access to API Services (PlayTest). Saves tested 2026-11-26: bought a dance, rejoined, Huss and owned items persisted.
 - [ ] Create the Roblox group; set `GROUP_ID` in `src/server/services/RewardService.luau`.
 - [ ] Create the VIP game pass and 5 developer products (HP 500 / 1,750 / 5,000, Second Wind,
       Throw a Party); fill the ids in `src/shared/Products.luau`.
