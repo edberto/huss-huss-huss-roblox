@@ -10,6 +10,25 @@ local Night = require(ReplicatedStorage.Shared.Night)
 
 local DUSK, DAWN = 18.6, 6.5
 
+-- The haze, not the sun, sets the mood here (the Atmosphere's Haze is high), so it gets its
+-- own colours through the day. Night is whatever the place has (cold full moon).
+type Palette = { haze: Color3, decay: Color3, outdoor: Color3 }
+local GLOW: Palette = { -- sunset / first light
+	haze = Color3.fromRGB(255, 130, 120),
+	decay = Color3.fromRGB(110, 50, 110),
+	outdoor = Color3.fromRGB(150, 110, 150),
+}
+local MORNING: Palette = {
+	haze = Color3.fromRGB(255, 205, 170),
+	decay = Color3.fromRGB(170, 130, 170),
+	outdoor = Color3.fromRGB(150, 145, 170),
+}
+local DAY: Palette = {
+	haze = Color3.fromRGB(190, 215, 255),
+	decay = Color3.fromRGB(120, 150, 210),
+	outdoor = Color3.fromRGB(150, 150, 165),
+}
+
 local function target(): number
 	local phase = ReplicatedStorage:GetAttribute("Phase")
 	if phase == "Night" then
@@ -23,9 +42,50 @@ local function target(): number
 	return if phase == "Dawn" then DAWN else DUSK
 end
 
+local function mix(a: Palette, b: Palette, t: number): Palette
+	return {
+		haze = a.haze:Lerp(b.haze, t),
+		decay = a.decay:Lerp(b.decay, t),
+		outdoor = a.outdoor:Lerp(b.outdoor, t),
+	}
+end
+
 local Sky = {}
 
 function Sky.start()
+	local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
+	local night: Palette = {
+		haze = if atmosphere then atmosphere.Color else Color3.new(),
+		decay = if atmosphere then atmosphere.Decay else Color3.new(),
+		outdoor = Lighting.OutdoorAmbient,
+	}
+	-- Hour -> palette, looping round the clock; night holds from 20:00 to 4:30.
+	local keys: { { number | Palette } } = {
+		{ 4.5, night },
+		{ 5.6, GLOW },
+		{ 6.5, MORNING },
+		{ 11, DAY },
+		{ 16.5, MORNING },
+		{ 18.6, GLOW },
+		{ 20, night },
+		{ 28.5, night },
+	}
+	local function paint(hour: number)
+		local h = if hour < 4.5 then hour + 24 else hour
+		for i = 1, #keys - 1 do
+			local h0, h1 = keys[i][1] :: number, keys[i + 1][1] :: number
+			if h >= h0 and h <= h1 then
+				local p = mix(keys[i][2] :: Palette, keys[i + 1][2] :: Palette, (h - h0) / (h1 - h0))
+				if atmosphere then
+					atmosphere.Color = p.haze
+					atmosphere.Decay = p.decay
+				end
+				Lighting.OutdoorAmbient = p.outdoor
+				return
+			end
+		end
+	end
+
 	Lighting.ClockTime = target()
 	RunService.RenderStepped:Connect(function(dt)
 		-- Hours still to go, counting forward only (Dawn -> Dusk is half a day ahead).
@@ -35,6 +95,7 @@ function Sky.start()
 		end
 		-- Catch up quickly (a phase change sweeps in about 3 s) and track the night clock smoothly.
 		Lighting.ClockTime = (Lighting.ClockTime + ahead * math.min(1, dt * 1.5)) % 24
+		paint(Lighting.ClockTime)
 	end)
 end
 
