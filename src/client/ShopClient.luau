@@ -7,6 +7,8 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local MarketplaceService = game:GetService("MarketplaceService")
+local SocialService = game:GetService("SocialService")
+local StarterGui = game:GetService("StarterGui")
 
 local Cosmetics = require(ReplicatedStorage.Shared.Cosmetics)
 local Products = require(ReplicatedStorage.Shared.Products)
@@ -1127,17 +1129,21 @@ function ShopClient.start()
 		Size = UDim2.fromScale(0.09, 0.74),
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Parent = gui,
-	}, { make("UIListLayout", { Padding = UDim.new(0.05, 0) }) })
-	-- The column fits between Roblox's top-left buttons and the beat track, so on phones it
-	-- shrinks instead of sliding under either (74% of the screen height at most).
+	})
+	local sideList = make("UIListLayout", { Parent = side })
+	-- Square tiles in a column that fits between Roblox's top-left buttons and the beat track,
+	-- so on phones it shrinks instead of sliding under either (74% of the screen height at most).
+	local GAP = 0.3 -- gap between tiles, in tile widths
 	Ui.onResize(function()
 		local height = workspace.CurrentCamera.ViewportSize.Y
 		local top = Ui.topInset() + 10
 		local bottom = height - Ui.trackClearance() - 14 -- the bottom label spills a bit
 		local column = math.min(height * 0.74, bottom - top)
+		local tile = math.floor(column / (6 + 5 * GAP))
 		side.SizeConstraint = Enum.SizeConstraint.RelativeXY
-		side.Size = UDim2.fromOffset(column * 0.09 / 0.74, column)
+		side.Size = UDim2.fromOffset(tile, column)
 		side.Position = UDim2.fromOffset(28, (top + bottom) / 2)
+		sideList.Padding = UDim.new(0, math.floor(tile * GAP))
 	end)
 	local dots: { [string]: Frame } = {}
 	local SIDE = {
@@ -1146,17 +1152,19 @@ function ShopClient.start()
 		{ "Gifts", "77368354228555", "BE6EFF", "8246DC" },
 		{ "Settings", "111747124734544", "46C8FF", "1E8CDC" },
 		{ "Ranks", "108570200348915", "FFD23C", "E6A014" },
+		{ "Invite", "", "FF5AC8", "C8287A" }, -- no icon: shows the friend bonus instead
 	}
 	for i, spec in SIDE do
 		local side_button = make("TextButton", {
 			AutoButtonColor = true,
 			BackgroundColor3 = Color3.new(1, 1, 1),
 			LayoutOrder = i,
-			Size = UDim2.fromScale(1, 0.16),
+			Size = UDim2.fromScale(1, 1),
 			Text = "",
 			ZIndex = 5,
 			Parent = side,
 		}, {
+			make("UIAspectRatioConstraint", { DominantAxis = Enum.DominantAxis.Width }),
 			corner(14),
 			make("UIGradient", {
 				Color = ColorSequence.new(Color3.fromHex(spec[3]), Color3.fromHex(spec[4])),
@@ -1167,14 +1175,25 @@ function ShopClient.start()
 				Color = Color3.new(0, 0, 0),
 				Thickness = 4,
 			}),
-			make("ImageLabel", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundTransparency = 1,
-				Image = "rbxassetid://" .. spec[2],
-				Position = UDim2.fromScale(0.5, 0.42),
-				Size = UDim2.fromScale(0.74, 0.74),
-				ZIndex = 6,
-			}),
+			if spec[2] ~= ""
+				then make("ImageLabel", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundTransparency = 1,
+					Image = "rbxassetid://" .. spec[2],
+					Position = UDim2.fromScale(0.5, 0.42),
+					ScaleType = Enum.ScaleType.Fit,
+					Size = UDim2.fromScale(0.74, 0.74),
+					ZIndex = 6,
+				})
+				else Ui.shout({
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					Position = UDim2.fromScale(0.5, 0.4),
+					Rotation = 6,
+					Size = UDim2.fromScale(0.9, 0.42),
+					Text = "+10%",
+					TextColor3 = Color3.fromHex("FFE63C"),
+					ZIndex = 6,
+				}),
 			-- The label spills over the bottom edge, Roblox-style.
 			Ui.shout({
 				AnchorPoint = Vector2.new(0.5, 0.5),
@@ -1205,7 +1224,13 @@ function ShopClient.start()
 			}),
 		})
 		side_button.Activated:Connect(function()
-			if spec[1] == "Ranks" then
+			if spec[1] == "Invite" then
+				pcall(function()
+					if SocialService:CanSendGameInviteAsync(player) then
+						SocialService:PromptGameInvite(player)
+					end
+				end)
+			elseif spec[1] == "Ranks" then
 				shop.Visible, rewards.Visible, timing.Visible = false, false, false
 				Ranks.toggle()
 			elseif spec[1] == "Settings" then
@@ -1228,6 +1253,33 @@ function ShopClient.start()
 			end
 		end)
 	end
+	-- Nights are for practising or partying: the menu (and any panel it opened) goes away until
+	-- Dawn, for trainers and partiers alike.
+	local function refreshSide()
+		local night = ReplicatedStorage:GetAttribute("Phase") == "Night"
+		side.Visible = not night
+		if night then
+			shop.Visible, rewards.Visible, timing.Visible = false, false, false
+			Ranks.close()
+		end
+	end
+	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(refreshSide)
+	refreshSide()
+
+	-- A friend joined (or left): say what the friend bonus is now (Products.nightMultiplier).
+	local friendsHere = tonumber(player:GetAttribute("FriendsHere")) or 0
+	player:GetAttributeChangedSignal("FriendsHere"):Connect(function()
+		local now = tonumber(player:GetAttribute("FriendsHere")) or 0
+		if now > friendsHere then
+			local bonus = math.min(now, Products.friendBonusMax) * Products.friendBonus * 100
+			pcall(StarterGui.SetCore, StarterGui, "SendNotification", {
+				Title = "A friend joined!",
+				Text = `Friend bonus: +{bonus}% Huss every night`,
+				Duration = 5,
+			})
+		end
+		friendsHere = now
+	end)
 
 	-- Keep dots, open panels and the ball skin in step with saved data.
 	for _, name in

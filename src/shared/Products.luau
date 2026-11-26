@@ -23,13 +23,19 @@ Products.boostMultiplier = 2
 
 -- The night's Huss multiplier and the boost nights left after this night. Group members get a
 -- small bonus, VIP doubles, and a Huss Boost doubles again while it lasts.
+Products.friendBonus = 0.1 -- per friend in the same server
+Products.friendBonusMax = 5 -- so +50% at most
+
+-- friends: how many of the player's Roblox friends are in the server (adds to the group bonus).
 function Products.nightMultiplier(
 	inGroup: boolean,
 	groupBonus: number,
 	vip: boolean,
-	boostNightsLeft: number
+	boostNightsLeft: number,
+	friends: number?
 ): (number, number)
-	local multiplier = if inGroup then 1 + groupBonus else 1
+	local multiplier = (if inGroup then 1 + groupBonus else 1)
+		+ math.min(friends or 0, Products.friendBonusMax) * Products.friendBonus
 	if vip then
 		multiplier *= Products.vipMultiplier
 	end

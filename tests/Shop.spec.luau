@@ -62,6 +62,8 @@ describe("Rewards", function()
 	end)
 
 	it("stacks group, VIP and boost multipliers and counts boost nights down", function()
+		expect((Products.nightMultiplier(false, 0, false, 0, 2))).toBeCloseTo(1.2)
+		expect((Products.nightMultiplier(true, 0.5, false, 0, 9))).toBeCloseTo(2) -- friends cap at +50%
 		local m, left = Products.nightMultiplier(false, 0.1, false, 0)
 		expect(m).toBe(1)
 		expect(left).toBe(0)

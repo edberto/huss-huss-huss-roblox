@@ -132,6 +132,10 @@ function Ranks.open(key: string?)
 	render()
 end
 
+function Ranks.close()
+	panel.Visible = false
+end
+
 function Ranks.toggle()
 	if panel.Visible then
 		panel.Visible = false

@@ -4,7 +4,6 @@
 local AvatarEditorService = game:GetService("AvatarEditorService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local SocialService = game:GetService("SocialService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -814,10 +813,9 @@ function NightScreens.start()
 		})
 	end
 
-	-- At most one prompt per Dawn, each once per session (no rewards: Roblox forbids rewarding
-	-- favorites). A top-3 finish asks to favorite; otherwise, invite friends.
-	-- ponytail: once per session, not once per account; save flags if players find it nagging.
-	local askedFavorite, askedInvite = false, false
+	-- A top-3 finish asks to favorite, once per session (no rewards: Roblox forbids rewarding
+	-- favorites). Inviting is the side menu's Invite tile, never an automatic prompt.
+	local askedFavorite = false
 	resultsEvent.OnClientEvent:Connect(function(results: { any })
 		local topThree = false
 		for i, result in results do
@@ -830,13 +828,6 @@ function NightScreens.start()
 			askedFavorite = true
 			ask = function()
 				AvatarEditorService:PromptSetFavorite(game.PlaceId, Enum.AvatarItemType.Asset, true)
-			end
-		elseif not askedInvite then
-			askedInvite = true
-			ask = function()
-				if SocialService:CanSendGameInviteAsync(player) then
-					SocialService:PromptGameInvite(player)
-				end
 			end
 		end
 		if ask then

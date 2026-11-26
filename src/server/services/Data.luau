@@ -167,7 +167,8 @@ function Data.creditNight(
 		player:GetAttribute("InGroup") == true,
 		Rewards.groupBonus,
 		player:GetAttribute("VIP") == true,
-		data.boostNights
+		data.boostNights,
+		tonumber(player:GetAttribute("FriendsHere")) or 0
 	)
 	data.boostNights = boostLeft
 	local credited = math.max(0, math.floor(hp * multiplier))

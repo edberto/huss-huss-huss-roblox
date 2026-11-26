@@ -131,4 +131,38 @@ Players.PlayerRemoving:Connect(function(player)
 	giftsClaimed[player] = nil
 end)
 
+-- Friend bonus: "FriendsHere" = how many of the player's Roblox friends share the server
+-- (Products.nightMultiplier turns it into +10% each, up to +50%).
+local friendPairs: { [Player]: { [Player]: boolean } } = {}
+local function countFriends(player: Player)
+	local count = 0
+	for _ in friendPairs[player] or {} do
+		count += 1
+	end
+	player:SetAttribute("FriendsHere", count)
+end
+Players.PlayerAdded:Connect(function(player)
+	friendPairs[player] = {}
+	for _, other in Players:GetPlayers() do
+		if other ~= player and friendPairs[other] then
+			local ok, friends = pcall(player.IsFriendsWith, player, other.UserId)
+			if ok and friends and player.Parent and other.Parent then
+				friendPairs[player][other] = true
+				friendPairs[other][player] = true
+				countFriends(other)
+			end
+		end
+	end
+	countFriends(player)
+end)
+Players.PlayerRemoving:Connect(function(player)
+	for other in friendPairs[player] or {} do
+		if friendPairs[other] then
+			friendPairs[other][player] = nil
+			countFriends(other)
+		end
+	end
+	friendPairs[player] = nil
+end)
+
 return {}

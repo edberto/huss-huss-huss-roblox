@@ -57,8 +57,8 @@ function RhythmClient.start()
 		})
 	end
 
-	-- Top bar: moon + night clock, and the focus meter while practising. The top-left corner
-	-- belongs to Roblox's menu buttons, so it sits in the middle.
+	-- Top bar: moon + night clock. The top-left corner belongs to Roblox's menu buttons, so it
+	-- sits in the middle. The focus meter sits on top of the beat track (placed below).
 	local clock = Ui.shout({
 		LayoutOrder = 2,
 		Size = UDim2.fromOffset(104, 30),
@@ -85,10 +85,25 @@ function RhythmClient.start()
 		ZIndex = 3,
 	}, { make("UIPadding", { PaddingTop = UDim.new(0.12, 0), PaddingBottom = UDim.new(0.12, 0) }) })
 	local focusBar = make("Frame", {
+		AnchorPoint = Vector2.new(0, 1),
 		BackgroundColor3 = Color3.fromHex("140C28"),
-		LayoutOrder = 4,
-		Size = UDim2.fromOffset(190, 24),
-	}, { corner(), stroke(2.5), focusFill, focusText })
+		Position = UDim2.new(0, 14, 0, -10),
+		Size = UDim2.new(0.6, 0, 0, 40),
+	}, {
+		corner(),
+		stroke(3),
+		focusFill,
+		focusText,
+		Ui.label({
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromOffset(0, 20),
+			Rotation = -8,
+			Size = UDim2.fromOffset(38, 46),
+			Text = "⚡",
+			TextColor3 = Color3.fromHex("FFE63C"),
+			ZIndex = 4,
+		}),
+	})
 	local topBar = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
 		AutomaticSize = Enum.AutomaticSize.X,
@@ -110,13 +125,6 @@ function RhythmClient.start()
 		}),
 		Ui.label({ LayoutOrder = 1, Size = UDim2.fromOffset(30, 30), Text = "🌙" }),
 		clock,
-		Ui.label({
-			LayoutOrder = 3,
-			Size = UDim2.fromOffset(18, 24),
-			Text = "⚡",
-			TextColor3 = Color3.fromHex("FFE63C"),
-		}),
-		focusBar,
 	})
 	-- Phones: shrink, and keep clear of Roblox's own top-left buttons and the Huss pill. Centred
 	-- on the screen when there's room; otherwise centred in the gap; otherwise a row lower.
@@ -275,6 +283,7 @@ function RhythmClient.start()
 	}, { corner(), stroke(3), gradient("2D1E5A", "190F37") })
 	-- Phones: the pill and the track shrink with the rest of the HUD (track width stays 62%).
 	local trackScale = make("UIScale", { Parent = track })
+	focusBar.Parent = track -- scales with it on phones
 	Ui.onResize(function()
 		local s = Ui.hudScale()
 		pointsScale.Scale = s
