@@ -151,17 +151,36 @@ function StationFx.pop()
 	task.delay(0.75, label.Destroy, label)
 end
 
--- Every hit: the next take in order, so steady hits say "huss huss huss" (1-3), then again (4-6).
--- After a pause, start a fresh phrase rather than finishing the old one.
-local hussIndex, lastHuss = 0, -math.huge
+-- The meme rhythm: three hits each say one "huss", the fourth says the whole "huss huss huss"
+-- at once. Takes 1-3 and 4-6 are two recordings of the phrase; each round of four uses one for
+-- the singles and the other for the phrase, then they swap. While the phrase plays, the next
+-- hit keeps quiet (its pop still shows) so voices don't pile up. A pause over 1.5 s starts over.
+local PHRASE_GAP = 0.2 -- each take is about 0.2 s long
+local hits, round, lastHuss, quietUntil = 0, 0, -math.huge, 0
 function StationFx.huss()
-	if os.clock() - lastHuss > 1.5 and hussIndex % 3 ~= 0 then
-		hussIndex += 3 - hussIndex % 3
+	local now = os.clock()
+	if now - lastHuss > 1.5 then
+		hits = 0
 	end
-	lastHuss = os.clock()
-	hussIndex = hussIndex % 6 + 1
-	StationFx.play("huss" .. hussIndex)
-	StationFx.pop()
+	lastHuss = now
+	hits += 1
+	local singles = if round % 2 == 0 then 0 else 3 -- take offset for this round's singles
+	if hits <= 3 then
+		if now >= quietUntil then
+			StationFx.play("huss" .. singles + hits)
+		end
+		StationFx.pop()
+		return
+	end
+	local phrase = 3 - singles
+	for k = 1, 3 do
+		task.delay((k - 1) * PHRASE_GAP, function()
+			StationFx.play("huss" .. phrase + k)
+			StationFx.pop()
+		end)
+	end
+	quietUntil = now + 3 * PHRASE_GAP
+	hits, round = 0, round + 1
 end
 
 local lastAlmost = -math.huge
