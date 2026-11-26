@@ -2,13 +2,18 @@
 -- The sky tells the time: a sunset at Dusk, then the sky follows the night clock (9 PM to 6 AM,
 -- so the moon crosses and the horizon starts to glow near the end), the sun up at Dawn, and a
 -- quick sweep through the day back to the next sunset. The sky only ever moves forward.
+-- A high latitude keeps the moon low (about 20-35 degrees up) so it crosses where people look
+-- instead of straight overhead.
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Night = require(ReplicatedStorage.Shared.Night)
 
-local DUSK, DAWN = 18.6, 6.5
+-- Dusk and Dawn drift across their phase: the sun sinks onto the horizon, then rises off it.
+local DUSK_FROM, DUSK_TO = 17.6, 18.5
+local DAWN_FROM, DAWN_TO = 6.0, 7.0
+local LATITUDE, MOON_SIZE = 78, 18 -- Roblox defaults are about 42 and 11
 
 -- The haze, not the sun, sets the mood here (the Atmosphere's Haze is high), so it gets its
 -- own colours through the day. Night is whatever the place has (cold full moon).
@@ -39,7 +44,14 @@ local function target(): number
 			+ (Night.clockEndMinutes - Night.clockStartMinutes) * progress
 		return (minutes / 60) % 24
 	end
-	return if phase == "Dawn" then DAWN else DUSK
+	local dawn = phase == "Dawn"
+	local ends = ReplicatedStorage:GetAttribute("PhaseEnds") :: number?
+	local length = if dawn then Night.dawnTime else Night.duskTime
+	local left = if ends then ends - workspace:GetServerTimeNow() else length
+	local t = math.clamp(1 - left / length, 0, 1)
+	return if dawn
+		then DAWN_FROM + (DAWN_TO - DAWN_FROM) * t
+		else DUSK_FROM + (DUSK_TO - DUSK_FROM) * t
 end
 
 local function mix(a: Palette, b: Palette, t: number): Palette
@@ -53,6 +65,11 @@ end
 local Sky = {}
 
 function Sky.start()
+	Lighting.GeographicLatitude = LATITUDE
+	local sky = Lighting:FindFirstChildOfClass("Sky")
+	if sky then
+		sky.MoonAngularSize = MOON_SIZE
+	end
 	local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
 	local night: Palette = {
 		haze = if atmosphere then atmosphere.Color else Color3.new(),
@@ -66,7 +83,7 @@ function Sky.start()
 		{ 6.5, MORNING },
 		{ 11, DAY },
 		{ 16.5, MORNING },
-		{ 18.6, GLOW },
+		{ 18.4, GLOW },
 		{ 20, night },
 		{ 28.5, night },
 	}
