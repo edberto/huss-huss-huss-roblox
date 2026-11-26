@@ -126,7 +126,11 @@ game:GetService("RunService").Heartbeat:Connect(function()
 		local color = TILE_COLORS[(index + step) % #TILE_COLORS + 1]
 		for _, at in feet do
 			local offset = at - part.Position
-			if math.abs(offset.X) < TILE_HALF and math.abs(offset.Z) < TILE_HALF and offset.Y < 6 then
+			if
+				math.abs(offset.X) < TILE_HALF
+				and math.abs(offset.Z) < TILE_HALF
+				and offset.Y < 6
+			then
 				color = if onBeat then Color3.new(1, 1, 1) else color:Lerp(Color3.new(1, 1, 1), 0.5)
 				break
 			end
