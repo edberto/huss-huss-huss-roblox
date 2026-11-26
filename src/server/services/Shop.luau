@@ -81,8 +81,34 @@ local function applyTag(player: Player)
 	local label = (tag :: BillboardGui):FindFirstChild("Text") :: TextLabel
 	local text = if item then `{rank} · {item.name}` else rank
 	local vip = player:GetAttribute("VIP") == true
-	label.Text = if vip then `VIP · {text}` else text
-	label.TextColor3 = if vip then Color3.fromHex("FAC775") else Color3.fromHex("3DFFB0")
+	label.Text = if vip then `👑 VIP · {text}` else text
+	-- VIP: white text under a gold gradient with a thick dark-gold outline, a bit bigger.
+	label.TextColor3 = if vip then Color3.new(1, 1, 1) else Color3.fromHex("3DFFB0")
+	label.TextStrokeTransparency = if vip then 1 else 0.4;
+	(tag :: BillboardGui).Size = if vip then UDim2.fromOffset(240, 32) else UDim2.fromOffset(200, 26)
+	local gold = label:FindFirstChild("VipGold")
+	if vip and not gold then
+		local gradient = Instance.new("UIGradient")
+		gradient.Name = "VipGold"
+		gradient.Rotation = 90
+		gradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromHex("FFF4B8")),
+			ColorSequenceKeypoint.new(0.5, Color3.fromHex("FFD34D")),
+			ColorSequenceKeypoint.new(1, Color3.fromHex("E89B1A")),
+		})
+		gradient.Parent = label
+		local stroke = Instance.new("UIStroke")
+		stroke.Name = "VipStroke"
+		stroke.Color = Color3.fromHex("5A3300")
+		stroke.Thickness = 2
+		stroke.Parent = label
+	elseif not vip and gold then
+		gold:Destroy()
+		local stroke = label:FindFirstChild("VipStroke")
+		if stroke then
+			stroke:Destroy()
+		end
+	end
 end
 
 buyEvent.OnServerInvoke = function(player: Player, id: unknown): string?

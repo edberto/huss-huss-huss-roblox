@@ -85,6 +85,9 @@ function Dance.start(practising: () -> boolean)
 	RunService.Heartbeat:Connect(function()
 		local off = not practising()
 		button.Visible = off
+		-- At Dawn the NEXT NIGHT pill owns the bottom centre; sit just above it.
+		local dawn = ReplicatedStorage:GetAttribute("Phase") == "Dawn"
+		button.Position = UDim2.new(0.5, 0, if dawn then 0.87 else 1, if dawn then 0 else -14)
 		if track and not off then
 			stop()
 		end
