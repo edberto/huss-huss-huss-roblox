@@ -101,22 +101,37 @@ game:GetService("RunService").RenderStepped:Connect(function()
 end)
 
 -- The dance floor (Decor's DanceTile parts) steps through the party colours, about one beat
--- apart, on each client.
+-- apart, on each client, and the tile under anyone standing on it flashes white on the beat.
 local TILE_COLORS = {
 	Color3.fromRGB(255, 70, 200),
 	Color3.fromRGB(80, 220, 255),
 	Color3.fromRGB(255, 220, 60),
 	Color3.fromRGB(150, 90, 255),
 }
-task.spawn(function()
-	local step = 0
-	while true do
-		step += 1
-		for _, tile in CollectionService:GetTagged("DanceTile") do
-			local index = tonumber(tile:GetAttribute("Index")) or 0
-			(tile :: BasePart).Color = TILE_COLORS[(index + step) % #TILE_COLORS + 1]
+local TILE_STEP = 0.48
+local TILE_HALF = 1.05 -- tiles are 1.9 wide on a 2-stud grid
+game:GetService("RunService").Heartbeat:Connect(function()
+	local step = math.floor(os.clock() / TILE_STEP)
+	local onBeat = os.clock() % TILE_STEP < TILE_STEP * 0.5
+	local feet = {}
+	for _, other in Players:GetPlayers() do
+		local root = other.Character and other.Character:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") then
+			table.insert(feet, root.Position)
 		end
-		task.wait(0.48)
+	end
+	for _, tile in CollectionService:GetTagged("DanceTile") do
+		local part = tile :: BasePart
+		local index = tonumber(part:GetAttribute("Index")) or 0
+		local color = TILE_COLORS[(index + step) % #TILE_COLORS + 1]
+		for _, at in feet do
+			local offset = at - part.Position
+			if math.abs(offset.X) < TILE_HALF and math.abs(offset.Z) < TILE_HALF and offset.Y < 6 then
+				color = if onBeat then Color3.new(1, 1, 1) else color:Lerp(Color3.new(1, 1, 1), 0.5)
+				break
+			end
+		end
+		part.Color = color
 	end
 end)
 
