@@ -11,12 +11,14 @@ local Progress = require(ReplicatedStorage.Shared.Progress)
 
 local Badges = {}
 
+local PRODUCTION = 10778958069 -- universe id
+
 Badges.ids = {
-	welcome = 0,
-	first_dawn = 0,
-	party_starter = 0,
-	life_of_party = 0,
-	cant_resist = 0,
+	welcome = 2729952847267139,
+	first_dawn = 2410536785469302,
+	party_starter = 4336268289171617,
+	life_of_party = 3637131010736431,
+	cant_resist = 2908580743569424,
 	combo_50 = 0,
 	bad_influence = 0,
 	peer_pressure = 0,
@@ -45,7 +47,8 @@ local tried: { [Player]: { [string]: boolean } } = {}
 function Badges.award(player: Player, key: string)
 	local id = Badges.ids[key]
 	local done = tried[player]
-	if not id or id == 0 or not done or done[key] then
+	-- Badges belong to the Production experience; anywhere else (PLAYTEST) awarding fails.
+	if game.GameId ~= PRODUCTION or not id or id == 0 or not done or done[key] then
 		return
 	end
 	done[key] = true
