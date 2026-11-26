@@ -84,8 +84,10 @@ local function applyTag(player: Player)
 	label.Text = if vip then `👑 VIP · {text}` else text
 	-- VIP: white text under a gold gradient with a thick dark-gold outline, a bit bigger.
 	label.TextColor3 = if vip then Color3.new(1, 1, 1) else Color3.fromHex("3DFFB0")
-	label.TextStrokeTransparency = if vip then 1 else 0.4;
-	(tag :: BillboardGui).Size = if vip then UDim2.fromOffset(240, 32) else UDim2.fromOffset(200, 26)
+	label.TextStrokeTransparency = if vip then 1 else 0.4
+	(tag :: BillboardGui).Size = if vip
+		then UDim2.fromOffset(240, 32)
+		else UDim2.fromOffset(200, 26)
 	local gold = label:FindFirstChild("VipGold")
 	if vip and not gold then
 		local gradient = Instance.new("UIGradient")
