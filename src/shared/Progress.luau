@@ -3,17 +3,17 @@
 -- tests check them: station levels from XP, the Locked-In rank, and what a night pays.
 local Progress = {}
 
-Progress.maxLevel = 100
+Progress.maxLevel = 200
 Progress.xpStep = 50 -- level L -> L+1 costs 50 * L XP
 
 -- Rank by the sum of all station levels: { minimum total, name }, lowest first.
 Progress.ranks = table.freeze({
 	{ 0, "Rookie" },
-	{ 10, "Grinder" },
-	{ 25, "Locked In" },
-	{ 50, "Pro" },
-	{ 100, "Legend" },
-	{ 200, "GOAT" },
+	{ 15, "Grinder" },
+	{ 50, "Locked In" },
+	{ 150, "Pro" },
+	{ 300, "Legend" },
+	{ 450, "GOAT" }, -- three stations at 150 (max 600)
 })
 
 -- Dawn rewards in Huss Points (design doc).

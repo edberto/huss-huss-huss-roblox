@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Night = require(ReplicatedStorage.Shared.Night)
 local Analytics = require(script.Parent.Analytics)
+local Badges = require(script.Parent.Badges)
 local Decor = require(script.Parent.Decor)
 local Focus = require(script.Parent.Focus)
 local Homes = require(script.Parent.Homes)
@@ -100,6 +101,7 @@ Focus.onBroken = function(player: Player)
 	Analytics.step(player, "NightOver")
 	Analytics.event(player, "GiveInProgress", math.floor(progressNow() * 100)) -- % of the night
 	Party.creditGiveIn(player)
+	Badges.award(player, "cant_resist")
 	player:SetAttribute("Team", "Partier")
 	setMovement(player, true)
 	if player.Character then
@@ -210,6 +212,11 @@ local function runNight()
 		elseif hadTrainers and not allIn and progressNow() < 0.95 then
 			allIn = true
 			Leaderboards.allInFireworks()
+			for _, player in Players:GetPlayers() do
+				if player:GetAttribute("Team") == "Partier" then
+					Badges.award(player, "full_house")
+				end
+			end
 		end
 		task.wait(1)
 	end
@@ -305,6 +312,9 @@ function Round.run()
 				result.earned = hp
 				Analytics.step(player, "NightOver") -- no-op if they already gave in
 				Analytics.step(player, "Dawn")
+				if player:GetAttribute("Team") == "Partier" then
+					Badges.award(player, "party_starter")
+				end
 				Analytics.event(player, "DawnPlace", place)
 				Data.recordStats(player, {
 					dawnAt = if result.lasted == nil then result.station else nil,

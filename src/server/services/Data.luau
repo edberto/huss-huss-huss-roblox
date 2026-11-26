@@ -14,6 +14,7 @@ local Rewards = require(ReplicatedStorage.Shared.Rewards)
 local Stats = require(ReplicatedStorage.Shared.Stats)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 local Analytics = require(script.Parent.Analytics)
+local Badges = require(script.Parent.Badges)
 
 export type Data = {
 	hp: number,
@@ -106,6 +107,7 @@ local function publish(player: Player, data: Data)
 		(stats:FindFirstChild("Huss") :: IntValue).Value = data.hp;
 		(stats:FindFirstChild("Rank") :: StringValue).Value = rank
 	end
+	Badges.check(player, data)
 end
 
 -- Saves now (after a Robux purchase) instead of waiting for the autosave.
