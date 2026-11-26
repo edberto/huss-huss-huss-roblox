@@ -154,6 +154,55 @@ function StationFx.pop()
 	task.delay(0.75, label.Destroy, label)
 end
 
+-- "MISS!" over another trainer's head, so partiers see their distraction landed. One billboard
+-- per player, rebuilt if their character respawned.
+local missBoards: { [Player]: BillboardGui } = {}
+function StationFx.missOver(who: Player)
+	local head = who.Character and who.Character:FindFirstChild("Head")
+	if not head then
+		return
+	end
+	local board = missBoards[who]
+	if not board or not board.Parent or board.Adornee ~= head then
+		board = Ui.make("BillboardGui", {
+			Size = UDim2.fromOffset(160, 90),
+			StudsOffset = Vector3.new(0, 3.2, 0),
+			AlwaysOnTop = true,
+			MaxDistance = 120,
+			Adornee = head,
+			Parent = player:FindFirstChildOfClass("PlayerGui"),
+		})
+		missBoards[who] = board
+	end
+	local label = Ui.shout({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5 + (math.random() - 0.5) * 0.3, 0.6),
+		Rotation = math.random(-14, 14),
+		Size = UDim2.fromOffset(110, 40),
+		Text = "MISS!",
+		TextColor3 = Color3.fromHex("FF4D6D"),
+		Thickness = 3,
+		Parent = board,
+	})
+	local scale = Ui.make("UIScale", { Scale = 0.4, Parent = label })
+	local stroke = label:FindFirstChildOfClass("UIStroke") :: UIStroke
+	TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	local fade = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, 0.2)
+	TweenService:Create(label, fade, {
+		TextTransparency = 1,
+		Position = label.Position - UDim2.fromScale(0, 0.25),
+	}):Play()
+	TweenService:Create(stroke, fade, { Transparency = 1 }):Play()
+	task.delay(0.85, label.Destroy, label)
+end
+Players.PlayerRemoving:Connect(function(who)
+	local board = missBoards[who]
+	if board then
+		board:Destroy()
+	end
+	missBoards[who] = nil
+end)
+
 -- The meme rhythm: three hits each say one "huss", the fourth says the whole "huss huss huss"
 -- at once. Takes 1-3 and 4-6 are two recordings of the phrase; each round of four uses one for
 -- the singles and the other for the phrase, then they swap. While the phrase plays, the next

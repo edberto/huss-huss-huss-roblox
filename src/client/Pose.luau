@@ -96,6 +96,18 @@ local MOVES: { [string]: Move } = {
 			}
 		end,
 	},
+	fumble = { -- a miss: arms flail out, any station
+		duration = 0.45,
+		at = function(p)
+			local f = bump(p) * math.sin(p * math.pi * 4)
+			return {
+				RightShoulder = arm(30, -70 * bump(p) + 25 * f),
+				LeftShoulder = arm(30, 70 * bump(p) - 25 * f),
+				RightElbow = arm(10, 0),
+				LeftElbow = arm(10, 0),
+			}
+		end,
+	},
 	wrap = { -- both hands sweep the burger across
 		duration = 0.3,
 		at = function(p)
@@ -194,10 +206,11 @@ end
 function Pose.hit(who: Player, grade: string, skill: boolean)
 	local state = stateOf(who)
 	local station = state.station
-	if not station or grade == "Miss" then
+	if not station then
 		return
 	end
-	local kind = if station == "Basketball"
+	local kind = if grade == "Miss" then "fumble"
+		elseif station == "Basketball"
 		then (if skill then "shoot" else "dribble")
 		elseif station == "Gym" then (if skill then "press" else "curl")
 		else (if skill then "wrap" else "chop")

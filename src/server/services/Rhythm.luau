@@ -53,6 +53,14 @@ resultEvent.Parent = remotes
 local stationHitEvent = Instance.new("RemoteEvent")
 stationHitEvent.Name = "StationHit"
 stationHitEvent.Parent = remotes
+-- Misses too: partiers see the trainer fumble, so they know their distraction landed.
+local function broadcast(player: Player, grade: string, skill: boolean)
+	for _, other in Players:GetPlayers() do
+		if other ~= player then
+			stationHitEvent:FireClient(other, player, grade, skill)
+		end
+	end
+end
 local calibrate = Instance.new("RemoteFunction")
 calibrate.Name = "SetTapOffset" -- client -> server: seconds; saved, returns nil or a reason
 calibrate.Parent = remotes
@@ -192,13 +200,7 @@ tapEvent.OnServerEvent:Connect(function(player: Player, tapTime: unknown)
 		session.score.combo,
 		skill
 	)
-	if grade ~= "Miss" then
-		for _, other in Players:GetPlayers() do
-			if other ~= player then
-				stationHitEvent:FireClient(other, player, grade, skill)
-			end
-		end
-	end
+	broadcast(player, grade, skill)
 	Rhythm.onGrade(player, grade)
 	Analytics.step(player, "FirstTap")
 	if Score.multiplier(session.score.combo) >= 2 then
@@ -224,6 +226,7 @@ RunService.Heartbeat:Connect(function()
 				session.tapped[n] = nil
 			else
 				session.score = Score.apply(session.score, "Miss")
+				broadcast(player, "Miss", false)
 				Rhythm.onSkip(player)
 			end
 			session.settled = n

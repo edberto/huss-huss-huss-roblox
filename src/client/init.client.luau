@@ -238,6 +238,9 @@ stationHit.OnClientEvent:Connect(function(who: Player, grade: string, skill: boo
 	if rig and isPractising(who) then
 		stationOf(rig).onResult(grade, skill)
 		Pose.hit(who, grade, skill)
+		if grade == "Miss" then
+			StationFx.missOver(who)
+		end
 	end
 end)
 RhythmClient.start()
