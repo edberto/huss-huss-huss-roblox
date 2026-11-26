@@ -2,7 +2,6 @@
 -- The approved night-cycle screens: Dusk station picker, temptation prompts, the give-in screen
 -- and the Dawn results card. Driven by ReplicatedStorage "Phase"/"PhaseEnds" and the remotes.
 local AvatarEditorService = game:GetService("AvatarEditorService")
-local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SocialService = game:GetService("SocialService")
@@ -996,7 +995,7 @@ function NightScreens.start()
 		end
 	end)
 
-	-- Phase changes: show the right screen, move the sky between night and dawn -----------------
+	-- Phase changes: show the right screen (the sky is Sky.luau) -----------------
 	local function onPhase()
 		local phase = ReplicatedStorage:GetAttribute("Phase")
 		dusk.Visible = phase == "Dusk"
@@ -1006,8 +1005,6 @@ function NightScreens.start()
 		if phase ~= "Night" then
 			prompt.Visible = false
 		end
-		local clockTime = if phase == "Dawn" then 6.3 else 0
-		TweenService:Create(Lighting, TweenInfo.new(3), { ClockTime = clockTime }):Play()
 	end
 	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(onPhase)
 	onPhase()
