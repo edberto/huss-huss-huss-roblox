@@ -74,6 +74,11 @@ MarketplaceService.ProcessReceipt = function(receipt)
 		elseif key == "huss_boost" then
 			data.boostNights += Products.boostNights
 		end
+		if key == "starter_pack" then
+			data.owned.trail_starter = true
+			data.boostNights += Products.boostNights
+			data.starterPack = true
+		end
 		table.insert(data.receipts, receipt.PurchaseId)
 		while #data.receipts > RECEIPTS_KEPT do
 			table.remove(data.receipts, 1)

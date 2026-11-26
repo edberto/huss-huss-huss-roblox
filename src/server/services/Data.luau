@@ -37,6 +37,7 @@ export type Data = {
 	partyTickets: number, -- each skips one night's practice (Gifts; Party Animal skips for free)
 	calmFlashing: boolean, -- Settings > Visual: calmer dance floor, no fireworks, no beat flare
 	quests: Quests.State, -- today's daily quests (QuestService)
+	starterPack: boolean, -- bought the one-time Starter Pack
 }
 
 local TEMPLATE: Data = {
@@ -58,6 +59,7 @@ local TEMPLATE: Data = {
 	partyTickets = 0,
 	calmFlashing = false,
 	quests = { day = 0, ids = {}, progress = {}, done = {}, bonus = false },
+	starterPack = false,
 }
 
 local store = ProfileStore.New("PlayerData_v1", TEMPLATE)
@@ -105,6 +107,7 @@ local function publish(player: Player, data: Data)
 	player:SetAttribute("Vol_sfx", data.volume.sfx)
 	player:SetAttribute("PartyTickets", data.partyTickets)
 	player:SetAttribute("CalmFlashing", data.calmFlashing)
+	player:SetAttribute("StarterPack", data.starterPack)
 	-- Today's quests for the client card: id, text, progress, goal, reward, done.
 	local quests = {}
 	for _, id in data.quests.ids do

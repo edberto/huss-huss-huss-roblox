@@ -42,6 +42,7 @@ local TABS = {
 }
 -- Robux tab cards, in order.
 local ROBUX_CARDS = {
+	{ key = "starter_pack", name = "Starter Pack", robux = 49, color = "FF5AC8" }, -- hidden once bought
 	{ key = "vip", name = "VIP: x2 Huss", robux = 199, color = "FAC775" },
 	{ key = "party_animal", name = "Party Animal", robux = 149, color = "FF2E93" },
 	{ key = "hp_small", name = "500 Huss", robux = 25, color = "FFB547" },
@@ -380,6 +381,9 @@ function ShopClient.start()
 		end
 		if currentTab == "robux" then
 			for order, card in ROBUX_CARDS do
+				if card.key == "starter_pack" and player:GetAttribute("StarterPack") ~= false then
+					continue -- one per account; nil = save not loaded yet
+				end
 				local owns = (card.key == "vip" and player:GetAttribute("VIP") == true)
 					or (card.key == "party_animal" and player:GetAttribute("PartyAnimal") == true)
 				local frame, action = shopCard(

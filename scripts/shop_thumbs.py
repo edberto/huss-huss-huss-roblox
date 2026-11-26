@@ -140,7 +140,8 @@ def party_animal():
 if __name__ == '__main__':
     for n, a, b in [('trail_mint', '3DFFB0', '3DFFB0'), ('trail_fire', 'FF6B1A', 'FFB547'),
                     ('trail_ice', '85B7EB', 'F2EEDC'), ('trail_party', 'FF2E93', '8A3CFF'),
-                    ('trail_gold', 'FAC775', 'FFB547'), ('trail_streak', '3DFFB0', 'FF2E93')]:
+                    ('trail_gold', 'FAC775', 'FFB547'), ('trail_streak', '3DFFB0', 'FF2E93'),
+                    ('trail_starter', 'FF5AC8', 'FFCD3C')]:
         trail(n, a, b)
     for n, t in [('title_hooper', 'Hooper'), ('title_gymrat', 'Gym Rat'), ('title_burgerboss', 'Burger Boss'),
                  ('title_neverpartied', 'Never Partied'), ('title_legend', 'Huss Legend')]:

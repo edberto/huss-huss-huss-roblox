@@ -22,6 +22,7 @@ Cosmetics.items = table.freeze({
 	trail_party = { slot = "trail", name = "Party", price = 2500, colors = { "FF2E93", "8A3CFF" } },
 	trail_gold = { slot = "trail", name = "Gold", price = 6000, colors = { "FAC775", "FFB547" } },
 	trail_streak = { slot = "trail", name = "7-Day Streak", colors = { "3DFFB0", "FF2E93" } },
+	trail_starter = { slot = "trail", name = "Starter", colors = { "FF5AC8", "FFCD3C" } }, -- Starter Pack
 	title_hooper = { slot = "title", name = "Hooper", price = 300 },
 	title_gymrat = { slot = "title", name = "Gym Rat", price = 300 },
 	title_burgerboss = { slot = "title", name = "Burger Boss", price = 300 },

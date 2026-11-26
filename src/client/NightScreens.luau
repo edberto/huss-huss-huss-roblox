@@ -815,7 +815,7 @@ function NightScreens.start()
 
 	-- A top-3 finish asks to favorite, once per session (no rewards: Roblox forbids rewarding
 	-- favorites). Inviting is the side menu's Invite tile, never an automatic prompt.
-	local askedFavorite = false
+	local askedFavorite, offeredStarter = false, false
 	resultsEvent.OnClientEvent:Connect(function(results: { any })
 		local topThree = false
 		for i, result in results do
@@ -828,6 +828,13 @@ function NightScreens.start()
 			askedFavorite = true
 			ask = function()
 				AvatarEditorService:PromptSetFavorite(game.PlaceId, Enum.AvatarItemType.Asset, true)
+			end
+		elseif not offeredStarter and player:GetAttribute("StarterPack") == false then
+			-- The one-time Starter Pack, offered once per session after a Dawn (not alongside
+			-- the favorite prompt).
+			offeredStarter = true
+			ask = function()
+				MarketplaceService:PromptProductPurchase(player, Products.items.starter_pack.id)
 			end
 		end
 		if ask then
