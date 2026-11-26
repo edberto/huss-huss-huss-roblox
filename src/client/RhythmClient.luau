@@ -505,7 +505,8 @@ function RhythmClient.start()
 					tapGlow.Transparency = 0.1
 					ringGlow.Transparency = 0.05
 					TweenService:Create(tapGlow, TweenInfo.new(0.35), { Transparency = 0.7 }):Play()
-					TweenService:Create(ringGlow, TweenInfo.new(0.35), { Transparency = 0.6 }):Play()
+					TweenService:Create(ringGlow, TweenInfo.new(0.35), { Transparency = 0.6 })
+						:Play()
 				end
 			end
 			if note > clapNote then

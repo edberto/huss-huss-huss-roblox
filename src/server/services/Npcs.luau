@@ -131,42 +131,45 @@ local function tempt(npc: Npc)
 	end)
 end
 
-Party.abilityEvent.OnServerEvent:Connect(function(partier: Player, ability: unknown, target: unknown)
-	if
-		typeof(target) ~= "Instance"
-		or not target:IsA("Model")
-		or target.Parent ~= folder
-		or ReplicatedStorage:GetAttribute("Phase") ~= "Night"
-	then
-		return
-	end
-	local npc
-	for _, candidate in npcs do
-		if candidate.model == target and not candidate.partier then
-			npc = candidate
+Party.abilityEvent.OnServerEvent:Connect(
+	function(partier: Player, ability: unknown, target: unknown)
+		if
+			typeof(target) ~= "Instance"
+			or not target:IsA("Model")
+			or target.Parent ~= folder
+			or ReplicatedStorage:GetAttribute("Phase") ~= "Night"
+		then
+			return
 		end
+		local npc
+		for _, candidate in npcs do
+			if candidate.model == target and not candidate.partier then
+				npc = candidate
+			end
+		end
+		local mine = partier.Character
+			and partier.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+		local theirs = npc and npc.model:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if
+			not npc
+			or not mine
+			or not theirs
+			or (mine.Position - theirs.Position).Magnitude > Night.abilityRange
+			or os.clock() < npc.shieldUntil
+		then
+			return
+		end
+		local spec = Party.spend(partier, ability)
+		if not spec then
+			return
+		end
+		npc.shieldUntil = os.clock() + Night.shieldTime
+		npc.giveInAt -= PULL[ability :: string] or 0
+		npc.tempter, npc.temptedAt = partier, os.clock()
+		npc.humanoid.Jump = true -- a startled hop, so the partier sees it land
+		Party.addPoints(partier, spec.points + (if ability == "Dance" then DANCE_POINTS else 0))
 	end
-	local mine = partier.Character and partier.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
-	local theirs = npc and npc.model:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if
-		not npc
-		or not mine
-		or not theirs
-		or (mine.Position - theirs.Position).Magnitude > Night.abilityRange
-		or os.clock() < npc.shieldUntil
-	then
-		return
-	end
-	local spec = Party.spend(partier, ability)
-	if not spec then
-		return
-	end
-	npc.shieldUntil = os.clock() + Night.shieldTime
-	npc.giveInAt -= PULL[ability :: string] or 0
-	npc.tempter, npc.temptedAt = partier, os.clock()
-	npc.humanoid.Jump = true -- a startled hop, so the partier sees it land
-	Party.addPoints(partier, spec.points + (if ability == "Dance" then DANCE_POINTS else 0))
-end)
+)
 
 -- Fill free homes at the start of a night.
 function Npcs.beginNight()
