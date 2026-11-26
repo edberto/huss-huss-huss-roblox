@@ -63,7 +63,8 @@ function Progress.nightReward(
 	players: number,
 	finished: boolean
 ): number
-	local hp = math.floor(points * Progress.hussPerPoint) + math.floor(partyPoints * Progress.hussPerPartyPoint)
+	local hp = math.floor(points * Progress.hussPerPoint)
+		+ math.floor(partyPoints * Progress.hussPerPartyPoint)
 	if players >= Progress.placementMinPlayers then
 		if place == 1 then
 			hp += Progress.lastStandingBonus
