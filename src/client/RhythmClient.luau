@@ -481,7 +481,14 @@ function RhythmClient.start()
 		-- (Parenthesised: nearest() also returns the offset, which must not reach math.max.)
 		local first = math.max(
 			0,
-			(BeatClock.nearest(current.startTime, current.bpm, now - interval * 0.25, current.pattern))
+			(
+				BeatClock.nearest(
+					current.startTime,
+					current.bpm,
+					now - interval * 0.25,
+					current.pattern
+				)
+			)
 		)
 		for beat = first, first + #dots - 1 do
 			local time = BeatClock.noteTime(current.startTime, current.bpm, beat, current.pattern)
