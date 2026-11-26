@@ -14,3 +14,6 @@ tmp/
 *.log
 .DS_Store
 Thumbs.db
+
+.trailer/
+marketing/
