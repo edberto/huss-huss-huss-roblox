@@ -1,7 +1,7 @@
 --!strict
 -- Station arm motions for your own avatar while practising. The default animations (the
 -- character's Animate script) are switched off for the night and switched back on after, and
--- the arms are posed here by offsetting the shoulder and elbow Motor6D C0s each frame (the
+-- the arms are posed here by offsetting the shoulder and elbow joint C0s each frame (the
 -- Animator still resets Transform, so C0 is what sticks): a rest pose per station plus a short
 -- motion on every hit. The original C0s come back when posing stops. No animation assets.
 local Players = game:GetService("Players")
@@ -114,7 +114,7 @@ local station: string? = nil -- posing for this station; nil = off
 local move: Move? = nil
 local moveStart = 0
 local animate: LocalScript? = nil
-local originalC0: { [Motor6D]: CFrame } = {}
+local originalC0: { [any]: CFrame } = {}
 
 local MOTORS = {
 	RightShoulder = { "RightUpperArm", "RightShoulder", "Torso", "Right Shoulder" },
@@ -122,7 +122,7 @@ local MOTORS = {
 	RightElbow = { "RightLowerArm", "RightElbow" },
 	LeftElbow = { "LeftLowerArm", "LeftElbow" },
 }
-local function motors(character: Model): { [string]: Motor6D }
+local function motors(character: Model): { [string]: any }
 	local found = {}
 	for name, path in MOTORS do
 		local r15 = character:FindFirstChild(path[1])
@@ -131,7 +131,8 @@ local function motors(character: Model): { [string]: Motor6D }
 			local torso = character:FindFirstChild(path[3])
 			motor = torso and torso:FindFirstChild(path[4])
 		end
-		if motor and motor:IsA("Motor6D") then
+		-- Newer avatars use AnimationConstraint joints instead of Motor6D; both have a C0.
+		if motor and (motor:IsA("Motor6D") or motor:IsA("AnimationConstraint")) then
 			found[name] = motor
 		end
 	end
