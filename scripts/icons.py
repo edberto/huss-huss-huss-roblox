@@ -296,6 +296,24 @@ def party_animal():
 
 
 
+def starter_pack():
+    img = background()
+    d = ImageDraw.Draw(img)
+    # A gift box with a gold bow, coins spilling in front: the one-time starter offer.
+    x0, y0, x1, y1 = S * 0.27, S * 0.43, S * 0.73, S * 0.72
+    d.rounded_rectangle([x0 + 6, y0 + 8, x1 + 6, y1 + 8], 14, fill=INK)
+    d.rounded_rectangle([x0, y0, x1, y1], 14, fill=PINK, outline=INK, width=7)
+    d.rounded_rectangle([x0 - 16, y0 - 34, x1 + 16, y0 + 18], 12, fill=VIOLET, outline=INK, width=7)
+    d.rectangle([S / 2 - 22, y0 - 34, S / 2 + 22, y1], fill=GOLD, outline=INK, width=5)
+    for side in (-1, 1):
+        d.ellipse([S / 2 + side * 54 - 40, y0 - 80, S / 2 + side * 54 + 40, y0 - 34], fill=GOLD, outline=INK, width=6)
+    coin(d, S * 0.3, S * 0.75, 44)
+    coin(d, S * 0.7, S * 0.77, 38)
+    text(d, (S / 2, S * 0.12), "STARTER", 72, YELLOW, 9)
+    text(d, (S / 2, S * 0.88), 'PACK', 60)
+    save(img, 'starter_pack')
+
+
 if __name__ == '__main__':
     vip()
     game_icon()
@@ -306,6 +324,7 @@ if __name__ == '__main__':
     second_wind()
     throw_party()
     party_animal()
+    starter_pack()
 
     # Contact sheet with the circular crop, for review.
     names = ['vip_pass', 'huss_500', 'huss_1750', 'huss_5000', 'second_wind', 'throw_party', 'huss_boost', 'party_animal']
