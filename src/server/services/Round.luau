@@ -253,7 +253,8 @@ function Round.run()
 			-- Everyone starts at home; only a trainer spawning mid-Night is held on the spot.
 			local partier = player:GetAttribute("Team") == "Partier"
 			if not partier then
-				Homes.placeOnSpot(player)
+				-- Indoors (garage, kitchen) only while training; otherwise the driveway.
+				Homes.placeOnSpot(player, ReplicatedStorage:GetAttribute("Phase") ~= "Night")
 			end
 			setMovement(player, partier or ReplicatedStorage:GetAttribute("Phase") ~= "Night")
 		end)
@@ -278,6 +279,9 @@ function Round.run()
 
 		setPhase("Dawn", Night.dawnTime)
 		for _, player in Players:GetPlayers() do
+			if player:GetAttribute("Team") ~= "Partier" then
+				Homes.placeOnSpot(player, true) -- out of the garage or kitchen
+			end
 			setMovement(player, true) -- free to roam until the next Dusk
 		end
 		local ranking = sortedResults()

@@ -56,9 +56,10 @@ function Homes.of(player: Player): Model?
 	return owners[player]
 end
 
-function Homes.placeOnSpot(player: Player)
+-- outside = the driveway spot (Basketball's), whatever the station: used when not training.
+function Homes.placeOnSpot(player: Player, outside: boolean?)
 	local home = owners[player]
-	local station = player:GetAttribute("Station")
+	local station = if outside then nil else player:GetAttribute("Station")
 	local spot = home
 		and (
 			home:FindFirstChild(`PracticeSpot_{station}`) or home:FindFirstChild("PracticeSpot")
