@@ -478,21 +478,30 @@ function RhythmClient.start()
 		local upcoming: { { time: number, skill: boolean } } = {}
 		local waiting = if nextSegment and nextSegment ~= current then nextSegment else nil
 		local cutoff = if waiting then waiting.startTime else math.huge
+		-- (Parenthesised: nearest() also returns the offset, which must not reach math.max.)
 		local first = math.max(
 			0,
-			BeatClock.nearest(current.startTime, current.bpm, now - interval * 0.25, current.pattern)
+			(BeatClock.nearest(current.startTime, current.bpm, now - interval * 0.25, current.pattern))
 		)
 		for beat = first, first + #dots - 1 do
 			local time = BeatClock.noteTime(current.startTime, current.bpm, beat, current.pattern)
 			if time >= cutoff then
 				break
 			end
-			table.insert(upcoming, { time = time, skill = BeatClock.isSkillBeat(beat, current.pattern) })
+			table.insert(
+				upcoming,
+				{ time = time, skill = BeatClock.isSkillBeat(beat, current.pattern) }
+			)
 		end
 		if waiting then
 			for beat = 0, #dots - #upcoming - 1 do
 				table.insert(upcoming, {
-					time = BeatClock.noteTime(waiting.startTime, waiting.bpm, beat, waiting.pattern),
+					time = BeatClock.noteTime(
+						waiting.startTime,
+						waiting.bpm,
+						beat,
+						waiting.pattern
+					),
 					skill = BeatClock.isSkillBeat(beat, waiting.pattern),
 				})
 			end
