@@ -112,6 +112,34 @@ end
 Rhythm.onGrade = Focus.onGrade
 Rhythm.onSkip = Focus.onSkip
 
+-- "Skip practice, just party": free with Party Animal, otherwise one Party Ticket.
+local function spendSkip(player: Player): boolean
+	if player:GetAttribute("PartyAnimal") == true then
+		return true
+	end
+	return Data.update(player, function(data)
+		if data.partyTickets <= 0 then
+			return "NoTickets"
+		end
+		data.partyTickets -= 1
+		return nil
+	end) == nil
+end
+
+-- Straight to the party lawn as a partier for the whole night.
+local function joinPartyNow(player: Player)
+	Analytics.event(player, "SkippedToParty", 1)
+	record(player, "Partied all night", 0)
+	player:SetAttribute("Team", "Partier")
+	setMovement(player, true)
+	if player.Character then
+		player.Character:PivotTo(
+			partyLawn.CFrame + Vector3.new(math.random(-6, 6), 3, math.random(-4, 4))
+		)
+		Decor.dressPartier(player.Character)
+	end
+end
+
 local function setLockedIn(player: Player, on: boolean)
 	local character = player.Character
 	local glow = character and character:FindFirstChild("LockedInGlow")
@@ -143,7 +171,11 @@ local function runNight()
 	for _, player in Players:GetPlayers() do
 		Party.reset(player)
 		player:SetAttribute("UsedSecondWind", false)
-		startTraining(player)
+		if player:GetAttribute("PartyTonight") == true and spendSkip(player) then
+			joinPartyNow(player)
+		else
+			startTraining(player)
+		end
 	end
 	Npcs.beginNight()
 	local bpm = Night.bpm(0)
@@ -231,6 +263,7 @@ function Round.run()
 		Npcs.clear()
 		for _, player in Players:GetPlayers() do
 			player:SetAttribute("Team", "Trainer")
+			player:SetAttribute("PartyTonight", false) -- choose again each Dusk
 			player:SetAttribute("Focus", Night.focusStart)
 			task.spawn(player.LoadCharacter, player) -- everyone back to the driveway
 		end

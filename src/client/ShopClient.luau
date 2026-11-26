@@ -83,6 +83,7 @@ local function owned(): { [string]: boolean }
 end
 
 local BLACK, WHITE, GOLD = Color3.new(0, 0, 0), Color3.new(1, 1, 1), Color3.fromHex("FFD75A")
+local GOLD_TILE = Color3.fromHex("FFC83C") -- a reward ready to claim
 local PURPLE, CARD, IDLE =
 	Color3.fromHex("23164B"), Color3.fromHex("32235F"), Color3.fromHex("3C2D6E")
 local GREEN = Color3.fromHex("5AD278")
@@ -428,16 +429,63 @@ function ShopClient.start()
 	})
 	local gifts = make("Frame", {
 		BackgroundTransparency = 1,
-		Position = UDim2.fromScale(0, 0.46),
-		Size = UDim2.fromScale(1, 0.54),
+		Position = UDim2.fromScale(0, 0.44),
+		Size = UDim2.fromScale(1, 0.3),
 		ZIndex = 21,
 		Parent = rewardsBody,
 	}, {
-		make(
-			"UIGridLayout",
-			{ CellPadding = UDim2.fromScale(0.02, 0.06), CellSize = UDim2.fromScale(0.32, 0.27) }
-		),
+		make("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			Padding = UDim.new(0.015, 0),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
 	})
+
+	-- A reward card: icon (Huss coin or Party Ticket), amount, and a status pill underneath.
+	local COIN, TICKET = "rbxassetid://117706289482395", "rbxassetid://96730617685238"
+	type RewardCard = { cell: TextButton, icon: ImageLabel, amount: TextLabel, status: TextLabel }
+	local function rewardCard(parent: Instance, width: number): RewardCard
+		local cell = button(parent, "", IDLE)
+		cell.Size = UDim2.fromScale(width, 1)
+		local padding = cell:FindFirstChildOfClass("UIPadding")
+		if padding then
+			padding:Destroy()
+		end
+		local icon = make("ImageLabel", {
+			AnchorPoint = Vector2.new(0.5, 0),
+			BackgroundTransparency = 1,
+			Position = UDim2.fromScale(0.5, 0.08),
+			Size = UDim2.fromScale(0.8, 0.38),
+			ScaleType = Enum.ScaleType.Fit,
+			ZIndex = 23,
+			Parent = cell,
+		})
+		local amount = Ui.shout({
+			Position = UDim2.fromScale(0.05, 0.47),
+			Size = UDim2.fromScale(0.9, 0.22),
+			Text = "",
+			Thickness = 2,
+			ZIndex = 23,
+			Parent = cell,
+		})
+		local status = make("TextLabel", {
+			AnchorPoint = Vector2.new(0.5, 1),
+			BackgroundColor3 = Color3.fromHex("140C28"),
+			FontFace = Ui.display,
+			Position = UDim2.fromScale(0.5, 0.95),
+			Size = UDim2.fromScale(0.86, 0.2),
+			Text = "",
+			TextColor3 = WHITE,
+			TextScaled = true,
+			ZIndex = 23,
+			Parent = cell,
+		}, {
+			corner(8),
+			make("UIStroke", { Color = BLACK, Thickness = 2 }),
+			make("UIPadding", { PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.1, 0) }),
+		})
+		return { cell = cell, icon = icon, amount = amount, status = status }
+	end
 	local claimedGifts: { [number]: boolean } = {}
 
 	local function dailyReady(): boolean
@@ -459,10 +507,11 @@ function ShopClient.start()
 
 	-- Cells are built once; refreshRewards() only updates their text and colour, so a tap is
 	-- never lost to a rebuild while the countdowns tick.
-	local dayCells: { TextButton } = {}
+	local dayCells: { RewardCard } = {}
 	for day, hp in Rewards.daily do
-		local cell = button(calendar, "", IDLE)
-		cell.Size = UDim2.fromScale(0.13, 1)
+		local card = rewardCard(calendar, 0.13)
+		local cell = card.cell
+		card.icon.Image = COIN
 		cell.Activated:Connect(function()
 			local state = {
 				lastDay = tonumber(player:GetAttribute("DailyLastDay")) or 0,
@@ -473,24 +522,31 @@ function ShopClient.start()
 				rewardsNote.Text = if reason then REASONS[reason] or reason else `+{hp} Huss`
 			end
 		end)
-		dayCells[day] = cell
+		dayCells[day] = card
 	end
-	local giftCells: { TextButton } = {}
+	local giftCells: { RewardCard } = {}
 	for i, gift in Rewards.gifts do
-		local cell = button(gifts, "", IDLE)
+		local card = rewardCard(gifts, 0.188)
+		local cell = card.cell
 		cell.LayoutOrder = i
+		card.icon.Image = if gift.tickets then TICKET else COIN
+		card.amount.Text = if gift.tickets then "PARTY TICKET" else tostring(gift.hp)
 		cell.Activated:Connect(function()
 			local reason = giftRemote:InvokeServer(gift.minutes)
 			if not reason or reason == "AlreadyClaimed" then
 				claimedGifts[gift.minutes] = true
 			end
-			rewardsNote.Text = if reason then REASONS[reason] or reason else `+{gift.hp} Huss`
+			rewardsNote.Text = if reason
+				then REASONS[reason] or reason
+				elseif gift.tickets then `+{gift.tickets} Party Ticket`
+				else `+{gift.hp} Huss`
 		end)
-		giftCells[i] = cell
+		giftCells[i] = card
 	end
 	local groupButton =
-		button(gifts, `JOIN THE GROUP · {Rewards.groupHp} HUSS`, Color3.fromHex("FF50C8"))
-	groupButton.LayoutOrder = #Rewards.gifts + 1
+		button(rewardsBody, `JOIN THE GROUP · {Rewards.groupHp} HUSS`, Color3.fromHex("FF50C8"))
+	groupButton.Position = UDim2.fromScale(0, 0.76)
+	groupButton.Size = UDim2.fromScale(1, 0.07)
 	groupButton.Activated:Connect(function()
 		local reason = groupRemote:InvokeServer()
 		rewardsNote.Text = if reason then REASONS[reason] or reason else `+{Rewards.groupHp} Huss`
@@ -499,8 +555,8 @@ function ShopClient.start()
 	-- Code row under the gifts: box + Redeem, result on the line below.
 	local codeRow = make("Frame", {
 		BackgroundTransparency = 1,
-		Position = UDim2.fromScale(0, 0.83),
-		Size = UDim2.fromScale(1, 0.17),
+		Position = UDim2.fromScale(0, 0.85),
+		Size = UDim2.fromScale(1, 0.15),
 		ZIndex = 21,
 		Parent = rewardsBody,
 	})
@@ -553,29 +609,34 @@ function ShopClient.start()
 		}
 		local nextDay = Rewards.nextDailyDay(state, Rewards.today(os.time()))
 		local ready = dailyReady()
-		for day, cell in dayCells do
+		for day, card in dayCells do
 			local hp = Rewards.daily[day]
 			local claimable = day == nextDay and ready
 			local done = day < nextDay or (day == nextDay and not ready)
-			cell.Text = if claimable
-				then `Day {day}\nClaim`
-				else `Day {day}\n{hp}{if day == 7 then " + trail" else ""}`
-			cell.BackgroundColor3 = if claimable then C.orange elseif done then GREEN else IDLE
+			card.amount.Text = if day == 7 then `{hp} + TRAIL` else tostring(hp)
+			card.status.Text = if claimable then "CLAIM!" elseif done then "✓" else `DAY {day}`
+			card.status.BackgroundColor3 = if claimable
+				then C.pink
+				elseif done then GREEN
+				else Color3.fromHex("140C28")
+			card.cell.BackgroundColor3 = if claimable then GOLD_TILE else IDLE
 		end
 		local now = workspace:GetServerTimeNow()
 		local joined = tonumber(player:GetAttribute("JoinedAt")) or now
 		for i, gift in Rewards.gifts do
 			local left = math.max(0, gift.minutes * 60 - (now - joined))
-			local cell = giftCells[i]
-			cell.Text = if claimedGifts[gift.minutes]
-				then `{gift.minutes} min · claimed`
-				elseif left > 0 then `{gift.minutes} min · {gift.hp} Huss · {Ui.countdown(
-					now + left
-				)}`
-				else `{gift.minutes} min · Claim {gift.hp} Huss`
-			cell.BackgroundColor3 = if left <= 0 and not claimedGifts[gift.minutes]
-				then C.orange
-				else IDLE
+			local card = giftCells[i]
+			local claimed = claimedGifts[gift.minutes]
+			local claimable = left <= 0 and not claimed
+			card.status.Text = if claimed
+				then "✓"
+				elseif claimable then "CLAIM!"
+				else Ui.countdown(now + left)
+			card.status.BackgroundColor3 = if claimable
+				then C.pink
+				elseif claimed then GREEN
+				else Color3.fromHex("140C28")
+			card.cell.BackgroundColor3 = if claimable then GOLD_TILE else IDLE
 		end
 		groupButton.Visible = player:GetAttribute("GroupClaimed") ~= true
 	end

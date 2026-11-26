@@ -4,13 +4,14 @@ local Rewards = {}
 
 Rewards.daily = table.freeze({ 50, 75, 100, 150, 200, 300, 500 }) -- HP for streak day 1-7
 Rewards.dailyItem = "trail_streak" -- extra on day 7
-Rewards.gifts = table.freeze({ -- minutes played this session -> HP
+export type Gift = { minutes: number, hp: number?, tickets: number? }
+Rewards.gifts = table.freeze({ -- minutes played this session -> Huss or Party Tickets
 	{ minutes = 5, hp = 25 },
-	{ minutes = 15, hp = 50 },
+	{ minutes = 15, tickets = 1 },
 	{ minutes = 30, hp = 100 },
-	{ minutes = 45, hp = 150 },
+	{ minutes = 45, tickets = 1 },
 	{ minutes = 60, hp = 250 },
-})
+} :: { Gift })
 Rewards.groupHp = 250
 Rewards.groupBonus = 0.5 -- +50% night HP while in the group
 

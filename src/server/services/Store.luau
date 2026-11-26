@@ -111,10 +111,26 @@ local function checkVip(player: Player)
 	player:SetAttribute("VIP", ok and owns)
 end
 
+local function checkPartyAnimal(player: Player)
+	if Products.partyAnimalPassId == 0 then
+		return
+	end
+	local ok, owns = pcall(
+		MarketplaceService.UserOwnsGamePassAsync,
+		MarketplaceService,
+		player.UserId,
+		Products.partyAnimalPassId
+	)
+	player:SetAttribute("PartyAnimal", ok and owns)
+end
+
 Players.PlayerAdded:Connect(checkVip)
+Players.PlayerAdded:Connect(checkPartyAnimal)
 MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, purchased)
 	if purchased and passId == Products.vipPassId then
 		player:SetAttribute("VIP", true)
+	elseif purchased and passId == Products.partyAnimalPassId then
+		player:SetAttribute("PartyAnimal", true)
 	end
 end)
 

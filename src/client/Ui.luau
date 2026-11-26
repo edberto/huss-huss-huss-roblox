@@ -106,7 +106,7 @@ local PAD = { -- label and colour for controller buttons
 	DPadUp = { "▲", "5A5A64" },
 	DPadRight = { "▶", "5A5A64" },
 }
-local KEY_NAMES = { Space = "SPACE", Return = "ENTER", One = "1", Two = "2", Three = "3" }
+local KEY_NAMES = { Space = "SPACE", Return = "ENTER", One = "1", Two = "2", Three = "3", Four = "4" }
 
 local function device(): string
 	local last = UserInputService:GetLastInputType()

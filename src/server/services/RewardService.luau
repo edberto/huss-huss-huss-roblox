@@ -91,7 +91,8 @@ claimGift.OnServerInvoke = function(player: Player, minutes: unknown): string?
 	end
 	return Data.update(player, function(data)
 		claimed[gift.minutes] = true
-		data.hp += gift.hp
+		data.hp += gift.hp or 0
+		data.partyTickets += gift.tickets or 0
 		return nil
 	end)
 end

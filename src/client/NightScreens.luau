@@ -6,10 +6,12 @@ local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SocialService = game:GetService("SocialService")
+local MarketplaceService = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
 local Night = require(ReplicatedStorage.Shared.Night)
+local Products = require(ReplicatedStorage.Shared.Products)
 local StationFx = require(script.Parent.StationFx)
 local Ui = require(script.Parent.Ui)
 
@@ -91,7 +93,7 @@ function NightScreens.start()
 		AnchorPoint = Vector2.new(0.5, 0),
 		BackgroundColor3 = Color3.fromHex("5AD278"),
 		FontFace = Ui.display,
-		Position = UDim2.fromScale(0.5, 0.715),
+		Position = UDim2.fromScale(0.36, 0.715),
 		Size = UDim2.fromScale(0.14, 0.07),
 		Text = "DONE",
 		TextColor3 = Color3.new(1, 1, 1),
@@ -117,10 +119,14 @@ function NightScreens.start()
 		ZIndex = 5,
 		Parent = dusk,
 	})
+	local skipButton: GuiObject? = nil -- set once the skip button exists, below
 	local function setPickerOpen(open: boolean)
 		cards.Visible = open
 		done.Visible = open
 		reopen.Visible = not open
+		if skipButton then
+			skipButton.Visible = open
+		end
 	end
 	done.Activated:Connect(function()
 		setPickerOpen(false)
@@ -327,8 +333,92 @@ function NightScreens.start()
 			{ card = card, stroke = stroke, glow = glow, badge = badge, scale = scale }
 	end
 	-- The picked card lifts, glows and gets the SELECTED badge; the others sit back a little.
+	-- Skip practice, just party: a Party Ticket (or the Party Animal pass) sends you straight to
+	-- the party when night falls. Without either, it offers the pass.
+	local skip = make("TextButton", {
+		AnchorPoint = Vector2.new(0, 0),
+		BackgroundColor3 = Color3.fromHex("FF2E93"),
+		FontFace = Ui.display,
+		Position = UDim2.fromScale(0.44, 0.715),
+		Size = UDim2.fromScale(0.27, 0.07),
+		Text = "SKIP PRACTICE, JUST PARTY",
+		TextColor3 = WHITE,
+		TextScaled = true,
+		Parent = dusk,
+	}, {
+		corner(),
+		outline(4),
+		make("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+			Color = BLACK,
+			Thickness = 2.5,
+		}),
+		make("UIPadding", {
+			PaddingTop = UDim.new(0.22, 0),
+			PaddingBottom = UDim.new(0.16, 0),
+			PaddingLeft = UDim.new(0.05, 0),
+			PaddingRight = UDim.new(0.3, 0),
+		}),
+	})
+	local skipStroke = skip:FindFirstChildOfClass("UIStroke") :: UIStroke
+	local ticketChip = make("Frame", {
+		AnchorPoint = Vector2.new(1, 0.5),
+		BackgroundColor3 = Color3.fromHex("FFD246"),
+		Position = UDim2.new(1, -6, 0.5, 0),
+		Size = UDim2.new(0.27, 0, 0.78, 0),
+		Parent = skip,
+	}, {
+		corner(),
+		make("UIStroke", { Color = BLACK, Thickness = 2.5 }),
+		make("ImageLabel", {
+			BackgroundTransparency = 1,
+			Image = "rbxassetid://96730617685238",
+			Position = UDim2.fromScale(0.04, 0.05),
+			Size = UDim2.fromScale(0.5, 0.9),
+			ScaleType = Enum.ScaleType.Fit,
+		}),
+	})
+	local ticketCount = label({
+		AnchorPoint = Vector2.new(1, 0.5),
+		FontFace = Ui.display,
+		Position = UDim2.new(0.96, 0, 0.55, 0),
+		Size = UDim2.fromScale(0.42, 0.8),
+		Text = "x0",
+		TextColor3 = Color3.fromHex("412402"),
+		Parent = ticketChip,
+	})
+	local function refreshSkip()
+		local animal = player:GetAttribute("PartyAnimal") == true
+		local tickets = tonumber(player:GetAttribute("PartyTickets")) or 0
+		local on = player:GetAttribute("PartyTonight") == true
+		ticketCount.Text = if animal then "∞" else `x{tickets}`
+		skip.Text = if on then "✓ PARTYING TONIGHT" else "SKIP PRACTICE, JUST PARTY"
+		skip.BackgroundColor3 = if on then Color3.fromHex("FF64B4") else Color3.fromHex("FF2E93")
+		skipStroke.Color = if on then WHITE else BLACK
+	end
+	local function useSkip()
+		local animal = player:GetAttribute("PartyAnimal") == true
+		local tickets = tonumber(player:GetAttribute("PartyTickets")) or 0
+		if animal or tickets > 0 then
+			StationFx.play("clap", 1.3)
+			remotes:WaitForChild("SkipToParty"):FireServer()
+			task.delay(0.5, setPickerOpen, false)
+		elseif Products.partyAnimalPassId ~= 0 then
+			MarketplaceService:PromptGamePassPurchase(player, Products.partyAnimalPassId)
+		end
+	end
+	skip.Activated:Connect(useSkip)
+	Ui.bind(skip, { Enum.KeyCode.Four }, { Enum.KeyCode.ButtonY }, useSkip)
+	for _, name in { "PartyAnimal", "PartyTickets", "PartyTonight" } do
+		player:GetAttributeChangedSignal(name):Connect(refreshSkip)
+	end
+	refreshSkip()
+	skipButton = skip
+
 	local function refreshCards()
-		local picked = player:GetAttribute("Station")
+		local picked = if player:GetAttribute("PartyTonight") == true
+			then nil
+			else player:GetAttribute("Station")
 		for name, parts in cardParts do
 			local on = name == picked
 			parts.badge.Visible = on
@@ -344,6 +434,7 @@ function NightScreens.start()
 		end
 	end
 	player:GetAttributeChangedSignal("Station"):Connect(refreshCards)
+	player:GetAttributeChangedSignal("PartyTonight"):Connect(refreshCards)
 	refreshCards()
 	label({
 		AnchorPoint = Vector2.new(0.5, 1),
