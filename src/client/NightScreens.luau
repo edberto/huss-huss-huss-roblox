@@ -365,7 +365,7 @@ function NightScreens.start()
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundColor3 = Color3.fromHex("FFD246"),
 		Position = UDim2.new(1, -6, 0.5, 0),
-		Size = UDim2.new(0.27, 0, 0.78, 0),
+		Size = UDim2.fromScale(0.27, 0.78),
 		Parent = skip,
 	}, {
 		corner(),
@@ -381,7 +381,7 @@ function NightScreens.start()
 	local ticketCount = label({
 		AnchorPoint = Vector2.new(1, 0.5),
 		FontFace = Ui.display,
-		Position = UDim2.new(0.96, 0, 0.55, 0),
+		Position = UDim2.fromScale(0.96, 0.55),
 		Size = UDim2.fromScale(0.42, 0.8),
 		Text = "x0",
 		TextColor3 = Color3.fromHex("412402"),
