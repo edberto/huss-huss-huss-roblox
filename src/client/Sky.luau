@@ -92,7 +92,7 @@ function Sky.start()
 		-- Hours still to go, counting forward only (Dawn -> Dusk is half a day ahead).
 		local ahead = (target() - Lighting.ClockTime) % 24
 		if ahead > 20 then
-			return -- target is just behind us (clock jitter): wait rather than spin a whole day
+			ahead = 0 -- target is just behind us (rounding, clock jitter): hold, don't spin a whole day
 		end
 		-- Catch up quickly (a phase change sweeps in about 3 s) and track the night clock smoothly.
 		Lighting.ClockTime = (Lighting.ClockTime + ahead * math.min(1, dt * 1.5)) % 24
