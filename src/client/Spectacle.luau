@@ -147,7 +147,7 @@ function Spectacle.start()
 	local folder = ReplicatedStorage:WaitForChild("Leaderboards")
 	local event = folder:WaitForChild("Fireworks") :: RemoteEvent
 	event.OnClientEvent:Connect(function(reason: string)
-		Spectacle.fireworks(if reason == "Dawn" then 10 else 6)
+		Spectacle.fireworks(if reason == "Dawn" or reason == "AllIn" then 10 else 6)
 	end)
 end
 

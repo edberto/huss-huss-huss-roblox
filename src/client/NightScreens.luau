@@ -995,6 +995,47 @@ function NightScreens.start()
 		end
 	end)
 
+	-- The last trainer gave in: a big banner for the whole street (with the server's fireworks).
+	local allIn = Ui.shout({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.3),
+		Size = UDim2.fromScale(0.6, 0.13),
+		Text = "EVERYONE GAVE IN!",
+		TextColor3 = GOLD,
+		Thickness = 5,
+		Visible = false,
+		ZIndex = 20,
+		Parent = gui,
+	})
+	local allInSub = Ui.shout({
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.fromScale(0.5, 1),
+		Size = UDim2.fromScale(0.7, 0.45),
+		Text = "PARTY TILL 6 AM",
+		Thickness = 3,
+		ZIndex = 20,
+		Parent = allIn,
+	})
+	local allInScale = make("UIScale", { Parent = allIn })
+	local fireworksEvent =
+		ReplicatedStorage:WaitForChild("Leaderboards"):WaitForChild("Fireworks") :: RemoteEvent
+	fireworksEvent.OnClientEvent:Connect(function(reason: string)
+		if reason ~= "AllIn" then
+			return
+		end
+		allInSub.Text = if player:GetAttribute("Team") == "Partier"
+			then "PARTY TILL 6 AM"
+			else "THE STREET IS PARTYING"
+		allIn.Rotation = math.random(-4, 4)
+		allInScale.Scale = 0.3
+		allIn.Visible = true
+		TweenService:Create(allInScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 })
+			:Play()
+		task.delay(4, function()
+			allIn.Visible = false
+		end)
+	end)
+
 	-- Phase changes: show the right screen (the sky is Sky.luau) -----------------
 	local function onPhase()
 		local phase = ReplicatedStorage:GetAttribute("Phase")

@@ -157,6 +157,11 @@ function Leaderboards.dawnFireworks()
 	fireworks:FireAllClients("Dawn")
 end
 
+-- The last trainer gave in mid-night: fireworks and the "everyone gave in" banner.
+function Leaderboards.allInFireworks()
+	fireworks:FireAllClients("AllIn")
+end
+
 function Leaderboards.start()
 	Players.PlayerAdded:Connect(function(player)
 		task.wait(5) -- let the boards' first reads land

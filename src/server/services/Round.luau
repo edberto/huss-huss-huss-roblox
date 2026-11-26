@@ -179,6 +179,7 @@ local function runNight()
 	end
 	Npcs.beginNight()
 	local bpm = Night.bpm(0)
+	local hadTrainers, allIn = false, false
 	while os.clock() - nightStart < Night.nightTime do
 		local progress = progressNow()
 		ReplicatedStorage:SetAttribute("NightClock", Night.clockText(progress))
@@ -203,7 +204,13 @@ local function runNight()
 			)
 		end
 		-- No early end when everyone gives in: partiers (and Party Animal skippers) get the
-		-- whole night to party.
+		-- whole night to party. The moment the last trainer falls, the street celebrates once.
+		if left > 0 then
+			hadTrainers = true
+		elseif hadTrainers and not allIn and progressNow() < 0.95 then
+			allIn = true
+			Leaderboards.allInFireworks()
+		end
 		task.wait(1)
 	end
 	ReplicatedStorage:SetAttribute("NightClock", Night.clockText(1))
