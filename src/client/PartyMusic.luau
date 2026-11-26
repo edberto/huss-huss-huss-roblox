@@ -250,7 +250,8 @@ end
 
 function PartyMusic.start()
 	buildToast()
-	lawn = workspace:WaitForChild("Town"):WaitForChild("PartyHouse"):WaitForChild("Lawn") :: BasePart
+	lawn =
+		workspace:WaitForChild("Town"):WaitForChild("PartyHouse"):WaitForChild("Lawn") :: BasePart
 	emitter = Ui.make("Part", {
 		Name = "PartyEmitter",
 		Anchored = true,

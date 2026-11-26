@@ -613,7 +613,8 @@ function Decor.build()
 	-- Rolling hills all round the town, so zooming out shows a valley instead of the edge of a
 	-- flat baseplate: big half-buried balls on an oval around the street, with pines on the
 	-- nearer ones' slopes.
-	local HILLS = { Color3.fromRGB(30, 50, 44), Color3.fromRGB(26, 44, 40), Color3.fromRGB(34, 56, 46) }
+	local HILLS =
+		{ Color3.fromRGB(30, 50, 44), Color3.fromRGB(26, 44, 40), Color3.fromRGB(34, 56, 46) }
 	local count = 30
 	for i = 1, count do
 		local angle = (i / count) * math.pi * 2 + math.random() * 0.12
