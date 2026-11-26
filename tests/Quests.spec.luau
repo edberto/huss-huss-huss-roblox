@@ -15,8 +15,13 @@ describe("Quests", function()
 	end)
 
 	it("pays each quest once and the bonus when all three are done", function()
-		local state: Quests.State =
-			{ day = 1, ids = { "perfects30", "dragin", "nights3" }, progress = {}, done = {}, bonus = false }
+		local state: Quests.State = {
+			day = 1,
+			ids = { "perfects30", "dragin", "nights3" },
+			progress = {},
+			done = {},
+			bonus = false,
+		}
 		expect((Quests.record(state, "perfects", 29))).toBe(0)
 		expect((Quests.record(state, "perfects", 5))).toBe(75)
 		expect((Quests.record(state, "perfects", 5))).toBe(0) -- already done
@@ -27,7 +32,8 @@ describe("Quests", function()
 	end)
 
 	it("keeps the best value for the combo quest", function()
-		local state: Quests.State = { day = 1, ids = { "combo4" }, progress = {}, done = {}, bonus = false }
+		local state: Quests.State =
+			{ day = 1, ids = { "combo4" }, progress = {}, done = {}, bonus = false }
 		Quests.record(state, "multiplier", 3)
 		Quests.record(state, "multiplier", 2)
 		expect(state.progress.combo4).toBe(3)

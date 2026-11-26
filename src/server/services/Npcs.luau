@@ -165,9 +165,9 @@ Party.abilityEvent.OnServerEvent:Connect(
 			return
 		end
 		npc.shieldUntil = os.clock() + Night.shieldTime
-	if ability == "Dance" then
-		QuestService.add(partier, "danceOff", 1)
-	end
+		if ability == "Dance" then
+			QuestService.add(partier, "danceOff", 1)
+		end
 		npc.giveInAt -= PULL[ability :: string] or 0
 		npc.tempter, npc.temptedAt = partier, os.clock()
 		npc.humanoid.Jump = true -- a startled hop, so the partier sees it land

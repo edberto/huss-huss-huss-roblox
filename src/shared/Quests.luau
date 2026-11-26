@@ -4,7 +4,14 @@
 -- Each quest counts one stat; Huss is paid the moment a quest completes, plus a bonus for all 3.
 local Quests = {}
 
-export type Quest = { id: string, group: string, text: string, stat: string, goal: number, reward: number }
+export type Quest = {
+	id: string,
+	group: string,
+	text: string,
+	stat: string,
+	goal: number,
+	reward: number,
+}
 export type State = {
 	day: number,
 	ids: { string },
@@ -16,10 +23,38 @@ export type State = {
 Quests.bonus = 150
 
 Quests.pool = table.freeze({
-	{ id = "perfects30", group = "practice", text = "Hit 30 Perfects", stat = "perfects", goal = 30, reward = 75 },
-	{ id = "combo4", group = "practice", text = "Reach a x4 combo", stat = "multiplier", goal = 4, reward = 75 },
-	{ id = "until3am", group = "practice", text = "Last until 3 AM", stat = "until3am", goal = 1, reward = 100 },
-	{ id = "dawn", group = "practice", text = "Make it to Dawn", stat = "dawn", goal = 1, reward = 100 },
+	{
+		id = "perfects30",
+		group = "practice",
+		text = "Hit 30 Perfects",
+		stat = "perfects",
+		goal = 30,
+		reward = 75,
+	},
+	{
+		id = "combo4",
+		group = "practice",
+		text = "Reach a x4 combo",
+		stat = "multiplier",
+		goal = 4,
+		reward = 75,
+	},
+	{
+		id = "until3am",
+		group = "practice",
+		text = "Last until 3 AM",
+		stat = "until3am",
+		goal = 1,
+		reward = 100,
+	},
+	{
+		id = "dawn",
+		group = "practice",
+		text = "Make it to Dawn",
+		stat = "dawn",
+		goal = 1,
+		reward = 100,
+	},
 	{
 		id = "hardnight",
 		group = "practice",
@@ -28,12 +63,54 @@ Quests.pool = table.freeze({
 		goal = 1,
 		reward = 75,
 	},
-	{ id = "party100", group = "partier", text = "Earn 100 party points", stat = "partyPoints", goal = 100, reward = 75 },
-	{ id = "dragin", group = "partier", text = "Drag in a trainer", stat = "dragIn", goal = 1, reward = 100 },
-	{ id = "danceoff3", group = "partier", text = "Use Dance-Off 3 times", stat = "danceOff", goal = 3, reward = 50 },
-	{ id = "friend", group = "social", text = "Play a night with a friend", stat = "friendNight", goal = 1, reward = 100 },
-	{ id = "nights3", group = "social", text = "Play 3 nights", stat = "nights", goal = 3, reward = 50 },
-	{ id = "shop", group = "social", text = "Buy anything in the shop", stat = "shopBuy", goal = 1, reward = 50 },
+	{
+		id = "party100",
+		group = "partier",
+		text = "Earn 100 party points",
+		stat = "partyPoints",
+		goal = 100,
+		reward = 75,
+	},
+	{
+		id = "dragin",
+		group = "partier",
+		text = "Drag in a trainer",
+		stat = "dragIn",
+		goal = 1,
+		reward = 100,
+	},
+	{
+		id = "danceoff3",
+		group = "partier",
+		text = "Use Dance-Off 3 times",
+		stat = "danceOff",
+		goal = 3,
+		reward = 50,
+	},
+	{
+		id = "friend",
+		group = "social",
+		text = "Play a night with a friend",
+		stat = "friendNight",
+		goal = 1,
+		reward = 100,
+	},
+	{
+		id = "nights3",
+		group = "social",
+		text = "Play 3 nights",
+		stat = "nights",
+		goal = 3,
+		reward = 50,
+	},
+	{
+		id = "shop",
+		group = "social",
+		text = "Buy anything in the shop",
+		stat = "shopBuy",
+		goal = 1,
+		reward = 50,
+	},
 } :: { Quest })
 Quests.groups = table.freeze({ "practice", "partier", "social" })
 

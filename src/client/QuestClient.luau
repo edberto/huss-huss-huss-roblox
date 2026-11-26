@@ -126,7 +126,8 @@ function QuestClient.start()
 	})
 
 	local function refresh()
-		local ok, list = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Quests") or "[]")
+		local ok, list =
+			pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Quests") or "[]")
 		list = if ok and typeof(list) == "table" then list else {}
 		local allDone = #list > 0
 		for i, row in rows do
@@ -164,7 +165,9 @@ function QuestClient.start()
 	task.spawn(function()
 		while true do
 			local left = 86400 - os.time() % 86400 -- quests reset with the UTC day
-			resets.Text = if left >= 3600 then `resets in {left // 3600}h` else `resets in {left // 60}m`
+			resets.Text = if left >= 3600
+				then `resets in {left // 3600}h`
+				else `resets in {left // 60}m`
 			task.wait(30)
 		end
 	end)
@@ -202,7 +205,12 @@ function QuestClient.start()
 		banner.Text = table.remove(queue, 1) :: string
 		banner.Visible = true
 		bannerScale.Scale = 0.6 * Ui.hudScale()
-		TweenService:Create(bannerScale, TweenInfo.new(0.2, Enum.EasingStyle.Back), { Scale = Ui.hudScale() })
+		TweenService
+			:Create(
+				bannerScale,
+				TweenInfo.new(0.2, Enum.EasingStyle.Back),
+				{ Scale = Ui.hudScale() }
+			)
 			:Play()
 		task.delay(2.6, function()
 			banner.Visible = false

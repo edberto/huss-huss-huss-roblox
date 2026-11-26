@@ -16,7 +16,8 @@ doneEvent.Name = "QuestDone" -- server -> client: quest text, Huss earned (bonus
 doneEvent.Parent = ReplicatedStorage -- not RhythmRemotes: Rhythm requires this module first
 
 -- 3 AM as night progress (the night clock runs 9 PM to 6 AM).
-local THREE_AM = (27 * 60 - Night.clockStartMinutes) / (Night.clockEndMinutes - Night.clockStartMinutes)
+local THREE_AM = (27 * 60 - Night.clockStartMinutes)
+	/ (Night.clockEndMinutes - Night.clockStartMinutes)
 
 -- Today's quests, rolled fresh when the UTC day has changed. Returns true if it rolled.
 function QuestService.ensureToday(player: Player, data: any): boolean
