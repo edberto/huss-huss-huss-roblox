@@ -57,7 +57,7 @@ describe("Rewards", function()
 		used[key] = true
 		expect(select(2, Rewards.redeem(codes, used, "HUSS", 500))).toBe("AlreadyRedeemed")
 		expect(select(2, Rewards.redeem(codes, used, "NOPE", 500))).toBe("Invalid")
-		expect(Rewards.redeem(codes, used, "old", 999)).toBe(50)
+		expect((Rewards.redeem(codes, used, "old", 999))).toBe(50)
 		expect(select(2, Rewards.redeem(codes, used, "old", 1001))).toBe("Invalid")
 	end)
 
