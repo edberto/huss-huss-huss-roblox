@@ -131,7 +131,8 @@ function QuestClient.start()
 		local allDone = #list > 0
 		for i, row in rows do
 			local quest = list[i]
-			(row.name.Parent :: Frame).Visible = quest ~= nil
+			local rowFrame = row.name.Parent :: Frame
+			rowFrame.Visible = quest ~= nil
 			if quest then
 				row.name.Text = quest.text
 				row.reward.Text = if quest.done then "DONE" else `+{quest.reward}`
