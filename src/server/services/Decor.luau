@@ -610,6 +610,27 @@ function Decor.build()
 	fireflies(Vector3.new(-25, 4, -72), Vector3.new(230, 6, 18))
 	fireflies(Vector3.new(-170, 4, -6), Vector3.new(22, 6, 70))
 
+	-- Rolling hills all round the town, so zooming out shows a valley instead of the edge of a
+	-- flat baseplate: big half-buried balls on an oval around the street, with pines on the
+	-- nearer ones' slopes.
+	local HILLS = { Color3.fromRGB(30, 50, 44), Color3.fromRGB(26, 44, 40), Color3.fromRGB(34, 56, 46) }
+	local count = 30
+	for i = 1, count do
+		local angle = (i / count) * math.pi * 2 + math.random() * 0.12
+		local reach = 1 + math.random() * 0.25
+		local size = math.random(150, 230)
+		local x = -25 + math.cos(angle) * 340 * reach
+		local z = math.sin(angle) * 240 * reach
+		part({
+			Name = "Hill",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.new(size, size, size),
+			Position = Vector3.new(x, -size * 0.3, z),
+			Color = pick(HILLS),
+			CastShadow = false,
+		})
+	end
+
 	Decor.buildNeighbourhood()
 end
 

@@ -170,6 +170,11 @@ type Deck = {
 	fadingSince: number?,
 }
 local decks: { Deck } = {}
+-- The decks sit on a local, invisible emitter: on the lawn, except for trainers at Night, who
+-- hear the party straight ahead (the emitter rides just in front of their camera), so every
+-- house hears it the same, centred rather than panned to one side.
+local emitter: BasePart? = nil
+local lawn: BasePart? = nil
 local live = 1
 local level = 0
 local muffle = 0 -- 0 = clear, 1 = through the wall
@@ -207,6 +212,11 @@ local function step(dt: number)
 	local gain = VOLUME * level * setting
 	-- Partiers hear it from the lawn at Night; trainers hear it through their own walls.
 	local near = if night and isPartier() then NEAR_NIGHT else NEAR_DAY
+	if emitter and lawn then
+		emitter.CFrame = if night and not isPartier()
+			then workspace.CurrentCamera.CFrame * CFrame.new(0, 0, -8)
+			else lawn.CFrame
+	end
 
 	local deck = decks[live]
 	local sound = deck.sound
@@ -240,7 +250,18 @@ end
 
 function PartyMusic.start()
 	buildToast()
-	local lawn = workspace:WaitForChild("Town"):WaitForChild("PartyHouse"):WaitForChild("Lawn")
+	lawn = workspace:WaitForChild("Town"):WaitForChild("PartyHouse"):WaitForChild("Lawn") :: BasePart
+	emitter = Ui.make("Part", {
+		Name = "PartyEmitter",
+		Anchored = true,
+		CanCollide = false,
+		CanQuery = false,
+		CanTouch = false,
+		Transparency = 1,
+		Size = Vector3.one,
+		CFrame = (lawn :: BasePart).CFrame,
+		Parent = workspace,
+	}) :: BasePart
 	for i = 1, 2 do
 		local sound = Ui.make("Sound", {
 			Name = "PartyDeck" .. i,
@@ -248,7 +269,7 @@ function PartyMusic.start()
 			RollOffMode = Enum.RollOffMode.InverseTapered,
 			RollOffMinDistance = NEAR_DAY,
 			RollOffMaxDistance = 1000,
-			Parent = lawn,
+			Parent = emitter,
 		}) :: Sound
 		local eq = Ui.make("EqualizerSoundEffect", {
 			LowGain = 0,
