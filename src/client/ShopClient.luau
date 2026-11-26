@@ -351,8 +351,9 @@ function ShopClient.start()
 			TextWrapped = true,
 			ZIndex = 23,
 			Parent = frame,
-		})
+		}, { make("UITextSizeConstraint", { MaxTextSize = 24 }) }) -- same size across cards
 		local action = button(frame, text, color)
+		make("UITextSizeConstraint", { MaxTextSize = 18, Parent = action })
 		action.Position = UDim2.fromScale(0.53, 0.62)
 		action.Size = UDim2.fromScale(0.43, 0.28)
 		return frame, action
