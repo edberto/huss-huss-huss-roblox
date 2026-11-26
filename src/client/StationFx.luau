@@ -128,7 +128,10 @@ function StationFx.pop()
 	attach()
 	local label = Ui.shout({
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5 + (math.random() - 0.5) * 0.4, 0.5 + (math.random() - 0.5) * 0.4),
+		Position = UDim2.fromScale(
+			0.5 + (math.random() - 0.5) * 0.4,
+			0.5 + (math.random() - 0.5) * 0.4
+		),
 		Rotation = math.random(-14, 14),
 		Size = UDim2.fromOffset(110, 40),
 		Text = "HUSS!",
