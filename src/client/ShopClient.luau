@@ -47,6 +47,34 @@ local ROBUX_CARDS = {
 	{ key = "huss_boost", name = "x2 Boost: 3 nights", robux = 29, color = "5CC8C8" },
 	{ key = "throw_party", name = "Throw a Party", robux = 99, color = "FF2E93" },
 }
+-- Shop thumbnails (scripts/shop_thumbs.py, uploaded as images). Robux cards use the pass or
+-- product's own icon; these cover cosmetics and stand in for a pass with no icon.
+local THUMBS = {
+	trail_mint = 130779402457161,
+	trail_fire = 115877021150734,
+	trail_ice = 71078139565955,
+	trail_party = 104361770927158,
+	trail_gold = 113621687094789,
+	trail_streak = 101230609203595,
+	title_hooper = 76134100486639,
+	title_gymrat = 131364933082912,
+	title_burgerboss = 118928807169788,
+	title_neverpartied = 70544057662921,
+	title_legend = 110927414447494,
+	ball_glow = 110022714907618,
+	ball_party = 136776836967202,
+	ball_gold = 122444761756422,
+	dance_groove = 97783313027624,
+	dance_shuffle = 70866889299728,
+	dance_bounce = 110607216827251,
+	dance_cheer = 114090572702154,
+	dance_hype = 116112396167967,
+	dance_floss = 71585991226793,
+	dance_robot = 77008878542057,
+	dance_celebrate = 76128618290428,
+	perk_party_animal = 107951112207432,
+	party_animal = 107951112207432,
+}
 local REASONS = {
 	NotEnoughHP = "Not enough Huss yet",
 	AlreadyOwned = "You already own this",
@@ -296,63 +324,42 @@ function ShopClient.start()
 		renderShop()
 	end
 
-	-- What goes in a cosmetic card's banner: the trail's gradient, the title as it shows
-	-- overhead, the ball's colour, or an emoji for dances and perks.
-	local EMOJI = {
-		dance_groove = "🕺",
-		dance_shuffle = "👟",
-		dance_bounce = "🦘",
-		dance_cheer = "📣",
-		dance_hype = "🔥",
-		dance_floss = "💃",
-		dance_robot = "🤖",
-		dance_celebrate = "🎉",
-		perk_party_animal = "🥳",
-	}
-	local function bannerPreview(banner: Frame, id: string, item: Cosmetics.Item)
-		local colors = item.colors
-		if item.slot == "trail" and colors then
-			banner.BackgroundColor3 = WHITE
-			make("UIGradient", {
-				Color = ColorSequence.new(Color3.fromHex(colors[1]), Color3.fromHex(colors[2])),
-				Parent = banner,
-			})
-		elseif item.slot == "title" then
-			label({
-				Size = UDim2.fromScale(1, 1),
-				-- Same font and colour as the tag over your head.
-				FontFace = Font.fromEnum(Enum.Font.FredokaOne),
-				Text = item.name,
-				TextColor3 = Color3.fromHex("3DFFB0"),
-				ZIndex = 24,
-				Parent = banner,
-			}, {
-				make(
-					"UIPadding",
-					{ PaddingTop = UDim.new(0.18, 0), PaddingBottom = UDim.new(0.18, 0) }
-				),
-			})
-		elseif item.slot == "ball" and colors then
-			banner.BackgroundColor3 = C.navy
-			make("Frame", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundColor3 = Color3.fromHex(colors[1]),
-				Position = UDim2.fromScale(0.5, 0.5),
-				Size = UDim2.fromScale(0.78, 0.78),
-				SizeConstraint = Enum.SizeConstraint.RelativeYY,
-				ZIndex = 24,
-				Parent = banner,
-			}, { corner(999), outline(2.5) })
-		elseif EMOJI[id] then
-			label({
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				Position = UDim2.fromScale(0.5, 0.5),
-				Size = UDim2.fromScale(1, 1),
-				Text = EMOJI[id],
-				ZIndex = 24,
-				Parent = banner,
-			})
-		end
+	-- One shop card: a square thumbnail on the left, the name and an action button on the right.
+	local function shopCard(order: number, image: string, name: string, text: string, color: Color3)
+		local frame = make("Frame", {
+			BackgroundColor3 = CARD,
+			LayoutOrder = order,
+			ZIndex = 22,
+			Parent = grid,
+		}, { corner(14), outline(3) })
+		make("ImageLabel", {
+			AnchorPoint = Vector2.new(0, 0.5),
+			BackgroundColor3 = C.navy,
+			Image = image,
+			Position = UDim2.fromScale(0.05, 0.5),
+			ScaleType = Enum.ScaleType.Crop,
+			Size = UDim2.fromScale(0.44, 0.84),
+			ZIndex = 23,
+			Parent = frame,
+		}, { corner(10), outline(2.5), make("UIAspectRatioConstraint", { AspectRatio = 1 }) })
+		label({
+			Position = UDim2.fromScale(0.53, 0.1),
+			Size = UDim2.fromScale(0.43, 0.46),
+			FontFace = Ui.display,
+			Text = string.upper(name),
+			TextColor3 = WHITE,
+			TextWrapped = true,
+			ZIndex = 23,
+			Parent = frame,
+		})
+		local action = button(frame, text, color)
+		action.Position = UDim2.fromScale(0.53, 0.62)
+		action.Size = UDim2.fromScale(0.43, 0.28)
+		return frame, action
+	end
+
+	local function thumb(key: string): string
+		return if THUMBS[key] then `rbxassetid://{THUMBS[key]}` else ""
 	end
 
 	renderShop = function()
@@ -369,50 +376,23 @@ function ShopClient.start()
 		end
 		if currentTab == "robux" then
 			for order, card in ROBUX_CARDS do
-				local frame = make("Frame", {
-					BackgroundColor3 = CARD,
-					LayoutOrder = order,
-					ZIndex = 22,
-					Parent = grid,
-				}, { corner(14), outline(3) })
-				local swatch = make("Frame", {
-					BackgroundColor3 = Color3.fromHex(card.color),
-					Position = UDim2.fromScale(0.08, 0.08),
-					Size = UDim2.fromScale(0.84, 0.3),
-					ZIndex = 23,
-					Parent = frame,
-				}, { corner(10), outline(2.5) })
-				local icon = make("ImageLabel", {
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					BackgroundTransparency = 1,
-					Position = UDim2.fromScale(0.5, 0.5),
-					-- Pokes just past the banner but stops short of the title.
-					Size = UDim2.fromScale(1.25, 1.25),
-					SizeConstraint = Enum.SizeConstraint.RelativeYY,
-					ZIndex = 24,
-					Parent = swatch,
-				})
-				task.spawn(function()
-					icon.Image = iconFor(card.key)
-				end)
-				label({
-					Position = UDim2.fromScale(0.05, 0.42),
-					Size = UDim2.fromScale(0.9, 0.22),
-					FontFace = Ui.display,
-					Text = string.upper(card.name),
-					TextColor3 = WHITE,
-					ZIndex = 23,
-					Parent = frame,
-				})
 				local owns = (card.key == "vip" and player:GetAttribute("VIP") == true)
 					or (card.key == "party_animal" and player:GetAttribute("PartyAnimal") == true)
-				local action = button(
-					frame,
+				local frame, action = shopCard(
+					order,
+					thumb(card.key),
+					card.name,
 					if owns then "OWNED" else `R$ {card.robux}`,
 					if owns then GREEN else C.orange
 				)
-				action.Position = UDim2.fromScale(0.08, 0.7)
-				action.Size = UDim2.fromScale(0.84, 0.24)
+				local icon = frame:FindFirstChildOfClass("ImageLabel") :: ImageLabel
+				task.spawn(function()
+					-- The pass/product's own icon wins; the drawn thumb covers a missing one.
+					local own = iconFor(card.key)
+					if own ~= "" then
+						icon.Image = own
+					end
+				end)
 				action.Activated:Connect(function()
 					if not owns then
 						shopNote.Text = promptRobux(card.key) or ""
@@ -439,37 +419,13 @@ function ShopClient.start()
 				elseif mine[id] then "Owned"
 				elseif item.price == 0 then "Free"
 				else `{item.price} Huss`
-			local card = make("Frame", {
-				BackgroundColor3 = CARD,
-				LayoutOrder = order,
-				ZIndex = 22,
-				Parent = grid,
-			}, { corner(14), outline(3) })
-			local banner = make("Frame", {
-				BackgroundColor3 = if item.colors then Color3.fromHex(item.colors[1]) else C.navy,
-				ClipsDescendants = true,
-				Position = UDim2.fromScale(0.08, 0.08),
-				Size = UDim2.fromScale(0.84, 0.3),
-				ZIndex = 23,
-				Parent = card,
-			}, { corner(10), outline(2.5) })
-			bannerPreview(banner, id, item)
-			label({
-				Position = UDim2.fromScale(0.05, 0.42),
-				Size = UDim2.fromScale(0.9, 0.22),
-				FontFace = Ui.display,
-				Text = string.upper(item.name),
-				TextColor3 = WHITE,
-				ZIndex = 23,
-				Parent = card,
-			})
-			local action = button(
-				card,
+			local _, action = shopCard(
+				order,
+				thumb(id),
+				item.name,
 				string.upper(status),
 				if equipped then GREEN elseif mine[id] then Color3.fromHex("50AAFF") else C.orange
 			)
-			action.Position = UDim2.fromScale(0.08, 0.7)
-			action.Size = UDim2.fromScale(0.84, 0.24)
 			action.Activated:Connect(function()
 				act(id, item)
 			end)
