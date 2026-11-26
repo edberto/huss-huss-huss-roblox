@@ -137,6 +137,23 @@ UserInputService.LastInputTypeChanged:Connect(function()
 	end
 end)
 
+-- The button's top-left corner in its children's space. A UIPadding on the button shifts its
+-- children inward, which pushed badges onto the label (Second Wind's "G" over the "S").
+local function cornerOf(button: GuiObject): UDim2
+	local pad = button:FindFirstChildOfClass("UIPadding")
+	if not pad then
+		return UDim2.new()
+	end
+	local width = 1 - pad.PaddingLeft.Scale - pad.PaddingRight.Scale
+	local height = 1 - pad.PaddingTop.Scale - pad.PaddingBottom.Scale
+	return UDim2.new(
+		-pad.PaddingLeft.Scale / math.max(width, 0.1),
+		-pad.PaddingLeft.Offset,
+		-pad.PaddingTop.Scale / math.max(height, 0.1),
+		-pad.PaddingTop.Offset
+	)
+end
+
 function Ui.bind(
 	button: GuiObject,
 	pcKeys: { Enum.KeyCode },
@@ -158,7 +175,7 @@ function Ui.bind(
 		AutomaticSize = Enum.AutomaticSize.None,
 		BackgroundColor3 = Color3.new(1, 1, 1),
 		Name = "KeyBadge",
-		Position = UDim2.fromScale(0, 0),
+		Position = cornerOf(button),
 		Size = UDim2.fromOffset(30, 26),
 		ZIndex = button.ZIndex + 2,
 		Parent = button,
