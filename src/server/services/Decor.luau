@@ -135,7 +135,8 @@ local function car(at: CFrame, color: Color3)
 end
 
 -- Three kinds of tree, mixed: round, pine (stacked turned blocks) and pink blossom.
-local LEAF_GREENS = { Color3.fromRGB(40, 70, 75), Color3.fromRGB(45, 85, 60), Color3.fromRGB(55, 90, 50) }
+local LEAF_GREENS =
+	{ Color3.fromRGB(40, 70, 75), Color3.fromRGB(45, 85, 60), Color3.fromRGB(55, 90, 50) }
 local BLOSSOM = { Color3.fromRGB(235, 140, 185), Color3.fromRGB(245, 175, 205) }
 local function tree(x: number, z: number, kind: string?)
 	kind = kind or pick({ "round", "round", "round", "pine", "pine", "blossom" })
@@ -152,7 +153,8 @@ local function tree(x: number, z: number, kind: string?)
 			part({
 				Name = "Needles",
 				Size = Vector3.new(width, 3.2, width),
-				CFrame = CFrame.new(x, height - 1 + i * 2.6, z) * CFrame.Angles(0, turn + i * 0.4, 0),
+				CFrame = CFrame.new(x, height - 1 + i * 2.6, z)
+					* CFrame.Angles(0, turn + i * 0.4, 0),
 				Color = Color3.fromRGB(30, 70, 55),
 				CanCollide = false,
 			})
@@ -260,7 +262,8 @@ end
 -- Balloons on strings, tied at `at`.
 local function balloons(at: Vector3)
 	for i = 1, 5 do
-		local top = at + Vector3.new(math.random(-12, 12) / 10, 6 + i * 0.5, math.random(-12, 12) / 10)
+		local top = at
+			+ Vector3.new(math.random(-12, 12) / 10, 6 + i * 0.5, math.random(-12, 12) / 10)
 		part({
 			Name = "Balloon",
 			Shape = Enum.PartType.Ball,
@@ -686,7 +689,9 @@ local function yard(lot: CFrame, home: Model?)
 		local function refresh()
 			local owner = home:GetAttribute("Owner")
 			for _, label in labels do
-				label.Text = if typeof(owner) == "string" then `{string.upper(owner)}'S HOUSE` else "FOR SALE"
+				label.Text = if typeof(owner) == "string"
+					then `{string.upper(owner)}'S HOUSE`
+					else "FOR SALE"
 				label.TextColor3 = if typeof(owner) == "string"
 					then Color3.fromRGB(255, 220, 60)
 					else Color3.new(1, 1, 1)
