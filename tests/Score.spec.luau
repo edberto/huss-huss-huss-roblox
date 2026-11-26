@@ -19,7 +19,8 @@ describe("Score", function()
 		expect(Score.multiplier(7)).toBe(1)
 		expect(Score.multiplier(8)).toBe(2)
 		expect(Score.multiplier(100)).toBe(4)
-		local _, earned = Score.apply({ points = 0, combo = 16, perfects = 0, best = 16 }, "Perfect")
+		local _, earned =
+			Score.apply({ points = 0, combo = 16, perfects = 0, best = 16 }, "Perfect")
 		expect(earned).toBe(9)
 	end)
 
