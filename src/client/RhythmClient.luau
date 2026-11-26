@@ -149,7 +149,10 @@ function RhythmClient.start()
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Thickness = 2.5,
 	})
-	make("UIPadding", { PaddingTop = UDim.new(0.14, 0), PaddingBottom = UDim.new(0.04, 0), Parent = points })
+	make(
+		"UIPadding",
+		{ PaddingTop = UDim.new(0.14, 0), PaddingBottom = UDim.new(0.04, 0), Parent = points }
+	)
 	make("Frame", {
 		AnchorPoint = Vector2.new(1, 0),
 		BackgroundColor3 = Color3.new(1, 1, 1),
