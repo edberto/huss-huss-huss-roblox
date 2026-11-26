@@ -1,7 +1,8 @@
 --!strict
 -- The DANCE button: plays your equipped dance (Shop → Dances; Groove by default) on your avatar
 -- whenever you're not practising: at Dusk, at Dawn and as a partier. Your own avatar's
--- animations replicate, so everyone sees it. Walking or jumping stops it, like an emote.
+-- animations replicate, so everyone sees it. It keeps going while you move; pressing DANCE
+-- again or starting practice stops it.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -79,20 +80,12 @@ function Dance.start(practising: () -> boolean)
 	button.Activated:Connect(toggle)
 	Ui.bind(button, { Enum.KeyCode.F }, { Enum.KeyCode.DPadDown }, toggle)
 
-	-- Moving, jumping or starting practice ends the dance; the button shows only off-practice.
+	-- The dance keeps going while you walk or jump (you glide mid-dance); it ends when you press
+	-- DANCE again or when practice starts. The button shows only off-practice.
 	RunService.Heartbeat:Connect(function()
 		local off = not practising()
 		button.Visible = off
-		if not track then
-			return
-		end
-		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if
-			not off
-			or not humanoid
-			or humanoid.MoveDirection.Magnitude > 0.1
-			or humanoid:GetState() == Enum.HumanoidStateType.Jumping
-		then
+		if track and not off then
 			stop()
 		end
 	end)
