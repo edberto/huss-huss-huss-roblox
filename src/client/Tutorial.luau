@@ -82,7 +82,7 @@ function Tutorial.start()
 		local height = workspace.CurrentCamera.ViewportSize.Y
 		if ReplicatedStorage:GetAttribute("Phase") == "Dusk" then
 			card.AnchorPoint = Vector2.new(0.5, 0)
-			card.Position = UDim2.new(0.5, 0, 0.13, 0)
+			card.Position = UDim2.fromScale(0.5, 0.13)
 		else
 			card.AnchorPoint = Vector2.new(0, 1)
 			card.Position = UDim2.fromOffset(150 * Ui.hudScale(), height - Ui.trackClearance() - 6)
