@@ -1289,7 +1289,15 @@ function ShopClient.start()
 		})
 		side_button.Activated:Connect(function()
 			if spec[1] == "AFK" then
-				afkRemote:FireServer(player:GetAttribute("Afk") ~= true)
+				local on = player:GetAttribute("Afk") ~= true
+				afkRemote:FireServer(on)
+				if not on and ReplicatedStorage:GetAttribute("Phase") == "Night" then
+					pcall(StarterGui.SetCore, StarterGui, "SendNotification", {
+						Title = "Welcome back!",
+						Text = "You'll join in from the next Dusk.",
+						Duration = 5,
+					})
+				end
 			elseif spec[1] == "Invite" then
 				pcall(function()
 					if SocialService:CanSendGameInviteAsync(player) then
