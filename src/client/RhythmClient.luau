@@ -407,7 +407,6 @@ function RhythmClient.start()
 	player:GetAttributeChangedSignal("FriendsHere"):Connect(refreshFriends)
 	refreshFriends()
 
-
 	local function flashWord(text: string, color: Color3, seconds: number)
 		hitWord.Text = text
 		hitWord.TextColor3 = color
