@@ -203,15 +203,23 @@ function QuestClient.start()
 	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(refresh)
 	refresh()
 
-	-- Under the Huss pill, and under the friend chip when it shows (RhythmClient).
+	-- Under the Huss pill, the friend chip and the Starter Pack button when they show
+	-- (RhythmClient; the card only shows at Dusk and Dawn, like the Starter Pack button).
 	local function place()
 		local s = Ui.hudScale()
 		local friends = (tonumber(player:GetAttribute("FriendsHere")) or 0) > 0
+		local starter = player:GetAttribute("StarterPack") == false
 		scale.Scale = s
-		card.Position = UDim2.new(1, -16, 0, (8 + 46 + 10 + (if friends then 32 else 0)) * s)
+		card.Position = UDim2.new(
+			1,
+			-16,
+			0,
+			(8 + 46 + 10 + (if friends then 32 else 0) + (if starter then 46 else 0)) * s
+		)
 	end
 	Ui.onResize(place)
 	player:GetAttributeChangedSignal("FriendsHere"):Connect(place)
+	player:GetAttributeChangedSignal("StarterPack"):Connect(place)
 
 	task.spawn(function()
 		while true do

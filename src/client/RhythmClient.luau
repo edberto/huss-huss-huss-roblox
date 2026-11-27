@@ -407,6 +407,94 @@ function RhythmClient.start()
 	player:GetAttributeChangedSignal("FriendsHere"):Connect(refreshFriends)
 	refreshFriends()
 
+	-- Under the pill (and the friend chip): the one-time Starter Pack, shining, for players who
+	-- don't own it yet. Dusk and Dawn only, like the side menu; tapping opens the purchase.
+	local starter = make("TextButton", {
+		AnchorPoint = Vector2.new(1, 0),
+		AutoButtonColor = true,
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		ClipsDescendants = true,
+		Size = UDim2.new(1, 0, 0, 40),
+		Text = "",
+		Visible = false,
+		Parent = pill,
+	}, {
+		corner(),
+		stroke(3),
+		gradient("FF5AC8", "C8287A"),
+		Ui.shout({
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(0, 8, 0.5, 0),
+			Size = UDim2.new(0.6, -8, 0.62, 0),
+			Text = "STARTER PACK",
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Thickness = 2,
+		}),
+		make("Frame", {
+			AnchorPoint = Vector2.new(1, 0.5),
+			BackgroundColor3 = Color3.fromHex("3DDC84"),
+			Position = UDim2.new(1, -6, 0.5, 0),
+			Size = UDim2.new(0.36, 0, 0, 26),
+		}, {
+			corner(),
+			stroke(2),
+			Ui.label({
+				Size = UDim2.fromScale(1, 1),
+				Text = "R$ 49", -- the Starter Pack game pass price (Creator Hub)
+				TextColor3 = Color3.fromHex("04342C"),
+			}, {
+				make("UIPadding", { PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4) }),
+			}),
+		}),
+	})
+	local shine = make("Frame", {
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		BorderSizePixel = 0,
+		Position = UDim2.fromScale(-0.3, 0),
+		Size = UDim2.fromScale(0.25, 1),
+		ZIndex = 5,
+		Parent = starter,
+	}, {
+		make("UIGradient", {
+			Rotation = 20,
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.5, 0.35),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+		}),
+	})
+	starter.Activated:Connect(function()
+		pcall(
+			game:GetService("MarketplaceService").PromptGamePassPurchase,
+			game:GetService("MarketplaceService"),
+			player,
+			Products.starterPassId
+		)
+	end)
+	local function refreshStarter()
+		starter.Visible = player:GetAttribute("StarterPack") == false
+			and ReplicatedStorage:GetAttribute("Phase") ~= "Night"
+		starter.Position = UDim2.new(1, 0, 1, if friendChip.Visible then 38 else 6)
+	end
+	player:GetAttributeChangedSignal("StarterPack"):Connect(refreshStarter)
+	player:GetAttributeChangedSignal("FriendsHere"):Connect(refreshStarter)
+	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(refreshStarter)
+	refreshStarter()
+	task.spawn(function() -- a shine sweeps across every few seconds
+		while true do
+			if starter.Visible then
+				shine.Position = UDim2.fromScale(-0.3, 0)
+				TweenService:Create(
+					shine,
+					TweenInfo.new(0.8, Enum.EasingStyle.Sine),
+					{ Position = UDim2.fromScale(1.05, 0) }
+				):Play()
+			end
+			task.wait(2.6)
+		end
+	end)
+
 	local function flashWord(text: string, color: Color3, seconds: number)
 		hitWord.Text = text
 		hitWord.TextColor3 = color
