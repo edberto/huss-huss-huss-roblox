@@ -316,7 +316,10 @@ function Round.run()
 		ReplicatedStorage:SetAttribute("NightClock", nil)
 		Npcs.clear()
 		for _, player in Players:GetPlayers() do
-			player:SetAttribute("Team", if player:GetAttribute("Afk") == true then "Afk" else "Trainer")
+			player:SetAttribute(
+				"Team",
+				if player:GetAttribute("Afk") == true then "Afk" else "Trainer"
+			)
 			player:SetAttribute("PartyTonight", false) -- choose again each Dusk
 			task.spawn(QuestService.refresh, player) -- a new UTC day brings new quests
 			task.spawn(Referrals.collect, player) -- rewards for friends who joined elsewhere
