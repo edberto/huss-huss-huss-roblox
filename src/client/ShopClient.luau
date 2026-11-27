@@ -1192,7 +1192,7 @@ function ShopClient.start()
 		local top = Ui.topInset() + 10
 		local bottom = height - Ui.trackClearance() - 14 -- the bottom label spills a bit
 		local column = math.min(height * 0.74, bottom - top)
-		local tile = math.floor(column / (6 + 5 * GAP))
+		local tile = math.floor(column / (7 + 6 * GAP))
 		side.SizeConstraint = Enum.SizeConstraint.RelativeXY
 		side.Size = UDim2.fromOffset(tile, column)
 		side.Position = UDim2.fromOffset(28, (top + bottom) / 2)
@@ -1206,7 +1206,10 @@ function ShopClient.start()
 		{ "Settings", "111747124734544", "46C8FF", "1E8CDC" },
 		{ "Ranks", "108570200348915", "FFD23C", "E6A014" },
 		{ "Invite", "", "FF5AC8", "C8287A" }, -- no icon: shows the friend bonus instead
+		{ "AFK", "", "9696A0", "5A5A64" }, -- no icon: shows ON / OFF instead
 	}
+	local afkTile: { gradient: UIGradient, state: TextLabel }? = nil
+	local afkRemote = ReplicatedStorage:WaitForChild("SetAfk") :: RemoteEvent
 	for i, spec in SIDE do
 		local side_button = make("TextButton", {
 			AutoButtonColor = true,
@@ -1243,7 +1246,8 @@ function ShopClient.start()
 					Position = UDim2.fromScale(0.5, 0.4),
 					Rotation = 6,
 					Size = UDim2.fromScale(0.9, 0.42),
-					Text = "+10%",
+					Name = "State",
+					Text = if spec[1] == "AFK" then "OFF" else "+10%",
 					TextColor3 = Color3.fromHex("FFE63C"),
 					ZIndex = 6,
 				}),
@@ -1257,6 +1261,13 @@ function ShopClient.start()
 				ZIndex = 7,
 			}),
 		})
+		if spec[1] == "AFK" then
+			local state = side_button:FindFirstChild("State")
+			afkTile = {
+				gradient = side_button:FindFirstChildOfClass("UIGradient") :: UIGradient,
+				state = state :: TextLabel,
+			}
+		end
 		dots[spec[1]] = make("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromHex("FF3250"),
@@ -1277,7 +1288,9 @@ function ShopClient.start()
 			}),
 		})
 		side_button.Activated:Connect(function()
-			if spec[1] == "Invite" then
+			if spec[1] == "AFK" then
+				afkRemote:FireServer(player:GetAttribute("Afk") ~= true)
+			elseif spec[1] == "Invite" then
 				pcall(function()
 					if SocialService:CanSendGameInviteAsync(player) then
 						SocialService:PromptGameInvite(player)
@@ -1308,8 +1321,10 @@ function ShopClient.start()
 	end
 	-- Nights are for practising or partying: the menu (and any panel it opened) goes away until
 	-- Dawn, for trainers and partiers alike.
+	-- AFK players aren't in the night, so they keep the menu (and the AFK switch).
 	local function refreshSide()
 		local night = ReplicatedStorage:GetAttribute("Phase") == "Night"
+			and player:GetAttribute("Team") ~= "Afk"
 		side.Visible = not night
 		if night then
 			shop.Visible, rewards.Visible, timing.Visible = false, false, false
@@ -1317,7 +1332,20 @@ function ShopClient.start()
 		end
 	end
 	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(refreshSide)
+	player:GetAttributeChangedSignal("Team"):Connect(refreshSide)
 	refreshSide()
+	local function refreshAfk()
+		local on = player:GetAttribute("Afk") == true
+		if afkTile then
+			afkTile.state.Text = if on then "ON" else "OFF"
+			afkTile.state.TextColor3 = if on then Color3.fromHex("FFE63C") else Color3.new(1, 1, 1)
+			afkTile.gradient.Color = if on
+				then ColorSequence.new(Color3.fromHex("5AD278"), Color3.fromHex("28A05A"))
+				else ColorSequence.new(Color3.fromHex("9696A0"), Color3.fromHex("5A5A64"))
+		end
+	end
+	player:GetAttributeChangedSignal("Afk"):Connect(refreshAfk)
+	refreshAfk()
 
 	-- A friend joined (or left): say what the friend bonus is now (Products.nightMultiplier).
 	local friendsHere = tonumber(player:GetAttribute("FriendsHere")) or 0

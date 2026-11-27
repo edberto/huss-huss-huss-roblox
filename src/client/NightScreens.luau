@@ -1066,7 +1066,7 @@ function NightScreens.start()
 	-- Phase changes: show the right screen (the sky is Sky.luau) -----------------
 	local function onPhase()
 		local phase = ReplicatedStorage:GetAttribute("Phase")
-		dusk.Visible = phase == "Dusk"
+		dusk.Visible = phase == "Dusk" and player:GetAttribute("Afk") ~= true -- AFK: no picking
 		dawn.Visible = phase == "Dawn"
 		setPickerOpen(true) -- each Dusk and Dawn starts open
 		setResultsOpen(true)
@@ -1075,6 +1075,7 @@ function NightScreens.start()
 		end
 	end
 	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(onPhase)
+	player:GetAttributeChangedSignal("Afk"):Connect(onPhase)
 	onPhase()
 
 	-- Countdowns tick once a second.

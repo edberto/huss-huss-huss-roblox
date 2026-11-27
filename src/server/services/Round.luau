@@ -43,6 +43,39 @@ local resultsEvent = Instance.new("RemoteEvent")
 resultsEvent.Name = "NightResults" -- server -> client: { Result }, sorted best first
 resultsEvent.Parent = ReplicatedStorage:WaitForChild("RhythmRemotes")
 
+-- AFK: a player sits out every night (no station, no team, can't be targeted) and roams freely
+-- until they switch it off; then they're back in from the next Dusk.
+local afkEvent = Instance.new("RemoteEvent")
+afkEvent.Name = "SetAfk" -- client -> server: boolean
+afkEvent.Parent = ReplicatedStorage
+afkEvent.OnServerEvent:Connect(function(player: Player, on: unknown)
+	if typeof(on) ~= "boolean" then
+		return
+	end
+	-- Already practising or partying tonight: AFK can only start once this night is over.
+	if
+		on
+		and ReplicatedStorage:GetAttribute("Phase") == "Night"
+		and player:GetAttribute("Team") ~= "Afk"
+	then
+		return
+	end
+	player:SetAttribute("Afk", on)
+	if ReplicatedStorage:GetAttribute("Phase") == "Dusk" then
+		player:SetAttribute("Team", if on then "Afk" else "Trainer")
+	end
+end)
+
+local function playing(): number
+	local count = 0
+	for _, player in Players:GetPlayers() do
+		if player:GetAttribute("Team") ~= "Afk" then
+			count += 1
+		end
+	end
+	return count
+end
+
 local results: { [Player]: Result } = {}
 local nightStart = 0
 
@@ -61,6 +94,7 @@ local function setMovement(player: Player, free: boolean)
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
 		local night = ReplicatedStorage:GetAttribute("Phase") == "Night"
+			and player:GetAttribute("Team") ~= "Afk"
 		humanoid.UseJumpPower = false
 		humanoid.WalkSpeed = if not free then 0 elseif night then Night.partierSpeed else 16
 		humanoid.JumpHeight = if free then 7.2 else 0
@@ -175,7 +209,10 @@ local function runNight()
 	for _, player in Players:GetPlayers() do
 		Party.reset(player)
 		player:SetAttribute("UsedSecondWind", false)
-		if player:GetAttribute("PartyTonight") == true and spendSkip(player) then
+		if player:GetAttribute("Afk") == true then
+			player:SetAttribute("Team", "Afk")
+			setMovement(player, true)
+		elseif player:GetAttribute("PartyTonight") == true and spendSkip(player) then
 			joinPartyNow(player)
 		else
 			startTraining(player)
@@ -204,7 +241,7 @@ local function runNight()
 				player,
 				Focus.isTrainer(player)
 					and left <= Night.lockedInCount
-					and #Players:GetPlayers() > Night.lockedInCount
+					and playing() > Night.lockedInCount
 			)
 		end
 		-- No early end when everyone gives in: partiers (and Party Animal skippers) get the
@@ -261,11 +298,13 @@ function Round.run()
 			character:WaitForChild("HumanoidRootPart")
 			-- Everyone starts at home; only a trainer spawning mid-Night is held on the spot.
 			local partier = player:GetAttribute("Team") == "Partier"
+			local roaming = player:GetAttribute("Team") == "Afk"
+				or ReplicatedStorage:GetAttribute("Phase") ~= "Night"
 			if not partier then
 				-- Indoors (garage, kitchen) only while training; otherwise the driveway.
-				Homes.placeOnSpot(player, ReplicatedStorage:GetAttribute("Phase") ~= "Night")
+				Homes.placeOnSpot(player, roaming)
 			end
-			setMovement(player, partier or ReplicatedStorage:GetAttribute("Phase") ~= "Night")
+			setMovement(player, partier or roaming)
 		end)
 		if ReplicatedStorage:GetAttribute("Phase") == "Night" then
 			startTraining(player)
@@ -277,7 +316,7 @@ function Round.run()
 		ReplicatedStorage:SetAttribute("NightClock", nil)
 		Npcs.clear()
 		for _, player in Players:GetPlayers() do
-			player:SetAttribute("Team", "Trainer")
+			player:SetAttribute("Team", if player:GetAttribute("Afk") == true then "Afk" else "Trainer")
 			player:SetAttribute("PartyTonight", false) -- choose again each Dusk
 			task.spawn(QuestService.refresh, player) -- a new UTC day brings new quests
 			task.spawn(Referrals.collect, player) -- rewards for friends who joined elsewhere
@@ -310,7 +349,7 @@ function Round.run()
 					Progress.stationPoints(result.points, info.bonus),
 					result.party,
 					rewardPlace,
-					#Players:GetPlayers(), -- placement bonuses count real players only
+					playing(), -- placement bonuses count real players in the night only
 					result.lasted == nil
 				)
 				result.earned = hp
