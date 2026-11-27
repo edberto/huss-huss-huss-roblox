@@ -166,7 +166,12 @@ function QuestClient.start()
 		local b = a + Vector2.new(300, 290) * scale.Scale
 		for _, marker in player.PlayerGui:GetDescendants() do
 			local frame = marker.Parent
-			if marker.Name == "QuestCardAvoid" and frame and frame:IsA("GuiObject") and frame.Visible then
+			if
+				marker.Name == "QuestCardAvoid"
+				and frame
+				and frame:IsA("GuiObject")
+				and frame.Visible
+			then
 				local screen = frame:FindFirstAncestorWhichIsA("ScreenGui")
 				local shown = screen ~= nil and screen.Enabled
 				local ancestor = frame.Parent
