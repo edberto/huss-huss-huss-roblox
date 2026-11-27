@@ -1183,20 +1183,33 @@ function ShopClient.start()
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Parent = gui,
 	})
-	local sideList = make("UIListLayout", { Parent = side })
-	-- Square tiles in a column that fits between Roblox's top-left buttons and the beat track,
-	-- so on phones it shrinks instead of sliding under either (74% of the screen height at most).
-	local GAP = 0.3 -- gap between tiles, in tile widths
+	local sideGrid = make("UIGridLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Parent = side })
+	-- Square tiles between Roblox's top-left buttons and the beat track: one column on big
+	-- screens; on touch screens two columns in the top part, clear of the thumbstick, so the
+	-- tiles and their labels don't crowd each other.
+	local TILES = 7
 	Ui.onResize(function()
 		local height = workspace.CurrentCamera.ViewportSize.Y
+		local touch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+		local columns = if touch then 2 else 1
+		local gap = if touch then 0.45 else 0.3 -- in tile widths; labels spill past the tiles
+		local rows = math.ceil(TILES / columns)
 		local top = Ui.topInset() + 10
-		local bottom = height - Ui.trackClearance() - 14 -- the bottom label spills a bit
+		local bottom = if touch
+			then height * 0.62 -- the thumbstick lives below
+			else height - Ui.trackClearance() - 14
 		local column = math.min(height * 0.74, bottom - top)
-		local tile = math.floor(column / (7 + 6 * GAP))
+		local tile = math.floor(column / (rows + (rows - 1) * gap))
+		local pad = math.floor(tile * gap)
+		local width = columns * tile + (columns - 1) * pad
+		local tall = rows * tile + (rows - 1) * pad
+		side.AnchorPoint = Vector2.new(0, 0)
 		side.SizeConstraint = Enum.SizeConstraint.RelativeXY
-		side.Size = UDim2.fromOffset(tile, column)
-		side.Position = UDim2.fromOffset(28, (top + bottom) / 2)
-		sideList.Padding = UDim.new(0, math.floor(tile * GAP))
+		side.Size = UDim2.fromOffset(width, tall)
+		side.Position = UDim2.fromOffset(28, top + (column - tall) / 2)
+		sideGrid.CellSize = UDim2.fromOffset(tile, tile)
+		sideGrid.CellPadding = UDim2.fromOffset(pad, pad)
+		sideGrid.FillDirectionMaxCells = columns
 	end)
 	local dots: { [string]: Frame } = {}
 	local SIDE = {

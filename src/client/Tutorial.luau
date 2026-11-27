@@ -77,10 +77,19 @@ function Tutorial.start()
 			Ui.shout({ Size = UDim2.fromScale(1, 1), Text = "i", Thickness = 2 }),
 		}),
 	})
-	Ui.onResize(function()
+	-- At Dusk the bottom holds the DONE and SKIP buttons, so the Dusk hint sits under the title.
+	local function place()
 		local height = workspace.CurrentCamera.ViewportSize.Y
-		card.Position = UDim2.fromOffset(150 * Ui.hudScale(), height - Ui.trackClearance() - 6)
-	end)
+		if ReplicatedStorage:GetAttribute("Phase") == "Dusk" then
+			card.AnchorPoint = Vector2.new(0.5, 0)
+			card.Position = UDim2.new(0.5, 0, 0.13, 0)
+		else
+			card.AnchorPoint = Vector2.new(0, 1)
+			card.Position = UDim2.fromOffset(150 * Ui.hudScale(), height - Ui.trackClearance() - 6)
+		end
+	end
+	Ui.onResize(place)
+	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(place)
 
 	local shown: { [string]: boolean } = {}
 	local token = 0

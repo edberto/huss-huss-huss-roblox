@@ -59,12 +59,18 @@ function NightScreens.start()
 		"Frame",
 		{ BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, Parent = gui }
 	)
-	local _, duskTitle = Ui.pill({
+	local duskBar, duskTitle = Ui.pill({
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.fromScale(0.5, 0.04),
 		Size = UDim2.fromScale(0.5, 0.08),
 		Parent = dusk,
 	}, "3C2878", "1E1446")
+	-- Half the screen wide, but never under Roblox's top-left buttons (phones).
+	Ui.onResize(function()
+		local width = workspace.CurrentCamera.ViewportSize.X
+		local room = 2 * (width / 2 - Ui.topInsetRight() - 8)
+		duskBar.Size = UDim2.new(0, math.min(width * 0.5, room), 0.08, 0)
+	end)
 	-- Station cards: art, difficulty colour (green / blue / red), bonus chip and a 3-pip meter.
 	local STYLE = {
 		Basketball = { art = "131564544711416", top = "5AD278", bottom = "1E8C50", pips = 1 },
