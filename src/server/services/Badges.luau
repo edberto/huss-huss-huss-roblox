@@ -19,14 +19,14 @@ Badges.ids = {
 	party_starter = 4336268289171617,
 	life_of_party = 3637131010736431,
 	cant_resist = 2908580743569424,
-	combo_50 = 0,
+	combo_50 = 2838855070897681,
 	bad_influence = 0,
 	peer_pressure = 0,
 	party_legend = 0,
 	hype_crew = 0,
 	hype_machine = 0,
 	full_house = 0,
-	rank_grinder = 0,
+	rank_grinder = 904989648169522,
 	rank_locked_in = 0,
 	rank_pro = 0,
 	rank_legend = 0,
@@ -35,9 +35,15 @@ Badges.ids = {
 
 -- Station level badges: `{station}_{level}`, e.g. Gym_50.
 Badges.levels = { 5, 10, 25, 50, 100, 150, 200 }
+local created = { -- station level badges made so far (docs/badges.md)
+	Basketball_5 = 1893988389891274,
+	Gym_5 = 807095768225117,
+	Burgers_5 = 2316353506831693,
+}
 for _, station in Night.stations do
 	for _, level in Badges.levels do
-		Badges.ids[`{station}_{level}`] = 0
+		local key = `{station}_{level}`
+		Badges.ids[key] = created[key] or 0
 	end
 end
 

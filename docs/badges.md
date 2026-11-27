@@ -10,11 +10,11 @@ Icons: `assets/badges/<key>.png` (scripts/badges.py). Ids go in `src/server/serv
 | party_starter | Party Starter | Spent a whole night at the party. Practice can wait. | 4336268289171617 |
 | life_of_party | Life of the Party | Dragged your first trainer into the party. | 3637131010736431 |
 | cant_resist | Can't Resist | Gave in to the party. It happens to the best of us. | 2908580743569424 |
-| Basketball_5 | Rookie Baller | Reached level 5 at Basketball. | |
-| Gym_5 | Rookie Lifter | Reached level 5 at Gym. | |
-| Burgers_5 | Line Cook | Reached level 5 at Burgers. | |
-| combo_50 | Combo x50 | Hit a 50 combo. Huss huss huss! | |
-| rank_grinder | Grinder | Reached the Grinder rank (15 total station levels). | |
+| Basketball_5 | Rookie Baller | Reached level 5 at Basketball. || 1893988389891274 |
+| Gym_5 | Rookie Lifter | Reached level 5 at Gym. || 807095768225117 |
+| Burgers_5 | Line Cook | Reached level 5 at Burgers. || 2316353506831693 |
+| combo_50 | Combo x50 | Hit a 50 combo. Huss huss huss! || 2838855070897681 |
+| rank_grinder | Grinder | Reached the Grinder rank (15 total station levels). || 904989648169522 |
 | Basketball_10 | Baller | Reached level 10 at Basketball. | |
 | Gym_10 | Gym Rat | Reached level 10 at Gym. | |
 | Burgers_10 | Short-Order Cook | Reached level 10 at Burgers. | |
