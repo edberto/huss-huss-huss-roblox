@@ -214,7 +214,7 @@ function QuestClient.start()
 			1,
 			-16,
 			0,
-			(8 + 46 + 10 + (if friends then 32 else 0) + (if starter then 46 else 0)) * s
+			(8 + 46 + 10 + (if friends then 32 else 0) + (if starter then 68 else 0)) * s
 		)
 	end
 	Ui.onResize(place)
