@@ -1358,9 +1358,15 @@ function ShopClient.start()
 	end
 	-- Second Wind: shown to a trainer at low focus during the night, once per night.
 	local secondWind = button(gui, "Second Wind", C.mint, C.navy)
-	secondWind.AnchorPoint = Vector2.new(0.5, 0)
-	secondWind.Position = UDim2.fromScale(0.5, 0.12)
-	secondWind.Size = UDim2.fromScale(0.2, 0.08)
+	-- Above the right end of the beat track, beside the focus bar (RhythmClient: track 62% wide,
+	-- 60 px tall, 16 px from the bottom-left, focus bar on its left 60%), clear of the top prompts.
+	secondWind.AnchorPoint = Vector2.new(1, 1)
+	secondWind.Size = UDim2.fromScale(0.18, 0)
+	Ui.onResize(function()
+		local s = Ui.hudScale()
+		secondWind.Position = UDim2.new(0.62, 16, 1, -16 - 70 * s)
+		secondWind.Size = UDim2.new(0.18, 0, 0, 44 * s)
+	end)
 	secondWind.ZIndex = 8
 	secondWind.Visible = false
 	local function useSecondWind()

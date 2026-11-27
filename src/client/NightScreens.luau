@@ -555,6 +555,29 @@ function NightScreens.start()
 		end)
 	end)
 
+	-- The last trainer gave in: a big banner for the whole street (with the server's fireworks).
+	local allIn = Ui.shout({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.3),
+		Size = UDim2.fromScale(0.6, 0.13),
+		Text = "EVERYONE GAVE IN!",
+		TextColor3 = GOLD,
+		Thickness = 5,
+		Visible = false,
+		ZIndex = 20,
+		Parent = gui,
+	})
+	local allInSub = Ui.shout({
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.fromScale(0.5, 1),
+		Size = UDim2.fromScale(0.7, 0.45),
+		Text = "PARTY TILL 6 AM",
+		Thickness = 3,
+		ZIndex = 20,
+		Parent = allIn,
+	})
+	local allInScale = make("UIScale", { Parent = allIn })
+
 	-- 3. Gave in to the party ---------------------------------------------------------------------
 	local gaveIn = make("Frame", {
 		BackgroundColor3 = C.partyWall,
@@ -600,6 +623,10 @@ function NightScreens.start()
 			`LASTED UNTIL {player:GetAttribute("LastedUntil") or "?"} · {player:GetAttribute(
 				"NightPoints"
 			) or 0} HUSS`
+		tempt.Text = if allIn.Visible
+			then "EVERYONE GAVE IN · PARTY TILL 6 AM"
+			else "NOW DRAG THE OTHERS IN UNTIL DAWN"
+		allIn.Visible = false -- one banner at a time (both fire when you were the last in)
 		gaveIn.Visible = true
 		gaveInScale.Scale = 1.4
 		TweenService:Create(gaveInScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 })
@@ -995,32 +1022,14 @@ function NightScreens.start()
 		end
 	end)
 
-	-- The last trainer gave in: a big banner for the whole street (with the server's fireworks).
-	local allIn = Ui.shout({
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.3),
-		Size = UDim2.fromScale(0.6, 0.13),
-		Text = "EVERYONE GAVE IN!",
-		TextColor3 = GOLD,
-		Thickness = 5,
-		Visible = false,
-		ZIndex = 20,
-		Parent = gui,
-	})
-	local allInSub = Ui.shout({
-		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.fromScale(0.5, 1),
-		Size = UDim2.fromScale(0.7, 0.45),
-		Text = "PARTY TILL 6 AM",
-		Thickness = 3,
-		ZIndex = 20,
-		Parent = allIn,
-	})
-	local allInScale = make("UIScale", { Parent = allIn })
 	local fireworksEvent =
 		ReplicatedStorage:WaitForChild("Leaderboards"):WaitForChild("Fireworks") :: RemoteEvent
 	fireworksEvent.OnClientEvent:Connect(function(reason: string)
 		if reason ~= "AllIn" then
+			return
+		end
+		if gaveIn.Visible then -- you were the last one in: say it on your own screen
+			tempt.Text = "EVERYONE GAVE IN · PARTY TILL 6 AM"
 			return
 		end
 		allInSub.Text = if player:GetAttribute("Team") == "Partier"
