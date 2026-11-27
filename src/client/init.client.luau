@@ -38,10 +38,10 @@ local function cameraPoint(): BasePart
 	) :: BasePart
 end
 -- Trainers practising at Night get the fixed practice view; everyone else (Dusk, Dawn,
--- partiers) walks around with the normal camera.
+-- partiers, AFK players) walks around with the normal camera.
 local function practising(): boolean
 	return ReplicatedStorage:GetAttribute("Phase") == "Night"
-		and player:GetAttribute("Team") ~= "Partier"
+		and player:GetAttribute("Team") == "Trainer"
 end
 local function updateCamera()
 	local free = not practising()
@@ -150,7 +150,7 @@ local rigs: { [Player]: Rig } = {}
 
 local function isPractising(who: Player): boolean
 	return ReplicatedStorage:GetAttribute("Phase") == "Night"
-		and who:GetAttribute("Team") ~= "Partier"
+		and who:GetAttribute("Team") == "Trainer"
 		and who:GetAttribute("Station") ~= nil
 end
 local function stationOf(rig: Rig): StationFx.Station

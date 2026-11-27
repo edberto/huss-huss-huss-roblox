@@ -497,7 +497,7 @@ function NightScreens.start()
 			return
 		end
 		local practising = ReplicatedStorage:GetAttribute("Phase") == "Night"
-			and player:GetAttribute("Team") ~= "Partier"
+			and player:GetAttribute("Team") == "Trainer"
 		local justAnswered = os.clock() - answeredAt < 0.1 -- this same press closed the prompt
 		if
 			practising
