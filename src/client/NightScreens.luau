@@ -710,6 +710,14 @@ function NightScreens.start()
 		Parent = dawn,
 	})
 	make("UISizeConstraint", { MinSize = Vector2.new(420, 0), Parent = card })
+	-- Phones: the card shrinks to fit between the banner and the next-night pill.
+	local cardScale = make("UIScale", { Parent = card })
+	local function fitCard()
+		local height = workspace.CurrentCamera.ViewportSize.Y
+		local room = height * (0.95 - 0.065 - 0.14) - 10
+		cardScale.Scale = math.min(1, room / math.max(card.Size.Y.Offset, 1))
+	end
+	Ui.onResize(fitCard)
 	make("Configuration", { Name = "QuestCardAvoid", Parent = card }) -- QuestClient folds its card off it
 	-- Close the results with the X (or a click off the card); the RESULTS pill brings them back.
 	local closeResults = make("TextButton", {
@@ -1023,6 +1031,7 @@ function NightScreens.start()
 			end
 		end
 		card.Size = UDim2.new(0.4, 0, 0, height)
+		fitCard()
 	end)
 
 	-- A click or tap on the world (not on any button) folds away the picker or the results.
