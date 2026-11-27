@@ -2,10 +2,12 @@
 -- Daily quests card (top right, under the Huss count) at Dusk and Dawn, and a banner when a
 -- quest completes. State comes from the "Quests" attribute (Data); rules in Shared/Quests.
 local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local Products = require(ReplicatedStorage.Shared.Products)
 local Quests = require(ReplicatedStorage.Shared.Quests)
 local Ui = require(script.Parent.Ui)
 
@@ -48,6 +50,96 @@ function QuestClient.start()
 		Parent = gui,
 	}, { corner(16), stroke(3.5) })
 	local scale = make("UIScale", { Parent = card })
+
+	-- Under the card: the one-time Starter Pack, shining, for players who don't own it yet. It
+	-- shows with the card (Dusk and Dawn) and hides while the card is folded on small screens.
+	local starter = make("TextButton", {
+		AnchorPoint = Vector2.new(1, 0),
+		AutoButtonColor = true,
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		ClipsDescendants = true,
+		Position = UDim2.new(1, 0, 1, 10),
+		Size = UDim2.new(1, 0, 0, 64),
+		Text = "",
+		Visible = false,
+		Parent = card,
+	}, {
+		corner(16),
+		stroke(3.5),
+		make("UIGradient", {
+			Color = ColorSequence.new(Color3.fromHex("FF5AC8"), Color3.fromHex("C8287A")),
+			Rotation = 90,
+		}),
+		Ui.shout({
+			Position = UDim2.fromOffset(14, 6),
+			Size = UDim2.fromOffset(200, 30),
+			Text = "STARTER PACK",
+			TextColor3 = GOLD,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Thickness = 2.5,
+		}),
+		label({
+			Position = UDim2.fromOffset(14, 38),
+			Size = UDim2.fromOffset(190, 18),
+			Text = "1,000 Huss + trail + 3 boost nights",
+			TextColor3 = Color3.new(1, 1, 1),
+			TextXAlignment = Enum.TextXAlignment.Left,
+		}),
+		make("Frame", {
+			AnchorPoint = Vector2.new(1, 0.5),
+			BackgroundColor3 = MINT,
+			Position = UDim2.new(1, -10, 0.5, 0),
+			Size = UDim2.fromOffset(72, 36),
+		}, {
+			corner(10),
+			stroke(2.5),
+			Ui.shout({
+				Size = UDim2.fromScale(1, 1),
+				Text = "R$ 49", -- the Starter Pack game pass price (Creator Hub)
+				Thickness = 2,
+			}, {
+				make("UIPadding", { PaddingTop = UDim.new(0, 6), PaddingBottom = UDim.new(0, 6) }),
+			}),
+		}),
+	})
+	local shine = make("Frame", {
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		BorderSizePixel = 0,
+		Position = UDim2.fromScale(-0.3, 0),
+		Size = UDim2.fromScale(0.2, 1),
+		ZIndex = 5,
+		Parent = starter,
+	}, {
+		make("UIGradient", {
+			Rotation = 20,
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.5, 0.3),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+		}),
+	})
+	starter.Activated:Connect(function()
+		pcall(
+			MarketplaceService.PromptGamePassPurchase,
+			MarketplaceService,
+			player,
+			Products.starterPassId
+		)
+	end)
+	task.spawn(function() -- a shine sweeps across every few seconds
+		while true do
+			if starter.Visible and card.Visible then
+				shine.Position = UDim2.fromScale(-0.3, 0)
+				TweenService:Create(
+					shine,
+					TweenInfo.new(0.8, Enum.EasingStyle.Sine),
+					{ Position = UDim2.fromScale(1.1, 0) }
+				):Play()
+			end
+			task.wait(2.6)
+		end
+	end)
 	local title = Ui.shout({
 		Position = UDim2.fromOffset(14, 8),
 		Size = UDim2.fromOffset(270, 30),
@@ -157,13 +249,15 @@ function QuestClient.start()
 		resets.Visible = not folded
 		bonus.Text = if allDone then "All 3 done!" else `All 3: +{Quests.bonus} bonus`
 		card.Visible = #list > 0 and ReplicatedStorage:GetAttribute("Phase") ~= "Night"
+		starter.Visible = player:GetAttribute("StarterPack") == false and not folded
 	end
 	-- On small screens the card would cover the Dusk cards or the Dawn card (frames holding a
 	-- "QuestCardAvoid" marker): it folds to its title row, with done/3, until there's room.
 	local function overlapping(): boolean
 		-- The unfolded card's rectangle, whatever it shows now.
 		local a = card.AbsolutePosition
-		local b = a + Vector2.new(300, 290) * scale.Scale
+		local tall = 290 + (if player:GetAttribute("StarterPack") == false then 74 else 0)
+		local b = a + Vector2.new(300, tall) * scale.Scale
 		for _, marker in player.PlayerGui:GetDescendants() do
 			local frame = marker.Parent
 			if
@@ -203,23 +297,16 @@ function QuestClient.start()
 	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(refresh)
 	refresh()
 
-	-- Under the Huss pill, the friend chip and the Starter Pack button when they show
-	-- (RhythmClient; the card only shows at Dusk and Dawn, like the Starter Pack button).
+	-- Under the Huss pill, and under the friend chip when it shows (RhythmClient).
 	local function place()
 		local s = Ui.hudScale()
 		local friends = (tonumber(player:GetAttribute("FriendsHere")) or 0) > 0
-		local starter = player:GetAttribute("StarterPack") == false
 		scale.Scale = s
-		card.Position = UDim2.new(
-			1,
-			-16,
-			0,
-			(8 + 46 + 10 + (if friends then 32 else 0) + (if starter then 68 else 0)) * s
-		)
+		card.Position = UDim2.new(1, -16, 0, (8 + 46 + 10 + (if friends then 32 else 0)) * s)
 	end
 	Ui.onResize(place)
 	player:GetAttributeChangedSignal("FriendsHere"):Connect(place)
-	player:GetAttributeChangedSignal("StarterPack"):Connect(place)
+	player:GetAttributeChangedSignal("StarterPack"):Connect(refresh)
 
 	task.spawn(function()
 		while true do
