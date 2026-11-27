@@ -577,6 +577,25 @@ function NightScreens.start()
 		Parent = allIn,
 	})
 	local allInScale = make("UIScale", { Parent = allIn })
+	local allInShown = 0 -- bumped per showing, so an older hide timer can't cut a newer one short
+	local allInPending = false -- AllIn arrived while your own gave-in screen is up: show it after
+	local function showAllIn()
+		allInShown += 1
+		local shown = allInShown
+		allInSub.Text = if player:GetAttribute("Team") == "Partier"
+			then "PARTY TILL 6 AM"
+			else "THE STREET IS PARTYING"
+		allIn.Rotation = math.random(-4, 4)
+		allInScale.Scale = 0.3
+		allIn.Visible = true
+		TweenService:Create(allInScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 })
+			:Play()
+		task.delay(4.5, function()
+			if allInShown == shown then
+				allIn.Visible = false
+			end
+		end)
+	end
 
 	-- 3. Gave in to the party ---------------------------------------------------------------------
 	local gaveIn = make("Frame", {
@@ -623,16 +642,24 @@ function NightScreens.start()
 			`LASTED UNTIL {player:GetAttribute("LastedUntil") or "?"} · {player:GetAttribute(
 				"NightPoints"
 			) or 0} HUSS`
-		tempt.Text = if allIn.Visible
+		if allIn.Visible then -- one banner at a time: yours first, then everyone's
+			allIn.Visible = false
+			allInShown += 1
+			allInPending = true
+		end
+		tempt.Text = if allInPending
 			then "EVERYONE GAVE IN · PARTY TILL 6 AM"
 			else "NOW DRAG THE OTHERS IN UNTIL DAWN"
-		allIn.Visible = false -- one banner at a time (both fire when you were the last in)
 		gaveIn.Visible = true
 		gaveInScale.Scale = 1.4
 		TweenService:Create(gaveInScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 })
 			:Play()
 		task.delay(4, function()
 			gaveIn.Visible = false
+			if allInPending then
+				allInPending = false
+				showAllIn()
+			end
 		end)
 	end)
 
@@ -1028,21 +1055,12 @@ function NightScreens.start()
 		if reason ~= "AllIn" then
 			return
 		end
-		if gaveIn.Visible then -- you were the last one in: say it on your own screen
+		if gaveIn.Visible then -- you were the last one in: your screen first, then this
+			allInPending = true
 			tempt.Text = "EVERYONE GAVE IN · PARTY TILL 6 AM"
 			return
 		end
-		allInSub.Text = if player:GetAttribute("Team") == "Partier"
-			then "PARTY TILL 6 AM"
-			else "THE STREET IS PARTYING"
-		allIn.Rotation = math.random(-4, 4)
-		allInScale.Scale = 0.3
-		allIn.Visible = true
-		TweenService:Create(allInScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 })
-			:Play()
-		task.delay(4, function()
-			allIn.Visible = false
-		end)
+		showAllIn()
 	end)
 
 	-- Phase changes: show the right screen (the sky is Sky.luau) -----------------
