@@ -739,7 +739,7 @@ function ShopClient.start()
 	label({
 		Position = UDim2.fromScale(0, 0.14),
 		Size = UDim2.fromScale(1, 0.14),
-		Text = "Calmer dance floor, no fireworks and no flashing beat glow. For players sensitive to flashing lights.",
+		Text = "Still dance floor and light beams, no fireworks, no flashing beat glow. For players sensitive to flashing lights.",
 		TextColor3 = Color3.fromHex("C8B4E6"),
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Left,

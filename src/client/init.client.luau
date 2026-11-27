@@ -87,7 +87,8 @@ updateCamera()
 -- Party beams sweep the sky (built by the server's Decor; animated here so it's smooth and free).
 local CollectionService = game:GetService("CollectionService")
 game:GetService("RunService").RenderStepped:Connect(function()
-	local t = os.clock()
+	-- Reduce flashing: the beams hold still.
+	local t = if player:GetAttribute("CalmFlashing") == true then 0 else os.clock()
 	for _, beam in CollectionService:GetTagged("PartyBeam") do
 		local base, phase = beam:GetAttribute("Base"), beam:GetAttribute("Phase")
 		if typeof(base) == "CFrame" and typeof(phase) == "number" then
@@ -112,9 +113,9 @@ local TILE_COLORS = {
 local TILE_STEP = 0.48
 local TILE_HALF = 1.05 -- tiles are 1.9 wide on a 2-stud grid
 game:GetService("RunService").Heartbeat:Connect(function()
-	-- Settings > Visual > Reduce flashing: colours drift 4x slower and feet don't flash white.
+	-- Settings > Visual > Reduce flashing: the floor holds its colours and feet don't flash.
 	local calm = player:GetAttribute("CalmFlashing") == true
-	local step = math.floor(os.clock() / (if calm then TILE_STEP * 4 else TILE_STEP))
+	local step = if calm then 0 else math.floor(os.clock() / TILE_STEP)
 	local onBeat = not calm and os.clock() % TILE_STEP < TILE_STEP * 0.5
 	local feet = {}
 	for _, other in Players:GetPlayers() do
@@ -134,7 +135,10 @@ game:GetService("RunService").Heartbeat:Connect(function()
 				and math.abs(offset.Z) < TILE_HALF
 				and offset.Y < 6
 			then
-				color = if onBeat then Color3.new(1, 1, 1) else color:Lerp(Color3.new(1, 1, 1), 0.5)
+				color = if calm
+					then color
+					elseif onBeat then Color3.new(1, 1, 1)
+					else color:Lerp(Color3.new(1, 1, 1), 0.5)
 				break
 			end
 		end
