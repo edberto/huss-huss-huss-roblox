@@ -422,26 +422,25 @@ function RhythmClient.start()
 		corner(),
 		stroke(3),
 		gradient("FF5AC8", "C8287A"),
-		Ui.shout({
-			Position = UDim2.fromOffset(8, 6),
-			Size = UDim2.new(0.62, -8, 0, 28),
+		Ui.shout({ -- top row: the name, as wide as the button
+			Position = UDim2.fromOffset(8, 4),
+			Size = UDim2.new(1, -16, 0, 28),
 			Text = "STARTER PACK",
 			TextColor3 = Color3.fromHex("FFE63C"),
-			TextXAlignment = Enum.TextXAlignment.Left,
 			Thickness = 2.5,
 		}),
-		Ui.label({
-			Position = UDim2.fromOffset(8, 36),
-			Size = UDim2.new(0.62, -8, 0, 18),
-			Text = "1,000 Huss + trail + boosts",
+		Ui.label({ -- bottom row: what's inside, then the price
+			Position = UDim2.fromOffset(8, 34),
+			Size = UDim2.new(0.62, -8, 0, 22),
+			Text = "1,000 Huss + more",
 			TextColor3 = Color3.new(1, 1, 1),
 			TextXAlignment = Enum.TextXAlignment.Left,
 		}),
 		make("Frame", {
-			AnchorPoint = Vector2.new(1, 0.5),
+			AnchorPoint = Vector2.new(1, 0),
 			BackgroundColor3 = Color3.fromHex("3DDC84"),
-			Position = UDim2.new(1, -6, 0.5, 0),
-			Size = UDim2.new(0.34, 0, 0, 34),
+			Position = UDim2.new(1, -6, 0, 33),
+			Size = UDim2.new(0.36, 0, 0, 24),
 		}, {
 			corner(),
 			stroke(2),
