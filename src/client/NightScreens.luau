@@ -78,6 +78,7 @@ function NightScreens.start()
 		Size = UDim2.fromScale(0.62, 0.5),
 		Parent = dusk,
 	}, {
+		make("Configuration", { Name = "QuestCardAvoid" }), -- QuestClient folds its card off it
 		make("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,
 			HorizontalAlignment = Enum.HorizontalAlignment.Center,
@@ -649,6 +650,7 @@ function NightScreens.start()
 		Parent = dawn,
 	})
 	make("UISizeConstraint", { MinSize = Vector2.new(420, 0), Parent = card })
+	make("Configuration", { Name = "QuestCardAvoid", Parent = card }) -- QuestClient folds its card off it
 	-- Close the results with the X (or a click off the card); the RESULTS pill brings them back.
 	local closeResults = make("TextButton", {
 		AnchorPoint = Vector2.new(0.5, 0.5),

@@ -48,9 +48,9 @@ function QuestClient.start()
 		Parent = gui,
 	}, { corner(16), stroke(3.5) })
 	local scale = make("UIScale", { Parent = card })
-	Ui.shout({
+	local title = Ui.shout({
 		Position = UDim2.fromOffset(14, 8),
-		Size = UDim2.fromOffset(190, 30),
+		Size = UDim2.fromOffset(270, 30),
 		Text = "TODAY'S QUESTS",
 		TextColor3 = GOLD,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -125,6 +125,7 @@ function QuestClient.start()
 		Parent = card,
 	})
 
+	local folded = false -- set by the overlap check below
 	local function refresh()
 		local ok, list =
 			pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Quests") or "[]")
@@ -143,9 +144,56 @@ function QuestClient.start()
 				allDone = allDone and quest.done
 			end
 		end
+		local doneCount = 0
+		for _, quest in list do
+			doneCount += if quest.done then 1 else 0
+		end
+		title.Text = if folded then `TODAY'S QUESTS · {doneCount}/{#list}` else "TODAY'S QUESTS"
+		for _, row in rows do
+			local rowFrame = row.name.Parent :: Frame
+			rowFrame.Visible = rowFrame.Visible and not folded
+		end
+		bonus.Visible = not folded
+		resets.Visible = not folded
 		bonus.Text = if allDone then "All 3 done!" else `All 3: +{Quests.bonus} bonus`
 		card.Visible = #list > 0 and ReplicatedStorage:GetAttribute("Phase") ~= "Night"
 	end
+	-- On small screens the card would cover the Dusk cards or the Dawn card (frames holding a
+	-- "QuestCardAvoid" marker): it folds to its title row, with done/3, until there's room.
+	local function overlapping(): boolean
+		-- The unfolded card's rectangle, whatever it shows now.
+		local a = card.AbsolutePosition
+		local b = a + Vector2.new(300, 290) * scale.Scale
+		for _, marker in player.PlayerGui:GetDescendants() do
+			local frame = marker.Parent
+			if marker.Name == "QuestCardAvoid" and frame and frame:IsA("GuiObject") and frame.Visible then
+				local screen = frame:FindFirstAncestorWhichIsA("ScreenGui")
+				local shown = screen ~= nil and screen.Enabled
+				local ancestor = frame.Parent
+				while shown and ancestor and ancestor:IsA("GuiObject") do
+					shown = ancestor.Visible
+					ancestor = ancestor.Parent
+				end
+				local c, d = frame.AbsolutePosition, frame.AbsolutePosition + frame.AbsoluteSize
+				if shown and a.X < d.X and c.X < b.X and a.Y < d.Y and c.Y < b.Y then
+					return true
+				end
+			end
+		end
+		return false
+	end
+	task.spawn(function()
+		while true do
+			task.wait(0.5)
+			local fold = card.Visible and overlapping()
+			if fold ~= folded then
+				folded = fold
+				card.Size = if folded then UDim2.fromOffset(300, 44) else UDim2.fromOffset(300, 290)
+				refresh()
+			end
+		end
+	end)
+
 	player:GetAttributeChangedSignal("Quests"):Connect(refresh)
 	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(refresh)
 	refresh()
