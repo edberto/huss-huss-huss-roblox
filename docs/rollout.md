@@ -89,3 +89,4 @@ Manual place changes that a code publish doesn't carry. Newest first.
 - 2026-11-27 Production StarterGui.ScreenOrientation Sensor -> LandscapeSensor (set in Studio; also in default.project.json). Published as v0.4.3. Live check by user: badges award, phone layout OK.
 - 2026-11-27 Production published as v0.4.4: AFK switch (side menu), Starter Pack button under the quest card (after-Dawn pop-up removed), phone layout (2-column side menu, Dusk hint under the title, Dusk title clear of Roblox's buttons). Live checks by user: quest banner, LAUNCH code, invite reward, friend invite, phone layout.
 - 2026-11-28 Badges batch 3 created in Production: Baller, Gym Rat, Short-Order Cook, Bad Influence, Hype Crew (15/38).
+- 2026-11-28 Production published as v0.4.5 (by Claude, on Edbert's request): badges batch 3 ids, Dawn results card fits phones, stronger Reduce flashing.
