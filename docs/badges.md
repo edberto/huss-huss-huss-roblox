@@ -15,11 +15,11 @@ Icons: `assets/badges/<key>.png` (scripts/badges.py). Ids go in `src/server/serv
 | Burgers_5 | Line Cook | Reached level 5 at Burgers. || 2316353506831693 |
 | combo_50 | Combo x50 | Hit a 50 combo. Huss huss huss! || 2838855070897681 |
 | rank_grinder | Grinder | Reached the Grinder rank (15 total station levels). || 904989648169522 |
-| Basketball_10 | Baller | Reached level 10 at Basketball. | |
-| Gym_10 | Gym Rat | Reached level 10 at Gym. | |
-| Burgers_10 | Short-Order Cook | Reached level 10 at Burgers. | |
-| bad_influence | Bad Influence | Dragged 10 trainers into the party. | |
-| hype_crew | Hype Crew | Earned 1,000 party points. | |
+| Basketball_10 | Baller | Reached level 10 at Basketball. | 939063667821837 |
+| Gym_10 | Gym Rat | Reached level 10 at Gym. | 297372027911914 |
+| Burgers_10 | Short-Order Cook | Reached level 10 at Burgers. | 3787531535521495 |
+| bad_influence | Bad Influence | Dragged 10 trainers into the party. | 188704454098752 |
+| hype_crew | Hype Crew | Earned 1,000 party points. | 3376701504986193 |
 | full_house | Full House | Partied while the whole street gave in. | |
 | rank_locked_in | Locked In | Reached the Locked In rank (50 total station levels). | |
 | Basketball_25 | Hooper | Reached level 25 at Basketball. | |

@@ -20,10 +20,10 @@ Badges.ids = {
 	life_of_party = 3637131010736431,
 	cant_resist = 2908580743569424,
 	combo_50 = 2838855070897681,
-	bad_influence = 0,
+	bad_influence = 188704454098752,
 	peer_pressure = 0,
 	party_legend = 0,
-	hype_crew = 0,
+	hype_crew = 3376701504986193,
 	hype_machine = 0,
 	full_house = 0,
 	rank_grinder = 904989648169522,
@@ -39,6 +39,9 @@ local created = { -- station level badges made so far (docs/badges.md)
 	Basketball_5 = 1893988389891274,
 	Gym_5 = 807095768225117,
 	Burgers_5 = 2316353506831693,
+	Basketball_10 = 939063667821837,
+	Gym_10 = 297372027911914,
+	Burgers_10 = 3787531535521495,
 }
 for _, station in Night.stations do
 	for _, level in Badges.levels do
